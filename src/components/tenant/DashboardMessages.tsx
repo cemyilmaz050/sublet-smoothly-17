@@ -15,10 +15,12 @@ interface Conversation {
   participant_2: string;
   last_message_at: string;
   last_message?: string;
+  last_message_time?: string;
   unread_count: number;
   other_name: string;
   other_initial: string;
   listing_address?: string;
+  listing_headline?: string;
 }
 
 interface Message {
@@ -32,6 +34,7 @@ interface Message {
 interface Props {
   conversations: Conversation[];
   unreadCount: number;
+  autoOpenConversationId?: string;
 }
 
 const DashboardMessages = ({ conversations, unreadCount }: Props) => {
