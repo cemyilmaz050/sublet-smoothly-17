@@ -96,12 +96,16 @@ const SignUpPage = () => {
             phone,
             role: selectedRole || "tenant",
           },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
       if (error) {
         console.error("Signup error:", error);
+        if (error.message.includes("already registered") || error.message.includes("already exists")) {
+          setDuplicateEmail(email);
+          return;
+        }
         toast.error(error.message);
         return;
       }
@@ -110,8 +114,7 @@ const SignUpPage = () => {
       const identities = data.user?.identities ?? [];
       const isRepeatedSignup = data.user && !data.session && identities.length === 0;
       if (isRepeatedSignup) {
-        toast.error("An account with this email already exists. Please sign in instead.");
-        navigate("/login");
+        setDuplicateEmail(email);
         return;
       }
 
