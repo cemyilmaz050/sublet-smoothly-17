@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   isReady: boolean;
   role: string | null;
+  activeMode: string | null;
   onboardingComplete: boolean | null;
   documentsStatus: string | null;
   refreshProfile: () => Promise<void>;
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   isReady: false,
   role: null,
+  activeMode: null,
   onboardingComplete: null,
   documentsStatus: null,
   refreshProfile: async () => {},
@@ -31,16 +33,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [role, setRole] = useState<string | null>(null);
+  const [activeMode, setActiveMode] = useState<string | null>(null);
   const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
   const [documentsStatus, setDocumentsStatus] = useState<string | null>(null);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("role, onboarding_complete, documents_status")
+      .select("role, onboarding_complete, documents_status, active_mode")
       .eq("id", userId)
       .single() as any;
     setRole(data?.role ?? null);
+    setActiveMode(data?.active_mode ?? "subtenant");
     setOnboardingComplete(data?.onboarding_complete ?? false);
     setDocumentsStatus(data?.documents_status ?? null);
   };
@@ -60,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setRole(null);
+          setActiveMode(null);
           setOnboardingComplete(null);
           setDocumentsStatus(null);
         }
@@ -84,12 +89,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setSession(null);
     setRole(null);
+    setActiveMode(null);
     setOnboardingComplete(null);
     setDocumentsStatus(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isReady, role, onboardingComplete, documentsStatus, refreshProfile, signOut }}>
+    <AuthContext.Provider value={{ user, session, isReady, role, activeMode, onboardingComplete, documentsStatus, refreshProfile, signOut }}>
       {children}
     </AuthContext.Provider>
   );
