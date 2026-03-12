@@ -198,8 +198,8 @@ const SignUpPage = () => {
         <Navbar />
         <div className="container flex items-center justify-center py-16">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center space-y-6">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-              <AlertCircle className="h-8 w-8 text-amber-600" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Account already exists</h1>
             <p className="text-muted-foreground">
