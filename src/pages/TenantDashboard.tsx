@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Users, MessageSquare, Eye, Clock, Plus, DollarSign, TrendingUp, ArrowRight, Pencil, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import DocumentUpload from "@/components/DocumentUpload";
+import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
 import StepProgress from "@/components/StepProgress";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
