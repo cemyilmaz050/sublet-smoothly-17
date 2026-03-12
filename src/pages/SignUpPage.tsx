@@ -75,6 +75,13 @@ const SignUpPage = () => {
   };
 
   const handleSignUp = async () => {
+    console.log("Sign up button clicked");
+
+    if (!isReady) {
+      toast.info("Auth is still initializing. Please try again in a second.");
+      return;
+    }
+
     if (!validate()) return;
 
     setLoading(true);
@@ -99,9 +106,19 @@ const SignUpPage = () => {
         return;
       }
 
+      // Supabase returns an obfuscated success for existing users (user_repeated_signup)
+      const identities = data.user?.identities ?? [];
+      const isRepeatedSignup = data.user && !data.session && identities.length === 0;
+      if (isRepeatedSignup) {
+        toast.error("An account with this email already exists. Please sign in instead.");
+        navigate("/login");
+        return;
+      }
+
       // If email confirmation is required, user won't have a session yet
       if (data.user && !data.session) {
         setEmailSent(true);
+        toast.success("Confirmation email sent. Please check your inbox.");
         return;
       }
 
@@ -110,7 +127,10 @@ const SignUpPage = () => {
         toast.success("Account created successfully!");
         const role = selectedRole || "tenant";
         navigate(role === "tenant" ? "/dashboard/tenant" : "/dashboard/subtenant");
+        return;
       }
+
+      toast.error("Could not complete signup. Please try again.");
     } catch (err: any) {
       console.error("Unexpected signup error:", err);
       toast.error(err.message || "An unexpected error occurred");
