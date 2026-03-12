@@ -28,7 +28,6 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-const { refreshProfile } = useAuth ? {} as any : {};
 import { toast } from "sonner";
 
 const STEPS = ["Photo ID", "Application Form", "Co-Signer Info"];
