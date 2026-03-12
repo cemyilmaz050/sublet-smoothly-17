@@ -178,19 +178,36 @@ serve(async (req) => {
       throw new Error("Invalid AppFolio URL");
     }
 
-    // Fetch the public listings page
-    const listingsUrl = url.endsWith("/") ? `${url}listings` : `${url}/listings`;
-    logStep("Fetching listings from", { listingsUrl });
+    // Try the URL as-is first, then with /listings appended
+    const urlsToTry = [url];
+    // Only add /listings variant if URL doesn't already have a specific path
+    const urlPath = new URL(url).pathname;
+    if (urlPath === "/" || urlPath === "") {
+      urlsToTry.push(url.endsWith("/") ? `${url}listings` : `${url}/listings`);
+    }
 
-    const response = await fetch(listingsUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; SubletSafe/1.0)",
-        "Accept": "text/html",
-      },
-    });
+    let html = "";
+    let fetchSuccess = false;
+    for (const listingsUrl of urlsToTry) {
+      logStep("Fetching listings from", { listingsUrl });
+      const response = await fetch(listingsUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; SubletSafe/1.0)",
+          "Accept": "text/html",
+        },
+      });
+      if (response.ok) {
+        html = await response.text();
+        fetchSuccess = true;
+        break;
+      } else {
+        await response.text(); // consume body
+        logStep("URL returned", { status: response.status, url: listingsUrl });
+      }
+    }
 
-    if (!response.ok) {
-      const errMsg = `Failed to fetch AppFolio page: HTTP ${response.status}`;
+    if (!fetchSuccess) {
+      const errMsg = `Failed to fetch AppFolio page. Tried: ${urlsToTry.join(", ")}`;
       await supabaseAdmin.from("manager_integrations").update({
         status: "error",
         sync_error: errMsg,
