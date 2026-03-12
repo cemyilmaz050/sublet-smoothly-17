@@ -504,6 +504,8 @@ const ListingsPage = () => {
                 <div className="space-y-3 pt-2">
                   {(role === "subtenant" || (!user && !role)) && !isOwnListing(selectedListing) && (
                     <>
+                      <SecureThisPlace listing={selectedListing} userId={user?.id} />
+
                       {appliedListings.has(selectedListing.id) ? (
                         <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald/30 bg-emerald/10 py-3 text-sm font-medium text-emerald">
                           <CheckCircle2 className="h-4 w-4" /> Application Submitted
@@ -519,37 +521,17 @@ const ListingsPage = () => {
                             className="resize-none"
                           />
                           <div className="flex gap-2">
-                            <Button
-                              className="flex-1"
-                              onClick={() => handleApply(selectedListing)}
-                              disabled={applyingId === selectedListing.id}
-                            >
-                              {applyingId === selectedListing.id ? (
-                                <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Submitting...</>
-                              ) : (
-                                <><Send className="mr-1 h-4 w-4" />Submit Application</>
-                              )}
+                            <Button className="flex-1" onClick={() => handleApply(selectedListing)} disabled={applyingId === selectedListing.id}>
+                              {applyingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Submitting...</> : <><Send className="mr-1 h-4 w-4" />Submit Application</>}
                             </Button>
                             <Button variant="outline" onClick={() => { setShowApplyForm(false); setApplicationMessage(""); }}>Cancel</Button>
                           </div>
                         </div>
                       ) : (
-                        <Button className="w-full" size="lg" onClick={() => setShowApplyForm(true)}>
+                        <Button variant="outline" className="w-full" size="lg" onClick={() => setShowApplyForm(true)}>
                           <Zap className="mr-1 h-4 w-4" /> Apply Now
                         </Button>
                       )}
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => handleContact(selectedListing)}
-                        disabled={contactingId === selectedListing.id}
-                      >
-                        {contactingId === selectedListing.id ? (
-                          <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Starting chat...</>
-                        ) : (
-                          <><MessageSquare className="mr-1 h-4 w-4" />Message Tenant</>
-                        )}
-                      </Button>
                       <Button variant="outline" className="w-full" onClick={() => toggleSave(selectedListing.id)}>
                         <Heart className={`mr-1 h-4 w-4 ${savedListings.has(selectedListing.id) ? "fill-primary text-primary" : ""}`} />
                         {savedListings.has(selectedListing.id) ? "Saved" : "Save Listing"}
