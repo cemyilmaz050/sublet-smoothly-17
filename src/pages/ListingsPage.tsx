@@ -160,9 +160,96 @@ const ListingsPage = () => {
     });
   }, [user]);
 
-  const handleApply = (listing: ListingItem) => {
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [contactingId, setContactingId] = useState<string | null>(null);
+  const [appliedListings, setAppliedListings] = useState<Set<string>>(new Set());
+  const [applicationMessage, setApplicationMessage] = useState("");
+  const [showApplyForm, setShowApplyForm] = useState(false);
+
+  // Load existing applications
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("applications").select("listing_id").eq("applicant_id", user.id).then(({ data }) => {
+      if (data) setAppliedListings(new Set(data.map((d) => d.listing_id)));
+    });
+  }, [user]);
+
+  const handleApply = async (listing: ListingItem) => {
     if (!user) { toast.info("Please sign in to apply for this property."); navigate("/login"); return; }
-    toast.success("Application started! (Coming soon)");
+    if (appliedListings.has(listing.id)) { toast.info("You've already applied to this listing."); return; }
+    setApplyingId(listing.id);
+    const { error } = await supabase.from("applications").insert({
+      applicant_id: user.id,
+      listing_id: listing.id,
+      message: applicationMessage || null,
+      status: "pending",
+    });
+    setApplyingId(null);
+    if (error) { toast.error("Failed to submit application. Please try again."); return; }
+    setAppliedListings((prev) => new Set(prev).add(listing.id));
+    setApplicationMessage("");
+    setShowApplyForm(false);
+    toast.success("Application submitted! The tenant will be notified.");
+
+    // Also create a notification for the listing owner
+    await supabase.from("notifications").insert({
+      user_id: listing.tenant_id,
+      title: "New Application",
+      message: `Someone applied to your listing "${listing.headline || "Untitled"}"`,
+      type: "application",
+      link: "/tenant/applicants",
+    });
+  };
+
+  const handleContact = async (listing: ListingItem) => {
+    if (!user) { toast.info("Please sign in to contact the tenant."); navigate("/login"); return; }
+    setContactingId(listing.id);
+    // Check if a conversation already exists
+    const { data: existing } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("listing_id", listing.id)
+      .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
+      .maybeSingle();
+
+    if (existing) {
+      setContactingId(null);
+      navigate(`/messages?conversation=${existing.id}`);
+      return;
+    }
+
+    // Create a new conversation
+    const { data: convo, error } = await supabase
+      .from("conversations")
+      .insert({
+        participant_1: user.id,
+        participant_2: listing.tenant_id,
+        listing_id: listing.id,
+      })
+      .select("id")
+      .single();
+
+    setContactingId(null);
+    if (error || !convo) { toast.error("Failed to start conversation."); return; }
+
+    // Send an intro message
+    await supabase.from("messages").insert({
+      conversation_id: convo.id,
+      sender_id: user.id,
+      content: `Hi! I'm interested in your listing "${listing.headline || "your apartment"}". Is it still available?`,
+    });
+
+    // Notify the tenant
+    await supabase.from("notifications").insert({
+      user_id: listing.tenant_id,
+      title: "New Message",
+      message: `Someone sent you a message about "${listing.headline || "Untitled"}"`,
+      type: "message",
+      link: "/messages",
+    });
+
+    toast.success("Message sent! Redirecting to your conversation...");
+    navigate(`/messages?conversation=${convo.id}`);
   };
 
   return (
