@@ -3,9 +3,13 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import ListingsPage from "./pages/ListingsPage";
 import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import TenantDashboard from "./pages/TenantDashboard";
 import SubtenantDashboard from "./pages/SubtenantDashboard";
@@ -26,22 +30,31 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/listings" element={<ListingsPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/dashboard/tenant" element={<TenantDashboard />} />
-          <Route path="/dashboard/subtenant" element={<SubtenantDashboard />} />
-          <Route path="/dashboard/manager" element={<ManagerDashboard />} />
-          <Route path="/messages" element={<MessagesPage />} />
-          <Route path="/pricing-setup" element={<PricingSetupPage />} />
-          <Route path="/payments/summary" element={<PaymentSummaryPage />} />
-          <Route path="/payments/confirmation" element={<PaymentConfirmationPage />} />
-          <Route path="/payments" element={<SubtenantPaymentsPage />} />
-          <Route path="/earnings" element={<TenantEarningsPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/listings" element={<ListingsPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/sign-up" element={<SignUpPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            {/* Protected routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/dashboard/tenant" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/subtenant" element={<ProtectedRoute><SubtenantDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
+            <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+            <Route path="/pricing-setup" element={<ProtectedRoute><PricingSetupPage /></ProtectedRoute>} />
+            <Route path="/payments/summary" element={<ProtectedRoute><PaymentSummaryPage /></ProtectedRoute>} />
+            <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
+            <Route path="/payments" element={<ProtectedRoute><SubtenantPaymentsPage /></ProtectedRoute>} />
+            <Route path="/earnings" element={<ProtectedRoute><TenantEarningsPage /></ProtectedRoute>} />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

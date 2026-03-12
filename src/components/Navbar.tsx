@@ -1,12 +1,14 @@
-import { Bell, Home, Building2, Search, MessageSquare, User, Menu, X } from "lucide-react";
+import { Bell, Home, Building2, Search, MessageSquare, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const navItems = [
     { label: "Home", href: "/", icon: Home },
@@ -14,6 +16,11 @@ const Navbar = () => {
     { label: "Dashboard", href: "/dashboard", icon: Building2 },
     { label: "Messages", href: "/messages", icon: MessageSquare },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg">
@@ -42,15 +49,29 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-              3
-            </span>
-          </Button>
-          <Link to="/signup">
-            <Button size="sm" className="hidden md:inline-flex">Get Started</Button>
-          </Link>
+          {user && (
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
+                3
+              </span>
+            </Button>
+          )}
+          {user ? (
+            <Button variant="ghost" size="sm" className="hidden gap-2 md:inline-flex" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          ) : (
+            <div className="hidden gap-2 md:flex">
+              <Link to="/login">
+                <Button variant="ghost" size="sm">Sign In</Button>
+              </Link>
+              <Link to="/signup">
+                <Button size="sm">Get Started</Button>
+              </Link>
+            </div>
+          )}
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -72,9 +93,21 @@ const Navbar = () => {
                 </Button>
               </Link>
             ))}
-            <Link to="/signup" onClick={() => setMobileOpen(false)}>
-              <Button className="mt-2 w-full">Get Started</Button>
-            </Link>
+            {user ? (
+              <Button variant="ghost" className="mt-2 w-full justify-start gap-2" onClick={() => { handleSignOut(); setMobileOpen(false); }}>
+                <LogOut className="h-4 w-4" />
+                Sign Out
+              </Button>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMobileOpen(false)}>
+                  <Button variant="ghost" className="w-full">Sign In</Button>
+                </Link>
+                <Link to="/signup" onClick={() => setMobileOpen(false)}>
+                  <Button className="mt-1 w-full">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

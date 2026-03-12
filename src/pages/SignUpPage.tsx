@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Home, Search, Mail, Phone, ArrowRight, Loader2, CheckCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface FormErrors {
   firstName?: string;
@@ -18,6 +19,7 @@ interface FormErrors {
 }
 
 const SignUpPage = () => {
+  const { user, isReady, role } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialRole = searchParams.get("role") as "tenant" | "subtenant" | null;
@@ -32,6 +34,12 @@ const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [emailSent, setEmailSent] = useState(false);
+
+  // Auto-redirect if already logged in
+  if (isReady && user) {
+    const dest = role === "subtenant" ? "/dashboard/subtenant" : role === "manager" ? "/dashboard/manager" : "/dashboard/tenant";
+    return <Navigate to={dest} replace />;
+  }
 
   const roles = [
     {
