@@ -1,78 +1,95 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Calendar, DollarSign, ShieldCheck, Heart } from "lucide-react";
+import { MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+
+interface ListingItem {
+  id: string;
+  headline: string | null;
+  address: string | null;
+  monthly_rent: number | null;
+  photos: string[] | null;
+  available_from: string | null;
+  available_until: string | null;
+  bedrooms: number | null;
+  source: string;
+}
 
 const mockListings = [
   {
-    id: 1,
-    title: "Sunny 2BR in Downtown",
-    location: "Manhattan, NY",
-    price: 2400,
-    dates: "Jul 1 - Dec 31, 2026",
-    image: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop",
-    approved: true,
+    id: "mock-1",
+    headline: "Sunny 2BR in Downtown",
+    address: "Manhattan, NY",
+    monthly_rent: 2400,
+    photos: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop"],
+    available_from: "2026-07-01",
+    available_until: "2026-12-31",
     bedrooms: 2,
+    source: "manual",
   },
   {
-    id: 2,
-    title: "Cozy Studio near Park",
-    location: "Brooklyn, NY",
-    price: 1800,
-    dates: "Aug 1 - Nov 30, 2026",
-    image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop",
-    approved: true,
+    id: "mock-2",
+    headline: "Cozy Studio near Park",
+    address: "Brooklyn, NY",
+    monthly_rent: 1800,
+    photos: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop"],
+    available_from: "2026-08-01",
+    available_until: "2026-11-30",
     bedrooms: 1,
+    source: "manual",
   },
   {
-    id: 3,
-    title: "Modern 1BR with Views",
-    location: "Jersey City, NJ",
-    price: 2100,
-    dates: "Jul 15 - Jan 15, 2027",
-    image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop",
-    approved: true,
+    id: "mock-3",
+    headline: "Modern 1BR with Views",
+    address: "Jersey City, NJ",
+    monthly_rent: 2100,
+    photos: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop"],
+    available_from: "2026-07-15",
+    available_until: "2027-01-15",
     bedrooms: 1,
-  },
-  {
-    id: 4,
-    title: "Spacious 3BR Family Apt",
-    location: "Queens, NY",
-    price: 3200,
-    dates: "Sep 1 - Feb 28, 2027",
-    image: "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&h=400&fit=crop",
-    approved: true,
-    bedrooms: 3,
-  },
-  {
-    id: 5,
-    title: "Artist Loft in Williamsburg",
-    location: "Brooklyn, NY",
-    price: 2600,
-    dates: "Aug 15 - Dec 15, 2026",
-    image: "https://images.unsplash.com/photo-1536376072261-38c75010e6c9?w=600&h=400&fit=crop",
-    approved: true,
-    bedrooms: 1,
-  },
-  {
-    id: 6,
-    title: "Charming Brownstone Unit",
-    location: "Park Slope, NY",
-    price: 2900,
-    dates: "Jul 1 - Oct 31, 2026",
-    image: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=600&h=400&fit=crop",
-    approved: true,
-    bedrooms: 2,
+    source: "manual",
   },
 ];
 
 const ListingsPage = () => {
   const [location, setLocation] = useState("");
+  const [dbListings, setDbListings] = useState<ListingItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      const { data } = await supabase
+        .from("listings")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, source")
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
+      setDbListings((data as ListingItem[]) || []);
+      setLoading(false);
+    };
+    fetchListings();
+  }, []);
+
+  // Combine mock + real listings
+  const allListings = [...dbListings, ...mockListings];
+  const filtered = location
+    ? allListings.filter((l) => l.address?.toLowerCase().includes(location.toLowerCase()))
+    : allListings;
+
+  const formatDates = (from: string | null, until: string | null) => {
+    if (!from) return "";
+    const f = new Date(from);
+    const fStr = f.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    if (!until) return `From ${fStr}`;
+    const u = new Date(until);
+    const uStr = u.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return `${fStr} - ${uStr}`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -122,7 +139,7 @@ const ListingsPage = () => {
 
         {/* Listings Grid */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockListings.map((listing, index) => (
+          {filtered.map((listing, index) => (
             <motion.div
               key={listing.id}
               initial={{ opacity: 0, y: 20 }}
@@ -132,18 +149,29 @@ const ListingsPage = () => {
               <Link to={`/listing/${listing.id}`} className="group block">
                 <div className="overflow-hidden rounded-xl border bg-card shadow-card transition-all hover:shadow-elevated">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={listing.image}
-                      alt={listing.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    {listing.approved && (
-                      <Badge variant="approved" className="absolute left-3 top-3 shadow-sm">
-                        <ShieldCheck className="mr-1 h-3 w-3" />
-                        Manager Approved
-                      </Badge>
+                    {listing.photos && listing.photos.length > 0 ? (
+                      <img
+                        src={listing.photos[0]}
+                        alt={listing.headline || ""}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-muted text-muted-foreground">No photo</div>
                     )}
+                    <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+                      {listing.source === "appfolio" ? (
+                        <Badge className="bg-emerald-600 text-white shadow-sm">
+                          <Building2 className="mr-1 h-3 w-3" />
+                          AppFolio Verified
+                        </Badge>
+                      ) : (
+                        <Badge variant="approved" className="shadow-sm">
+                          <ShieldCheck className="mr-1 h-3 w-3" />
+                          Manager Approved
+                        </Badge>
+                      )}
+                    </div>
                     <button className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm transition-colors hover:bg-card">
                       <Heart className="h-4 w-4 text-muted-foreground" />
                     </button>
@@ -151,17 +179,19 @@ const ListingsPage = () => {
                   <div className="p-5">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="font-semibold text-foreground group-hover:text-primary">{listing.title}</h3>
+                        <h3 className="font-semibold text-foreground group-hover:text-primary">{listing.headline || "Untitled"}</h3>
                         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
                           <MapPin className="h-3.5 w-3.5" />
-                          {listing.location}
+                          {listing.address || "Unknown"}
                         </p>
                       </div>
-                      <p className="text-lg font-bold text-primary">${listing.price}<span className="text-xs font-normal text-muted-foreground">/mo</span></p>
+                      {listing.monthly_rent && (
+                        <p className="text-lg font-bold text-primary">${listing.monthly_rent}<span className="text-xs font-normal text-muted-foreground">/mo</span></p>
+                      )}
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-3.5 w-3.5" />
-                      {listing.dates}
+                      {formatDates(listing.available_from, listing.available_until)}
                     </div>
                   </div>
                 </div>
@@ -169,6 +199,12 @@ const ListingsPage = () => {
             </motion.div>
           ))}
         </div>
+
+        {filtered.length === 0 && !loading && (
+          <div className="py-16 text-center text-muted-foreground">
+            No listings found matching your search.
+          </div>
+        )}
       </div>
     </div>
   );
