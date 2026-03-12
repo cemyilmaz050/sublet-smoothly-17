@@ -189,9 +189,7 @@ const TenantDashboard = () => {
       </div>
 
       {/* Onboarding Overlay */}
-      {showOnboarding && (
-        <SubletOnboardingOverlay onClose={() => setShowOnboarding(false)} />
-      )}
+      <SubletOnboardingOverlay open={showOnboarding} onClose={() => setShowOnboarding(false)} />
     </div>
   );
 };
