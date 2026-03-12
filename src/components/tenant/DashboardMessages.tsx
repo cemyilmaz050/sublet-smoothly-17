@@ -101,7 +101,7 @@ const DashboardMessages = ({ conversations, unreadCount }: Props) => {
             <Badge className="bg-primary text-primary-foreground text-xs">{unreadCount}</Badge>
           )}
         </div>
-        <Button variant="ghost" size="sm" className="text-primary text-sm">View All</Button>
+        
       </div>
 
       {conversations.length === 0 ? (
@@ -109,12 +109,12 @@ const DashboardMessages = ({ conversations, unreadCount }: Props) => {
           <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">No messages yet</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            When subtenants apply or reach out, their messages will appear here.
+            Applicants who are interested in your listing will message you here.
           </p>
         </div>
       ) : (
         <div className="divide-y rounded-xl border bg-card">
-          {conversations.slice(0, 5).map((convo) => (
+          {conversations.map((convo) => (
             <button
               key={convo.id}
               onClick={() => setOpenConvo(convo)}

@@ -1,19 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Plus, AlertCircle, ArrowRight, Info } from "lucide-react";
+import { Building2, Home, ExternalLink, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import TenantSidebar from "@/components/tenant/TenantSidebar";
-import DashboardStats from "@/components/tenant/DashboardStats";
-import YourListingsSection from "@/components/tenant/YourListingsSection";
 import DashboardMessages from "@/components/tenant/DashboardMessages";
-import RecentApplicants from "@/components/tenant/RecentApplicants";
-import DashboardCalendarWidget from "@/components/tenant/DashboardCalendarWidget";
-import OnboardingChecklist from "@/components/tenant/OnboardingChecklist";
 import UserMenu from "@/components/UserMenu";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 
@@ -30,23 +23,34 @@ interface Listing {
   save_count: number;
 }
 
+const statusStyle: Record<string, string> = {
+  active: "bg-emerald/15 text-emerald border-emerald/30",
+  pending: "bg-amber/15 text-amber border-amber/30",
+  draft: "bg-muted text-muted-foreground border-border",
+  expired: "bg-destructive/15 text-destructive border-destructive/30",
+  rejected: "bg-destructive/15 text-destructive border-destructive/30",
+};
+
+const formatDates = (from: string | null, until: string | null) => {
+  if (!from) return "Dates not set";
+  const f = new Date(from).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (!until) return `From ${f}`;
+  const u = new Date(until).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return `${f} – ${u}`;
+};
+
 const TenantDashboard = () => {
-  const { user, onboardingComplete, documentsStatus } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSublet, setShowSublet] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
-  const [applicants, setApplicants] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-
-  const firstName = user?.user_metadata?.first_name || "there";
-  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
   const fetchData = useCallback(async () => {
     if (!user) return;
 
-    // Fetch listings
     const { data: listingsData } = await supabase
       .from("listings")
       .select("id, headline, address, monthly_rent, photos, status, available_from, available_until, view_count, save_count")
@@ -54,16 +58,13 @@ const TenantDashboard = () => {
       .order("created_at", { ascending: false });
     setListings((listingsData as Listing[]) || []);
 
-    // Fetch conversations
     const { data: convos } = await supabase
       .from("conversations")
       .select("*")
       .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
-      .order("last_message_at", { ascending: false })
-      .limit(5) as any;
+      .order("last_message_at", { ascending: false }) as any;
 
     if (convos && convos.length > 0) {
-      // Get last message for each
       const enriched = await Promise.all(
         convos.map(async (c: any) => {
           const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
@@ -81,7 +82,6 @@ const TenantDashboard = () => {
             .eq("read", false)
             .neq("sender_id", user.id) as any;
 
-          // Fetch listing address
           let listingAddress = "";
           if (c.listing_id) {
             const { data: l } = await supabase.from("listings").select("address").eq("id", c.listing_id).single() as any;
@@ -91,7 +91,7 @@ const TenantDashboard = () => {
           return {
             ...c,
             other_name: `User ${otherId.slice(0, 6)}`,
-            other_initial: "U",
+            other_initial: otherId.charAt(0).toUpperCase(),
             last_message: lastMsg?.[0]?.content || "",
             unread_count: count || 0,
             listing_address: listingAddress,
@@ -100,61 +100,25 @@ const TenantDashboard = () => {
       );
       setConversations(enriched);
       setUnreadCount(enriched.reduce((sum: number, c: any) => sum + c.unread_count, 0));
-    }
-
-    // Fetch applications
-    if (listingsData && listingsData.length > 0) {
-      const listingIds = listingsData.map((l: any) => l.id);
-      const { data: apps } = await supabase
-        .from("applications")
-        .select("*")
-        .in("listing_id", listingIds)
-        .order("created_at", { ascending: false })
-        .limit(10) as any;
-
-      if (apps) {
-        const enrichedApps = apps.map((a: any) => {
-          const listing = listingsData.find((l: any) => l.id === a.listing_id);
-          return {
-            id: a.id,
-            name: `Applicant ${a.applicant_id.slice(0, 6)}`,
-            initial: "A",
-            verified: false,
-            listing_headline: listing?.headline || "Listing",
-            listing_address: listing?.address || "",
-            message: a.message,
-            status: a.status,
-            created_at: a.created_at,
-          };
-        });
-        setApplicants(enrichedApps);
-      }
+    } else {
+      setConversations([]);
+      setUnreadCount(0);
     }
 
     setLoading(false);
   }, [user]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Realtime subscriptions
+  // Realtime
   useEffect(() => {
     if (!user) return;
-
     const channel = supabase
-      .channel("tenant-dashboard-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => {
-        fetchData();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, () => {
-        fetchData();
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "listings" }, () => {
-        fetchData();
-      })
+      .channel("tenant-dash-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => fetchData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => fetchData())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "listings" }, () => fetchData())
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [user, fetchData]);
 
@@ -164,119 +128,123 @@ const TenantDashboard = () => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  const activeListings = listings.filter((l) => l.status === "active").length;
-  const isNewTenant = listings.length === 0 && conversations.length === 0 && applicants.length === 0;
-  const draftListing = listings.find((l) => l.status === "draft");
-
-  const docBanner = documentsStatus && documentsStatus !== "approved" && documentsStatus !== "not_started";
-
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full">
-        <TenantSidebar />
-
-        <div className="flex flex-1 flex-col">
-          {/* Top bar */}
-          <header className="flex h-14 items-center justify-between border-b bg-card px-4">
-            <SidebarTrigger className="lg:hidden" />
-            <div />
-            <UserMenu />
-          </header>
-
-          {/* Document status banner */}
-          {docBanner && (
-            <div className={`px-6 py-3 text-sm font-medium ${
-              documentsStatus === "rejected" ? "bg-destructive/10 text-destructive" : "bg-amber/10 text-amber"
-            }`}>
-              <div className="flex items-center gap-2">
-                <AlertCircle className="h-4 w-4" />
-                {documentsStatus === "pending" && "Your documents are under review. You will be notified once approved."}
-                {documentsStatus === "rejected" && (
-                  <>Some documents need attention. <button className="underline font-semibold">View Details</button></>
-                )}
-                {documentsStatus === "more_info" && (
-                  <>Your property manager has requested more information. <button className="underline font-semibold">Respond Now</button></>
-                )}
-              </div>
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Top nav */}
+      <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg">
+        <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-4">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+              <Building2 className="h-5 w-5 text-primary-foreground" />
             </div>
-          )}
+            <span className="text-xl font-bold text-foreground">SubletSafe</span>
+          </Link>
+          <UserMenu />
+        </div>
+      </header>
 
-          {/* Main content */}
-          <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-            {/* Welcome header */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-foreground lg:text-3xl">
-                  Welcome back, {firstName} 👋
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground">{today}</p>
+      {/* Main content */}
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 space-y-8">
+        {/* SECTION 1: My Listing */}
+        <section>
+          <h2 className="mb-4 text-lg font-semibold text-foreground">My Listing</h2>
+
+          {loading ? (
+            <div className="h-32 animate-pulse rounded-xl bg-muted" />
+          ) : listings.length === 0 ? (
+            /* Empty state */
+            <div className="flex flex-col items-center rounded-xl border-2 border-dashed border-border bg-card p-12 text-center">
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <Home className="h-7 w-7 text-primary" />
               </div>
-              <Button onClick={() => setShowSublet(true)}>
-                <Plus className="mr-1.5 h-4 w-4" />
-                Sublet Another Property
+              <p className="font-medium text-foreground">You haven't posted a listing yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                List your apartment and find the perfect subtenant
+              </p>
+              <Button className="mt-5" onClick={() => setShowSublet(true)}>
+                Sublet Your Apartment
               </Button>
             </div>
+          ) : (
+            /* Listing cards */
+            <div className="space-y-4">
+              {listings.map((listing) => (
+                <div
+                  key={listing.id}
+                  className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:flex-row"
+                >
+                  {/* Photo */}
+                  <div className="relative aspect-square w-full shrink-0 sm:w-48">
+                    {listing.photos && listing.photos[0] ? (
+                      <img
+                        src={listing.photos[0]}
+                        alt={listing.headline || "Listing photo"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center bg-muted text-sm text-muted-foreground">
+                        No photo
+                      </div>
+                    )}
+                  </div>
 
-            {isNewTenant && !loading ? (
-              <OnboardingChecklist
-                identityVerified={onboardingComplete === true}
-                documentsSubmitted={documentsStatus === "pending" || documentsStatus === "approved"}
-                hasListing={false}
-                onSublet={() => setShowSublet(true)}
-              />
-            ) : (
-              <div className="space-y-8">
-                {/* Stats */}
-                <DashboardStats
-                  activeListings={activeListings}
-                  totalApplicants={applicants.length}
-                  unreadMessages={unreadCount}
-                  earningsThisMonth={0}
-                />
+                  {/* Details */}
+                  <div className="flex flex-1 flex-col justify-between p-5">
+                    <div>
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="text-base font-semibold text-foreground line-clamp-1">
+                          {listing.headline || "Untitled Listing"}
+                        </h3>
+                        <Badge
+                          variant="outline"
+                          className={`shrink-0 capitalize text-xs ${statusStyle[listing.status] || ""}`}
+                        >
+                          {listing.status}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">{listing.address || "No address"}</p>
+                      <p className="mt-2 text-2xl font-bold text-primary">
+                        ${listing.monthly_rent?.toLocaleString() ?? "—"}
+                        <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {formatDates(listing.available_from, listing.available_until)}
+                      </p>
+                    </div>
 
-                {/* Draft banner */}
-                {draftListing && (
-                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-                    <Card className="border-primary/30 bg-accent/50 shadow-card">
-                      <CardContent className="flex items-center justify-between p-4">
-                        <div className="flex items-center gap-3">
-                          <AlertCircle className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-medium text-foreground">You have an unfinished draft</p>
-                            <p className="text-sm text-muted-foreground">{draftListing.headline || draftListing.address || "Untitled listing"}</p>
-                          </div>
-                        </div>
-                        <Button size="sm" onClick={() => navigate(`/listings/edit/${draftListing.id}`)}>
-                          Continue Draft <ArrowRight className="ml-1 h-4 w-4" />
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
+                    <div className="mt-4 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/listings/edit/${listing.id}`)}
+                      >
+                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                        Edit Listing
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/listings?id=${listing.id}`)}
+                      >
+                        <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                        View Public Listing
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
 
-                {/* Listings */}
-                <YourListingsSection
-                  listings={listings}
-                  loading={loading}
-                  onOpenOnboarding={() => setShowSublet(true)}
-                />
-
-                {/* Messages */}
-                <DashboardMessages conversations={conversations} unreadCount={unreadCount} />
-
-                {/* Recent Applicants */}
-                <RecentApplicants applicants={applicants} />
-
-                {/* Calendar */}
-                <DashboardCalendarWidget listings={listings} />
-              </div>
-            )}
-          </main>
-        </div>
-      </div>
+        {/* SECTION 2: Messages */}
+        <section>
+          <DashboardMessages conversations={conversations} unreadCount={unreadCount} />
+        </section>
+      </main>
 
       <SubletFlowOverlay open={showSublet} onClose={() => setShowSublet(false)} />
-    </SidebarProvider>
+    </div>
   );
 };
 
