@@ -36,12 +36,11 @@ const statusVariant = (status: string) => {
 };
 
 const TenantDashboard = () => {
-  const { user } = useAuth();
+  const { user, documentsStatus } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  // Mock: approval status (in production, this would come from a sublet_requests table)
-  const [isApproved] = useState(true);
+  const isApproved = documentsStatus === "approved";
 
   useEffect(() => {
     if (!user) return;
