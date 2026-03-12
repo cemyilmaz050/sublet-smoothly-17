@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import UserMenu from "@/components/UserMenu";
-import SubletOnboardingOverlay from "@/components/SubletOnboardingOverlay";
+import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 
 const Navbar = () => {
   const location = useLocation();
