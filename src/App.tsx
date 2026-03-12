@@ -20,6 +20,7 @@ import PaymentSummaryPage from "./pages/PaymentSummaryPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import SubtenantPaymentsPage from "./pages/SubtenantPaymentsPage";
 import TenantEarningsPage from "./pages/TenantEarningsPage";
+import CreateListingPage from "./pages/CreateListingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,8 @@ const App = () => (
             <Route path="/dashboard/tenant" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/subtenant" element={<ProtectedRoute><SubtenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
+            <Route path="/listings/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
+            <Route path="/listings/edit/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
             <Route path="/pricing-setup" element={<ProtectedRoute><PricingSetupPage /></ProtectedRoute>} />
             <Route path="/payments/summary" element={<ProtectedRoute><PaymentSummaryPage /></ProtectedRoute>} />
