@@ -74,6 +74,23 @@ const TenantDashboard = () => {
               <Plus className="mr-1 h-4 w-4" />
               Create Listing
             </Button>
+          ) : needsOnboarding ? (
+            <Button size="lg" onClick={() => navigate("/tenant/onboarding")}>
+              <FileText className="mr-1 h-4 w-4" />
+              Get Verified to List
+            </Button>
+          ) : isPendingReview ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="lg" disabled>
+                  <Clock className="mr-1 h-4 w-4" />
+                  Verification In Progress
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Your documents are under review. You'll be able to list once verified.</p>
+              </TooltipContent>
+            </Tooltip>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -83,7 +100,7 @@ const TenantDashboard = () => {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>You need manager approval before listing your property</p>
+                <p>You need document approval before listing your property</p>
               </TooltipContent>
             </Tooltip>
           )}
