@@ -15,11 +15,6 @@ import TenantDashboard from "./pages/TenantDashboard";
 import SubtenantDashboard from "./pages/SubtenantDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import MessagesPage from "./pages/MessagesPage";
-import PricingSetupPage from "./pages/PricingSetupPage";
-import PaymentSummaryPage from "./pages/PaymentSummaryPage";
-import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
-import SubtenantPaymentsPage from "./pages/SubtenantPaymentsPage";
-import TenantEarningsPage from "./pages/TenantEarningsPage";
 import CreateListingPage from "./pages/CreateListingPage";
 import ManagerIntegrationsPage from "./pages/ManagerIntegrationsPage";
 import ManagerSubletRequestsPage from "./pages/ManagerSubletRequestsPage";
@@ -55,12 +50,6 @@ const App = () => (
             <Route path="/subtenant/onboarding" element={<ProtectedRoute><TenantOnboardingPage /></ProtectedRoute>} />
             <Route path="/dashboard/tenant" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
             <Route path="/tenant/dashboard" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
-            <Route path="/tenant/listings" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
-            <Route path="/tenant/messages" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
-            <Route path="/tenant/applicants" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
-            <Route path="/tenant/calendar" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
-            <Route path="/tenant/documents" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
-            <Route path="/tenant/settings" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/subtenant" element={<ProtectedRoute><SubtenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/manager/integrations" element={<ProtectedRoute><ManagerIntegrationsPage /></ProtectedRoute>} />
@@ -70,11 +59,6 @@ const App = () => (
             <Route path="/listings/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
             <Route path="/listings/edit/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
-            <Route path="/pricing-setup" element={<ProtectedRoute><PricingSetupPage /></ProtectedRoute>} />
-            <Route path="/payments/summary" element={<ProtectedRoute><PaymentSummaryPage /></ProtectedRoute>} />
-            <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
-            <Route path="/payments" element={<ProtectedRoute><SubtenantPaymentsPage /></ProtectedRoute>} />
-            <Route path="/earnings" element={<ProtectedRoute><TenantEarningsPage /></ProtectedRoute>} />
 
             <Route path="*" element={<NotFound />} />
           </Routes>
