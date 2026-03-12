@@ -200,6 +200,9 @@ const TenantOnboardingPage = () => {
         console.warn("Co-signer email could not be sent:", emailErr);
       }
 
+      // Refresh auth context so route guard allows dashboard access
+      await refreshProfile();
+
       toast.success("Documents submitted successfully! Your documents are under review.");
       navigate("/dashboard/tenant");
     } catch (err: any) {
