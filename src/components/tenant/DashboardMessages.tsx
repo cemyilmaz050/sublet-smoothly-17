@@ -170,8 +170,10 @@ const DashboardMessages = ({ conversations, unreadCount, autoOpenConversationId 
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">{openConvo?.other_name}</p>
-              {openConvo?.listing_address && (
-                <p className="text-[10px] text-muted-foreground">re: {openConvo.listing_address}</p>
+              {(openConvo?.listing_headline || openConvo?.listing_address) && (
+                <p className="text-[10px] text-muted-foreground truncate">
+                  re: {openConvo?.listing_headline || openConvo?.listing_address}
+                </p>
               )}
             </div>
           </div>
