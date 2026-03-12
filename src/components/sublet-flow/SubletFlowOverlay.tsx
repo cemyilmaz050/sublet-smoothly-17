@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, Loader2, Minus, Plus, MapPin } from "lucide-react";
+import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -316,12 +316,15 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                 }}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                  {mgr.logo_url ? <img src={mgr.logo_url} className="h-8 w-8 rounded" /> : <Building2 className="h-5 w-5 text-muted-foreground" />}
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  {mgr.logo_url ? <img src={mgr.logo_url} className="h-8 w-8 rounded" alt="" /> : <span className="text-xs font-bold text-primary">{mgr.name?.split(" ").map((w: string) => w[0]).join("").slice(0, 3).toUpperCase()}</span>}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{mgr.name}</p>
-                  <p className="text-xs text-muted-foreground">{mgr.city} · {mgr.properties_count || 0} properties</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-foreground">{mgr.name}</p>
+                    {mgr.verified && <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald"><CheckCircle className="h-3 w-3" />Verified</span>}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{mgr.city}{mgr.state ? `, ${mgr.state}` : ""} · {mgr.properties_count || 0} properties</p>
                 </div>
               </button>
             ))}

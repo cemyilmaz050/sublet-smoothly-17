@@ -27,6 +27,7 @@ import ManagerPropertiesPage from "./pages/ManagerPropertiesPage";
 import ManagerActiveSublets from "./pages/ManagerActiveSublets";
 import TenantOnboardingPage from "./pages/TenantOnboardingPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
+import ManagerProfilePage from "./pages/ManagerProfilePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route path="/managers/:slug" element={<ManagerProfilePage />} />
 
             {/* Protected routes */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
