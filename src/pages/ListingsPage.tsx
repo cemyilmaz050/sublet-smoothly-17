@@ -73,6 +73,7 @@ const mockListings: ListingItem[] = [
 
 const ListingsPage = () => {
   const { user, role } = useAuth();
+  const { requireAuth } = useAuthModal();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
