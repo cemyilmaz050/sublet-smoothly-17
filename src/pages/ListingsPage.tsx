@@ -69,10 +69,6 @@ const mockListings: ListingItem[] = [
   },
 ];
 
-const pinPositions = [
-  { x: 35, y: 30 }, { x: 55, y: 50 }, { x: 25, y: 65 },
-  { x: 65, y: 25 }, { x: 45, y: 72 }, { x: 70, y: 55 },
-];
 
 const ListingsPage = () => {
   const { user, role } = useAuth();
