@@ -25,6 +25,7 @@ import ManagerIntegrationsPage from "./pages/ManagerIntegrationsPage";
 import ManagerSubletRequestsPage from "./pages/ManagerSubletRequestsPage";
 import ManagerPropertiesPage from "./pages/ManagerPropertiesPage";
 import ManagerActiveSublets from "./pages/ManagerActiveSublets";
+import TenantOnboardingPage from "./pages/TenantOnboardingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
