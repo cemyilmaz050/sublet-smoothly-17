@@ -194,6 +194,98 @@ export type Database = {
         }
         Relationships: []
       }
+      request_documents: {
+        Row: {
+          document_type: string
+          file_name: string
+          file_url: string
+          id: string
+          request_id: string
+          review_comment: string | null
+          status: string
+          uploaded_at: string
+        }
+        Insert: {
+          document_type: string
+          file_name: string
+          file_url: string
+          id?: string
+          request_id: string
+          review_comment?: string | null
+          status?: string
+          uploaded_at?: string
+        }
+        Update: {
+          document_type?: string
+          file_name?: string
+          file_url?: string
+          id?: string
+          request_id?: string
+          review_comment?: string | null
+          status?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_documents_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "sublet_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sublet_requests: {
+        Row: {
+          additional_rules: string | null
+          co_approve_subtenant: boolean | null
+          created_at: string
+          id: string
+          manager_id: string
+          manager_message: string | null
+          max_sublet_duration: number | null
+          property_address: string
+          rejection_note: string | null
+          rejection_reason: string | null
+          status: string
+          tenant_id: string
+          unit_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          additional_rules?: string | null
+          co_approve_subtenant?: boolean | null
+          created_at?: string
+          id?: string
+          manager_id: string
+          manager_message?: string | null
+          max_sublet_duration?: number | null
+          property_address: string
+          rejection_note?: string | null
+          rejection_reason?: string | null
+          status?: string
+          tenant_id: string
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          additional_rules?: string | null
+          co_approve_subtenant?: boolean | null
+          created_at?: string
+          id?: string
+          manager_id?: string
+          manager_message?: string | null
+          max_sublet_duration?: number | null
+          property_address?: string
+          rejection_note?: string | null
+          rejection_reason?: string | null
+          status?: string
+          tenant_id?: string
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
