@@ -47,6 +47,7 @@ const App = () => (
             <Route path="/dashboard/tenant" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/subtenant" element={<ProtectedRoute><SubtenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
+            <Route path="/dashboard/manager/integrations" element={<ProtectedRoute><ManagerIntegrationsPage /></ProtectedRoute>} />
             <Route path="/listings/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
             <Route path="/listings/edit/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
             <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
