@@ -3,16 +3,10 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Users, Eye, Clock, Plus, DollarSign, TrendingUp, ArrowRight, AlertCircle } from "lucide-react";
+import { Plus, Eye, Heart, Users, MessageSquare, Home, ArrowRight, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import DocumentUpload from "@/components/DocumentUpload";
-import StepProgress from "@/components/StepProgress";
-import EmptyState from "@/components/EmptyState";
-import YourListingsSection from "@/components/tenant/YourListingsSection";
-import SubtenantActivitySection from "@/components/tenant/SubtenantActivitySection";
-import SubletOnboardingOverlay from "@/components/SubletOnboardingOverlay";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useNavigate } from "react-router-dom";
+import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -29,12 +23,20 @@ interface Listing {
   save_count: number;
 }
 
+const statusColor: Record<string, string> = {
+  active: "bg-emerald/15 text-emerald border-emerald/30",
+  pending: "bg-amber/15 text-amber border-amber/30",
+  draft: "bg-muted text-muted-foreground border-border",
+  expired: "bg-destructive/15 text-destructive border-destructive/30",
+  rejected: "bg-destructive/15 text-destructive border-destructive/30",
+};
+
 const TenantDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [subletOpen, setSubletOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -52,25 +54,42 @@ const TenantDashboard = () => {
 
   const draftListing = listings.find((l) => l.status === "draft");
 
+  const formatDates = (from: string | null, until: string | null) => {
+    if (!from) return "";
+    const f = new Date(from).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    if (!until) return `From ${f}`;
+    const u = new Date(until).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return `${f} – ${u}`;
+  };
+
+  // Empty state
+  if (!loading && listings.length === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="flex flex-col items-center justify-center px-4 py-32 text-center">
+          <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-2xl bg-accent">
+            <Home className="h-12 w-12 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">You haven't listed any properties yet</h2>
+          <p className="mt-2 max-w-md text-muted-foreground">Start subletting your place in just a few steps</p>
+          <Button size="lg" className="mt-6" onClick={() => setSubletOpen(true)}>
+            Sublet Your Apartment
+          </Button>
+          <SubletFlowOverlay open={subletOpen} onClose={() => setSubletOpen(false)} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Tenant Dashboard</h1>
-            <p className="mt-1 text-muted-foreground">Manage your sublet listing and applications</p>
-          </div>
-          <Button size="lg" onClick={() => navigate("/listings/create")}>
-            <Plus className="mr-1 h-4 w-4" />
-            Create Listing
-          </Button>
-        </div>
-
         {/* Draft Banner */}
         {draftListing && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="mb-6 border-primary/30 bg-accent/50 shadow-card">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+            <Card className="border-primary/30 bg-accent/50">
               <CardContent className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
                   <AlertCircle className="h-5 w-5 text-primary" />
@@ -79,117 +98,95 @@ const TenantDashboard = () => {
                     <p className="text-sm text-muted-foreground">{draftListing.headline || draftListing.address || "Untitled listing"}</p>
                   </div>
                 </div>
-                <Button onClick={() => navigate(`/listings/edit/${draftListing.id}`)}>
-                  Continue Draft
-                  <ArrowRight className="ml-1 h-4 w-4" />
+                <Button size="sm" onClick={() => navigate(`/listings/edit/${draftListing.id}`)}>
+                  Continue Draft <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
           </motion.div>
         )}
 
-        {/* Status Cards */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: "Total Listings", value: String(listings.length), icon: Eye },
-            { label: "Active", value: String(listings.filter((l) => l.status === "active").length), icon: FileText },
-            { label: "Pending Review", value: String(listings.filter((l) => l.status === "pending").length), icon: Clock },
-            { label: "Earnings", value: "$7,050", icon: TrendingUp },
-          ].map((stat) => (
-            <Card key={stat.label} className="shadow-card">
-              <CardContent className="flex items-center gap-4 p-5">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
-                  <stat.icon className="h-6 w-6 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                </div>
+        {/* Two-column layout */}
+        <div className="grid gap-8 lg:grid-cols-5">
+          {/* LEFT: Your Listings (60%) */}
+          <div className="lg:col-span-3">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-foreground">Your Listings</h2>
+            </div>
+
+            <div className="space-y-4">
+              {listings.map((listing, i) => (
+                <motion.div
+                  key={listing.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <Card className="overflow-hidden">
+                    <div className="relative">
+                      {listing.photos && listing.photos.length > 0 ? (
+                        <img
+                          src={listing.photos[0]}
+                          alt={listing.headline || ""}
+                          className="h-48 w-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="flex h-48 items-center justify-center bg-muted text-muted-foreground">No photo</div>
+                      )}
+                      <Badge className={`absolute right-3 top-3 border text-xs capitalize ${statusColor[listing.status] || statusColor.draft}`}>
+                        {listing.status}
+                      </Badge>
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-foreground line-clamp-1">{listing.headline || listing.address || "Untitled"}</h3>
+                      {listing.address && <p className="mt-1 text-sm text-muted-foreground">{listing.address}</p>}
+                      {listing.monthly_rent && (
+                        <p className="mt-1 text-lg font-bold text-primary">${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span></p>
+                      )}
+                      {listing.available_from && (
+                        <p className="mt-1 text-xs text-muted-foreground">{formatDates(listing.available_from, listing.available_until)}</p>
+                      )}
+                      <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1"><Eye className="h-3.5 w-3.5" />{listing.view_count} views</span>
+                        <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" />{listing.save_count} saves</span>
+                        <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />0 applicants</span>
+                      </div>
+                      <div className="mt-3 flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => navigate(`/listings/edit/${listing.id}`)}>Edit</Button>
+                        <Button size="sm" variant="outline">Pause</Button>
+                        <Button size="sm" variant="outline">View Applicants</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+
+              {/* Add another listing */}
+              <button
+                onClick={() => setSubletOpen(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-8 text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="font-medium">Add another listing</span>
+              </button>
+            </div>
+          </div>
+
+          {/* RIGHT: Messages (40%) */}
+          <div className="lg:col-span-2">
+            <h2 className="mb-4 text-xl font-bold text-foreground">Messages</h2>
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">No messages yet. They will appear here when subtenants reach out about your listings.</p>
               </CardContent>
             </Card>
-          ))}
+          </div>
         </div>
-
-        {/* Step Progress */}
-        <Card className="mb-8 shadow-card">
-          <CardContent className="py-8">
-            <StepProgress
-              steps={["Upload Documents", "Manager Review", "Create Listing", "Find Subtenant"]}
-              currentStep={1}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Your Listings Section */}
-        <YourListingsSection
-          listings={listings}
-          loading={loading}
-          onOpenOnboarding={() => setShowOnboarding(true)}
-        />
-
-        {/* Subtenant Activity Section */}
-        <SubtenantActivitySection listings={listings} />
-
-        {/* Tabs for Documents, Payments etc */}
-        <Tabs defaultValue="documents">
-          <TabsList className="mb-6">
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="documents">
-            <div className="space-y-4">
-              <DocumentUpload label="Lease Agreement" description="Upload your current lease agreement (PDF)" status="approved" fileName="lease_agreement_2026.pdf" />
-              <DocumentUpload label="Proof of Residence" description="Utility bill or bank statement" status="approved" fileName="utility_bill_june.pdf" />
-              <DocumentUpload label="Sublet Request Letter" description="Formal request to your property manager" status="pending" fileName="sublet_request.pdf" />
-              <DocumentUpload label="Additional Documents" description="Any other supporting documents" status="empty" />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Card className="shadow-card">
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald/15">
-                      <TrendingUp className="h-6 w-6 text-emerald" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Earned</p>
-                      <p className="text-xl font-bold text-foreground">$7,050.00</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="shadow-card">
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber/15">
-                      <Clock className="h-6 w-6 text-amber" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Pending Payout</p>
-                      <p className="text-xl font-bold text-foreground">$2,350.00</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="flex gap-3">
-                <Link to="/earnings">
-                  <Button>
-                    <DollarSign className="mr-1 h-4 w-4" />
-                    View Full Earnings
-                  </Button>
-                </Link>
-                <Link to="/pricing-setup">
-                  <Button variant="outline">Set Up Pricing</Button>
-                </Link>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
       </div>
 
-      {/* Onboarding Overlay */}
-      <SubletOnboardingOverlay open={showOnboarding} onClose={() => setShowOnboarding(false)} />
+      <SubletFlowOverlay open={subletOpen} onClose={() => setSubletOpen(false)} />
     </div>
   );
 };

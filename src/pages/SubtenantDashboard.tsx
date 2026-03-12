@@ -1,171 +1,174 @@
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, FileCheck, MessageSquare, Clock, Search, MapPin, Calendar, DollarSign, CreditCard, ShieldCheck, AlertCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Heart, MessageSquare, Search, MapPin, Calendar, X,
+} from "lucide-react";
 import Navbar from "@/components/Navbar";
-import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
-import StepProgress from "@/components/StepProgress";
-import EmptyState from "@/components/EmptyState";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import PaymentStatusBadge from "@/components/PaymentStatusBadge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+interface SavedListing {
+  listing_id: string;
+  headline: string | null;
+  address: string | null;
+  monthly_rent: number | null;
+  photos: string[] | null;
+  available_from: string | null;
+  available_until: string | null;
+}
 
 const SubtenantDashboard = () => {
-  const { documentsStatus, onboardingComplete } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const isApproved = documentsStatus === "approved";
-  const isPendingReview = documentsStatus === "pending_review";
-  const needsVerification = !onboardingComplete;
+  const [savedListings, setSavedListings] = useState<SavedListing[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    // Fetch saved listings with joined data
+    supabase
+      .from("saved_listings")
+      .select("listing_id, listings(headline, address, monthly_rent, photos, available_from, available_until)")
+      .eq("user_id", user.id)
+      .order("saved_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) {
+          setSavedListings(
+            data.map((d: any) => ({
+              listing_id: d.listing_id,
+              ...(d.listings || {}),
+            }))
+          );
+        }
+      });
+  }, [user]);
+
+  const formatDates = (from: string | null, until: string | null) => {
+    if (!from) return "";
+    const f = new Date(from).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    if (!until) return `From ${f}`;
+    const u = new Date(until).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return `${f} – ${u}`;
+  };
+
+  const removeSave = async (listingId: string) => {
+    if (!user) return;
+    setSavedListings((prev) => prev.filter((l) => l.listing_id !== listingId));
+    await supabase.from("saved_listings").delete().eq("user_id", user.id).eq("listing_id", listingId);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Subtenant Dashboard</h1>
-            <p className="mt-1 text-muted-foreground">Track your applications and find your next home</p>
-          </div>
-          {needsVerification ? (
-            <Button size="lg" onClick={() => navigate("/subtenant/onboarding")}>
-              <ShieldCheck className="mr-1 h-4 w-4" />
-              Get Verified to Apply
+        {/* Two-column layout */}
+        <div className="grid gap-8 lg:grid-cols-5">
+          {/* LEFT: Discover & Applications (60%) */}
+          <div className="lg:col-span-3">
+            <h2 className="mb-4 text-xl font-bold text-foreground">Discover Properties</h2>
+
+            {/* Search */}
+            <div className="mb-4 flex items-center gap-2 rounded-lg border bg-background px-3">
+              <Search className="h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by neighborhood, address or zip code"
+                className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")}>
+                  <X className="h-4 w-4 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+
+            <Button className="mb-6 w-full" onClick={() => navigate("/listings")}>
+              Browse All Properties
             </Button>
-          ) : isPendingReview ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="lg" disabled>
-                  <Clock className="mr-1 h-4 w-4" />
-                  Verification In Progress
+
+            {/* Applications */}
+            <h3 className="mb-3 text-lg font-semibold text-foreground">Your Applications</h3>
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <p className="text-sm text-muted-foreground">
+                  You haven't applied to any properties yet. Browse listings to find your perfect place.
+                </p>
+                <Button variant="link" onClick={() => navigate("/listings")} className="mt-2">
+                  Browse Listings
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Your documents are under review. You'll be able to apply once verified.</p>
-              </TooltipContent>
-            </Tooltip>
-          ) : null}
-        </div>
-
-        {/* Document Review Status for subtenants */}
-        <DocumentReviewStatusCard />
-
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: "Verification", value: "Complete", icon: FileCheck, color: "text-emerald" },
-            { label: "Applications", value: "2", icon: Clock, color: "text-primary" },
-            { label: "Saved Listings", value: "7", icon: Heart, color: "text-destructive" },
-            { label: "Next Payment", value: "$2,650", icon: CreditCard, color: "text-cyan" },
-          ].map((stat) => (
-            <Card key={stat.label} className="shadow-card">
-              <CardContent className="flex items-center gap-4 p-5">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                </div>
               </CardContent>
             </Card>
-          ))}
+          </div>
+
+          {/* RIGHT: Messages (40%) */}
+          <div className="lg:col-span-2">
+            <h2 className="mb-4 text-xl font-bold text-foreground">Messages</h2>
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground/50" />
+                <p className="text-sm text-muted-foreground">
+                  No messages yet. Messages from landlords will appear here.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        <Card className="mb-8 shadow-card">
-          <CardContent className="py-8">
-            <StepProgress steps={["Verify Identity", "Browse Listings", "Apply", "Get Matched"]} currentStep={2} />
-          </CardContent>
-        </Card>
-
-        <Tabs defaultValue="applications">
-          <TabsList className="mb-6">
-            <TabsTrigger value="applications">My Applications</TabsTrigger>
-            <TabsTrigger value="saved">Saved Listings</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="applications">
-            <div className="space-y-4">
-              {[
-                { title: "Sunny 2BR in Downtown", location: "Manhattan, NY", status: "Under Review", date: "Applied Jun 28" },
-                { title: "Cozy Studio near Park", location: "Brooklyn, NY", status: "Submitted", date: "Applied Jul 1" },
-              ].map((app) => (
-                <Card key={app.title} className="shadow-card">
-                  <CardContent className="flex items-center justify-between p-5">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{app.title}</h3>
-                      <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" /> {app.location}
-                      </p>
-                      <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" /> {app.date}
-                      </p>
-                    </div>
-                    <Badge variant="pending">{app.status}</Badge>
-                  </CardContent>
-                </Card>
+        {/* Saved Properties */}
+        {savedListings.length > 0 && (
+          <div className="mt-10">
+            <h2 className="mb-4 text-xl font-bold text-foreground">Saved Properties</h2>
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {savedListings.map((listing) => (
+                <motion.div
+                  key={listing.listing_id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="w-64 shrink-0"
+                >
+                  <Card className="overflow-hidden">
+                    {listing.photos && listing.photos.length > 0 ? (
+                      <img src={listing.photos[0]} alt={listing.headline || ""} className="h-36 w-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="flex h-36 items-center justify-center bg-muted text-muted-foreground text-sm">No photo</div>
+                    )}
+                    <CardContent className="p-3">
+                      <h4 className="font-semibold text-foreground text-sm line-clamp-1">{listing.headline || listing.address || "Untitled"}</h4>
+                      {listing.address && (
+                        <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3" />{listing.address}
+                        </p>
+                      )}
+                      {listing.monthly_rent && (
+                        <p className="mt-1 text-sm font-bold text-primary">${listing.monthly_rent.toLocaleString()}/mo</p>
+                      )}
+                      {listing.available_from && (
+                        <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                          <Calendar className="h-3 w-3" />{formatDates(listing.available_from, listing.available_until)}
+                        </p>
+                      )}
+                      <button
+                        onClick={() => removeSave(listing.listing_id)}
+                        className="mt-2 flex items-center gap-1 text-xs text-destructive hover:underline"
+                      >
+                        <Heart className="h-3 w-3 fill-current" /> Remove
+                      </button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="saved">
-            <EmptyState icon={Heart} title="No saved listings yet" description="Browse available listings and save the ones you're interested in." actionLabel="Browse Listings" onAction={() => {}} />
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <div className="space-y-4">
-              {/* Upcoming */}
-              <Card className="border-primary/20 shadow-card">
-                <CardContent className="flex items-center justify-between p-5">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
-                      <Calendar className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Next Payment — April 1, 2026</p>
-                      <p className="text-xl font-bold text-foreground">$2,650.00</p>
-                    </div>
-                  </div>
-                  <Link to="/payments/summary">
-                    <Button>
-                      <DollarSign className="mr-1 h-4 w-4" /> Pay Now
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-
-              {/* Recent */}
-              {[
-                { desc: "Monthly Rent — March", amount: "$2,650.00", status: "paid" as const },
-                { desc: "Security Deposit", amount: "$2,500.00", status: "deposit_held" as const },
-              ].map((p, i) => (
-                <Card key={i} className="shadow-card">
-                  <CardContent className="flex items-center justify-between p-5">
-                    <div>
-                      <p className="font-medium text-foreground">{p.desc}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-medium text-foreground">{p.amount}</span>
-                      <PaymentStatusBadge status={p.status} />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              <Link to="/payments">
-                <Button variant="outline" className="w-full">View All Payments</Button>
+              <Link to="/listings" className="flex w-48 shrink-0 items-center justify-center rounded-xl border-2 border-dashed text-sm text-muted-foreground hover:text-primary hover:border-primary">
+                Browse more properties
               </Link>
             </div>
-          </TabsContent>
-        </Tabs>
-
-        <div className="mt-8 text-center">
-          <Link to="/listings">
-            <Button variant="outline" size="lg">
-              <Search className="mr-1 h-4 w-4" /> Browse All Listings
-            </Button>
-          </Link>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
