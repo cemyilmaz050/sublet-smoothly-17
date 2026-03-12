@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
 const DashboardPage = () => {
-  const { isReady, role, activeMode } = useAuth();
+  const { isReady, role } = useAuth();
 
   if (!isReady) {
     return (
@@ -13,11 +13,10 @@ const DashboardPage = () => {
     );
   }
 
+  // Default to listings, but also support direct role dashboards
+  if (role === "subtenant") return <Navigate to="/dashboard/subtenant" replace />;
   if (role === "manager") return <Navigate to="/dashboard/manager" replace />;
-
-  // Use active_mode to decide which dashboard
-  if (activeMode === "tenant") return <Navigate to="/dashboard/tenant" replace />;
-  return <Navigate to="/dashboard/subtenant" replace />;
+  return <Navigate to="/dashboard/tenant" replace />;
 };
 
 export default DashboardPage;
