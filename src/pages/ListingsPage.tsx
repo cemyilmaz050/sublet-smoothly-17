@@ -140,7 +140,7 @@ const ListingsPage = () => {
   const isManagedListing = (listing: ListingItem) => user && listing.manager_id === user.id;
 
   const toggleSave = async (id: string) => {
-    if (!user) { toast.info("Please sign in to save listings."); navigate("/login"); return; }
+    if (!user) { requireAuth(() => toggleSave(id)); return; }
     const isSaved = savedListings.has(id);
     setSavedListings((prev) => {
       const next = new Set(prev);
