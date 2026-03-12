@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      cosigners: {
+        Row: {
+          address: string | null
+          confirmation_status: string
+          created_at: string
+          document_url: string | null
+          email: string
+          employment_status: string | null
+          full_name: string
+          id: string
+          monthly_income: number | null
+          phone: string
+          relationship: string
+          tenant_id: string
+        }
+        Insert: {
+          address?: string | null
+          confirmation_status?: string
+          created_at?: string
+          document_url?: string | null
+          email: string
+          employment_status?: string | null
+          full_name: string
+          id?: string
+          monthly_income?: number | null
+          phone: string
+          relationship: string
+          tenant_id: string
+        }
+        Update: {
+          address?: string | null
+          confirmation_status?: string
+          created_at?: string
+          document_url?: string | null
+          email?: string
+          employment_status?: string | null
+          full_name?: string
+          id?: string
+          monthly_income?: number | null
+          phone?: string
+          relationship?: string
+          tenant_id?: string
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           address: string | null
@@ -167,27 +212,33 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          documents_status: string
           first_name: string | null
           id: string
           last_name: string | null
+          onboarding_complete: boolean
           phone: string | null
           role: string
           updated_at: string
         }
         Insert: {
           created_at?: string
+          documents_status?: string
           first_name?: string | null
           id: string
           last_name?: string | null
+          onboarding_complete?: boolean
           phone?: string | null
           role?: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          documents_status?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
+          onboarding_complete?: boolean
           phone?: string | null
           role?: string
           updated_at?: string
@@ -283,6 +334,42 @@ export type Database = {
           tenant_id?: string
           unit_number?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tenant_documents: {
+        Row: {
+          document_type: string
+          file_name: string
+          file_size: number | null
+          file_url: string
+          id: string
+          review_comment: string | null
+          status: string
+          tenant_id: string
+          uploaded_at: string
+        }
+        Insert: {
+          document_type: string
+          file_name: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          review_comment?: string | null
+          status?: string
+          tenant_id: string
+          uploaded_at?: string
+        }
+        Update: {
+          document_type?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          review_comment?: string | null
+          status?: string
+          tenant_id?: string
+          uploaded_at?: string
         }
         Relationships: []
       }
