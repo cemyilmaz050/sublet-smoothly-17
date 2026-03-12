@@ -217,7 +217,7 @@ const CreateListingPage = () => {
       <PublishSuccess
         listingId={draftId || ""}
         headline={form.headline}
-        onDashboard={() => navigate("/dashboard/tenant")}
+        onDashboard={() => navigate("/tenant/dashboard")}
       />
     );
   }
