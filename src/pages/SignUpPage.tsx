@@ -377,16 +377,22 @@ const SignUpPage = () => {
                   />
                   {errors.password && <p className="mt-1 text-sm text-destructive">{errors.password}</p>}
                 </div>
+                {submitError && (
+                  <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {submitError}
+                  </div>
+                )}
                 <Button
                   className="mt-2 w-full"
                   size="lg"
+                  type="button"
                   onClick={handleSignUp}
                   disabled={loading}
                 >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
+                      Creating your account...
                     </>
                   ) : (
                     <>
