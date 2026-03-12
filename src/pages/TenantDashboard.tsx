@@ -139,7 +139,17 @@ const TenantDashboard = () => {
             </div>
             <span className="text-xl font-bold text-foreground">SubletSafe</span>
           </Link>
-          <UserMenu />
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-primary/40 text-primary hover:bg-primary/5"
+              onClick={() => navigate("/listings")}
+            >
+              🔍 Browse Properties
+            </Button>
+            <UserMenu />
+          </div>
         </div>
       </header>
 
