@@ -54,8 +54,8 @@ const UserMenu = () => {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>Sign In</Button>
-        <Button size="sm" onClick={() => navigate("/signup")}>Get Started</Button>
+        <Button variant="ghost" size="sm" onClick={() => requireAuth()}>Sign In</Button>
+        <Button size="sm" onClick={() => requireAuth()}>Get Started</Button>
       </div>
     );
   }
