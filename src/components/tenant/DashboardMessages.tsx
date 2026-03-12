@@ -143,8 +143,10 @@ const DashboardMessages = ({ conversations, unreadCount, autoOpenConversationId 
                   </p>
                   <span className="text-xs text-muted-foreground">{formatTime(convo.last_message_at)}</span>
                 </div>
-                {convo.listing_address && (
-                  <p className="text-[10px] text-muted-foreground">re: {convo.listing_address}</p>
+                {(convo.listing_headline || convo.listing_address) && (
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    re: {convo.listing_headline || convo.listing_address}
+                  </p>
                 )}
                 <p className={`mt-0.5 text-xs truncate ${convo.unread_count > 0 ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
                   {convo.last_message || "Start a conversation"}
