@@ -204,7 +204,7 @@ const TenantOnboardingPage = () => {
       await refreshProfile();
 
       toast.success("Documents submitted successfully! Your documents are under review.");
-      navigate("/dashboard/tenant");
+      navigate("/dashboard/subtenant");
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Failed to submit documents");
@@ -301,7 +301,7 @@ const TenantOnboardingPage = () => {
           <div className="mb-6 rounded-xl bg-accent/60 border border-primary/20 p-4 flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <p className="text-sm text-foreground">
-              Before you can list or manage your sublet, your property manager requires the following documents. This is a one-time step.
+              Before you can apply for a sublet, we need to verify your identity. This is a one-time step required by property managers.
             </p>
           </div>
 
