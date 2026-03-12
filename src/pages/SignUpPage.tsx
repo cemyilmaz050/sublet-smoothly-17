@@ -156,7 +156,7 @@ const SignUpPage = () => {
 
       if (data.session) {
         toast.success("Account created successfully!");
-        navigate(selectedRole === "tenant" ? "/dashboard/tenant" : "/dashboard/subtenant");
+        navigate("/listings");
         return;
       }
 
