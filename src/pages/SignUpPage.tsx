@@ -33,6 +33,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
