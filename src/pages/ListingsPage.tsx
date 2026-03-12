@@ -8,7 +8,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import {
   MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2,
   Search, SlidersHorizontal, Zap, Pencil, Eye, X, CalendarDays, Map,
+  MessageSquare, Send, CheckCircle2, Loader2,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import CalendarView from "@/components/discover/CalendarView";
 import { useNavigate } from "react-router-dom";
@@ -160,9 +162,96 @@ const ListingsPage = () => {
     });
   }, [user]);
 
-  const handleApply = (listing: ListingItem) => {
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [contactingId, setContactingId] = useState<string | null>(null);
+  const [appliedListings, setAppliedListings] = useState<Set<string>>(new Set());
+  const [applicationMessage, setApplicationMessage] = useState("");
+  const [showApplyForm, setShowApplyForm] = useState(false);
+
+  // Load existing applications
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("applications").select("listing_id").eq("applicant_id", user.id).then(({ data }) => {
+      if (data) setAppliedListings(new Set(data.map((d) => d.listing_id)));
+    });
+  }, [user]);
+
+  const handleApply = async (listing: ListingItem) => {
     if (!user) { toast.info("Please sign in to apply for this property."); navigate("/login"); return; }
-    toast.success("Application started! (Coming soon)");
+    if (appliedListings.has(listing.id)) { toast.info("You've already applied to this listing."); return; }
+    setApplyingId(listing.id);
+    const { error } = await supabase.from("applications").insert({
+      applicant_id: user.id,
+      listing_id: listing.id,
+      message: applicationMessage || null,
+      status: "pending",
+    });
+    setApplyingId(null);
+    if (error) { toast.error("Failed to submit application. Please try again."); return; }
+    setAppliedListings((prev) => new Set(prev).add(listing.id));
+    setApplicationMessage("");
+    setShowApplyForm(false);
+    toast.success("Application submitted! The tenant will be notified.");
+
+    // Also create a notification for the listing owner
+    await supabase.from("notifications").insert({
+      user_id: listing.tenant_id,
+      title: "New Application",
+      message: `Someone applied to your listing "${listing.headline || "Untitled"}"`,
+      type: "application",
+      link: "/tenant/applicants",
+    });
+  };
+
+  const handleContact = async (listing: ListingItem) => {
+    if (!user) { toast.info("Please sign in to contact the tenant."); navigate("/login"); return; }
+    setContactingId(listing.id);
+    // Check if a conversation already exists
+    const { data: existing } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("listing_id", listing.id)
+      .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
+      .maybeSingle();
+
+    if (existing) {
+      setContactingId(null);
+      navigate(`/messages?conversation=${existing.id}`);
+      return;
+    }
+
+    // Create a new conversation
+    const { data: convo, error } = await supabase
+      .from("conversations")
+      .insert({
+        participant_1: user.id,
+        participant_2: listing.tenant_id,
+        listing_id: listing.id,
+      })
+      .select("id")
+      .single();
+
+    setContactingId(null);
+    if (error || !convo) { toast.error("Failed to start conversation."); return; }
+
+    // Send an intro message
+    await supabase.from("messages").insert({
+      conversation_id: convo.id,
+      sender_id: user.id,
+      content: `Hi! I'm interested in your listing "${listing.headline || "your apartment"}". Is it still available?`,
+    });
+
+    // Notify the tenant
+    await supabase.from("notifications").insert({
+      user_id: listing.tenant_id,
+      title: "New Message",
+      message: `Someone sent you a message about "${listing.headline || "Untitled"}"`,
+      type: "message",
+      link: "/messages",
+    });
+
+    toast.success("Message sent! Redirecting to your conversation...");
+    navigate(`/messages?conversation=${convo.id}`);
   };
 
   return (
@@ -411,10 +500,55 @@ const ListingsPage = () => {
                     <p className="text-sm text-muted-foreground leading-relaxed">{selectedListing.description}</p>
                   </div>
                 )}
-                <div className="space-y-2 pt-2">
-                  {(role === "subtenant" || (!user && !role)) && (
+                <div className="space-y-3 pt-2">
+                  {(role === "subtenant" || (!user && !role)) && !isOwnListing(selectedListing) && (
                     <>
-                      <Button className="w-full" size="lg" onClick={() => handleApply(selectedListing)}>Apply Now<Zap className="ml-1 h-4 w-4" /></Button>
+                      {appliedListings.has(selectedListing.id) ? (
+                        <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald/30 bg-emerald/10 py-3 text-sm font-medium text-emerald">
+                          <CheckCircle2 className="h-4 w-4" /> Application Submitted
+                        </div>
+                      ) : showApplyForm ? (
+                        <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+                          <h4 className="text-sm font-semibold text-foreground">Apply to this listing</h4>
+                          <Textarea
+                            placeholder="Introduce yourself — why are you interested in this apartment? (optional)"
+                            value={applicationMessage}
+                            onChange={(e) => setApplicationMessage(e.target.value)}
+                            rows={3}
+                            className="resize-none"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              className="flex-1"
+                              onClick={() => handleApply(selectedListing)}
+                              disabled={applyingId === selectedListing.id}
+                            >
+                              {applyingId === selectedListing.id ? (
+                                <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Submitting...</>
+                              ) : (
+                                <><Send className="mr-1 h-4 w-4" />Submit Application</>
+                              )}
+                            </Button>
+                            <Button variant="outline" onClick={() => { setShowApplyForm(false); setApplicationMessage(""); }}>Cancel</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button className="w-full" size="lg" onClick={() => setShowApplyForm(true)}>
+                          <Zap className="mr-1 h-4 w-4" /> Apply Now
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => handleContact(selectedListing)}
+                        disabled={contactingId === selectedListing.id}
+                      >
+                        {contactingId === selectedListing.id ? (
+                          <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Starting chat...</>
+                        ) : (
+                          <><MessageSquare className="mr-1 h-4 w-4" />Message Tenant</>
+                        )}
+                      </Button>
                       <Button variant="outline" className="w-full" onClick={() => toggleSave(selectedListing.id)}>
                         <Heart className={`mr-1 h-4 w-4 ${savedListings.has(selectedListing.id) ? "fill-primary text-primary" : ""}`} />
                         {savedListings.has(selectedListing.id) ? "Saved" : "Save Listing"}
