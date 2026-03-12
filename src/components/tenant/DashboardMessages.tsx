@@ -109,7 +109,7 @@ const DashboardMessages = ({ conversations, unreadCount }: Props) => {
           <MessageSquare className="mb-3 h-10 w-10 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">No messages yet</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            When subtenants apply or reach out, their messages will appear here.
+            Applicants who are interested in your listing will message you here.
           </p>
         </div>
       ) : (
