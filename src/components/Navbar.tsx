@@ -39,7 +39,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      <SubletOnboardingOverlay open={subletOpen} onClose={() => setSubletOpen(false)} />
+      <SubletFlowOverlay open={subletOpen} onClose={() => setSubletOpen(false)} />
     </>
   );
 };
