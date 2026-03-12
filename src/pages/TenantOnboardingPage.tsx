@@ -204,7 +204,7 @@ const TenantOnboardingPage = () => {
       await refreshProfile();
 
       toast.success("Documents submitted successfully! Your documents are under review.");
-      navigate("/dashboard/tenant");
+      navigate("/dashboard/subtenant");
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || "Failed to submit documents");

@@ -22,10 +22,33 @@ const SubtenantDashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Subtenant Dashboard</h1>
-          <p className="mt-1 text-muted-foreground">Track your applications and find your next home</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Subtenant Dashboard</h1>
+            <p className="mt-1 text-muted-foreground">Track your applications and find your next home</p>
+          </div>
+          {needsVerification ? (
+            <Button size="lg" onClick={() => navigate("/subtenant/onboarding")}>
+              <ShieldCheck className="mr-1 h-4 w-4" />
+              Get Verified to Apply
+            </Button>
+          ) : isPendingReview ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="lg" disabled>
+                  <Clock className="mr-1 h-4 w-4" />
+                  Verification In Progress
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Your documents are under review. You'll be able to apply once verified.</p>
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
         </div>
+
+        {/* Document Review Status for subtenants */}
+        <DocumentReviewStatusCard />
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[

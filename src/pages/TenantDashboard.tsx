@@ -35,7 +35,7 @@ const statusVariant = (status: string) => {
 };
 
 const TenantDashboard = () => {
-  const { user, documentsStatus, onboardingComplete } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
