@@ -14,6 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
+      listings: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          available_from: string | null
+          available_until: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          description: string | null
+          guest_policy: Database["public"]["Enums"]["guest_policy"] | null
+          headline: string | null
+          house_rules: string | null
+          id: string
+          min_duration: number | null
+          monthly_rent: number | null
+          photos: string[] | null
+          property_type: Database["public"]["Enums"]["property_type"] | null
+          security_deposit: number | null
+          sqft: number | null
+          status: Database["public"]["Enums"]["listing_status"]
+          tenant_id: string
+          unit_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          available_from?: string | null
+          available_until?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          description?: string | null
+          guest_policy?: Database["public"]["Enums"]["guest_policy"] | null
+          headline?: string | null
+          house_rules?: string | null
+          id?: string
+          min_duration?: number | null
+          monthly_rent?: number | null
+          photos?: string[] | null
+          property_type?: Database["public"]["Enums"]["property_type"] | null
+          security_deposit?: number | null
+          sqft?: number | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          tenant_id: string
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          available_from?: string | null
+          available_until?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          description?: string | null
+          guest_policy?: Database["public"]["Enums"]["guest_policy"] | null
+          headline?: string | null
+          house_rules?: string | null
+          id?: string
+          min_duration?: number | null
+          monthly_rent?: number | null
+          photos?: string[] | null
+          property_type?: Database["public"]["Enums"]["property_type"] | null
+          security_deposit?: number | null
+          sqft?: number | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          tenant_id?: string
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          message: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          message?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -52,7 +160,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      guest_policy: "no_guests" | "occasional_guests" | "guests_allowed"
+      listing_status: "draft" | "pending" | "active" | "expired" | "rejected"
+      property_type: "apartment" | "condo" | "studio" | "house"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -179,6 +289,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      guest_policy: ["no_guests", "occasional_guests", "guests_allowed"],
+      listing_status: ["draft", "pending", "active", "expired", "rejected"],
+      property_type: ["apartment", "condo", "studio", "house"],
+    },
   },
 } as const
