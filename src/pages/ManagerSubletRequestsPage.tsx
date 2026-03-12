@@ -255,9 +255,17 @@ const ManagerSubletRequestsPage = () => {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Sublet Requests</h1>
-            <p className="text-sm text-muted-foreground">Review and manage tenant sublet requests</p>
+            <p className="text-sm text-muted-foreground">Review and manage tenant sublet requests and onboarding documents</p>
           </div>
         </div>
+
+        <Tabs defaultValue="requests" className="mb-6">
+          <TabsList>
+            <TabsTrigger value="requests">Sublet Requests</TabsTrigger>
+            <TabsTrigger value="onboarding">Onboarding Documents</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="requests">
 
         {/* Filters */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
