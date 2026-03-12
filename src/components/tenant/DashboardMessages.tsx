@@ -101,7 +101,7 @@ const DashboardMessages = ({ conversations, unreadCount }: Props) => {
             <Badge className="bg-primary text-primary-foreground text-xs">{unreadCount}</Badge>
           )}
         </div>
-        <Button variant="ghost" size="sm" className="text-primary text-sm">View All</Button>
+        
       </div>
 
       {conversations.length === 0 ? (
