@@ -2,14 +2,16 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Users, MessageSquare, Eye, Clock, Plus, DollarSign, TrendingUp, ArrowRight, Pencil, AlertCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { FileText, Users, Eye, Clock, Plus, DollarSign, TrendingUp, ArrowRight, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import DocumentUpload from "@/components/DocumentUpload";
 import StepProgress from "@/components/StepProgress";
 import EmptyState from "@/components/EmptyState";
+import YourListingsSection from "@/components/tenant/YourListingsSection";
+import SubtenantActivitySection from "@/components/tenant/SubtenantActivitySection";
+import SubletOnboardingOverlay from "@/components/SubletOnboardingOverlay";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,31 +23,25 @@ interface Listing {
   monthly_rent: number | null;
   photos: string[] | null;
   status: string;
+  available_from: string | null;
+  available_until: string | null;
+  view_count: number;
+  save_count: number;
 }
-
-const statusVariant = (status: string) => {
-  switch (status) {
-    case "active": return "emerald" as const;
-    case "pending": return "pending" as const;
-    case "draft": return "secondary" as const;
-    case "rejected": return "destructive" as const;
-    case "expired": return "outline" as const;
-    default: return "secondary" as const;
-  }
-};
 
 const TenantDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, status")
+        .select("id, headline, address, monthly_rent, photos, status, available_from, available_until, view_count, save_count")
         .eq("tenant_id", user.id)
         .order("created_at", { ascending: false });
       setListings((data as Listing[]) || []);
@@ -71,7 +67,6 @@ const TenantDashboard = () => {
           </Button>
         </div>
 
-
         {/* Draft Banner */}
         {draftListing && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
@@ -96,10 +91,10 @@ const TenantDashboard = () => {
         {/* Status Cards */}
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { label: "Total Listings", value: String(listings.length), icon: Eye, variant: "cyan" as const },
-            { label: "Active", value: String(listings.filter((l) => l.status === "active").length), icon: FileText, variant: "emerald" as const },
-            { label: "Pending Review", value: String(listings.filter((l) => l.status === "pending").length), icon: Clock, variant: "pending" as const },
-            { label: "Earnings", value: "$7,050", icon: TrendingUp, variant: "emerald" as const },
+            { label: "Total Listings", value: String(listings.length), icon: Eye },
+            { label: "Active", value: String(listings.filter((l) => l.status === "active").length), icon: FileText },
+            { label: "Pending Review", value: String(listings.filter((l) => l.status === "pending").length), icon: Clock },
+            { label: "Earnings", value: "$7,050", icon: TrendingUp },
           ].map((stat) => (
             <Card key={stat.label} className="shadow-card">
               <CardContent className="flex items-center gap-4 p-5">
@@ -125,73 +120,22 @@ const TenantDashboard = () => {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="listings">
+        {/* Your Listings Section */}
+        <YourListingsSection
+          listings={listings}
+          loading={loading}
+          onOpenOnboarding={() => setShowOnboarding(true)}
+        />
+
+        {/* Subtenant Activity Section */}
+        <SubtenantActivitySection listings={listings} />
+
+        {/* Tabs for Documents, Payments etc */}
+        <Tabs defaultValue="documents">
           <TabsList className="mb-6">
-            <TabsTrigger value="listings">My Listings</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="applicants">Applicants</TabsTrigger>
             <TabsTrigger value="payments">Payments</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="listings">
-            {loading ? (
-              <div className="py-12 text-center text-muted-foreground">Loading...</div>
-            ) : listings.length === 0 ? (
-              <EmptyState
-                icon={Eye}
-                title="No listings yet"
-                description="Create your first listing to start finding a subtenant."
-                actionLabel="Create Listing"
-                onAction={() => navigate("/listings/create")}
-              />
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {listings.map((listing) => (
-                  <Card key={listing.id} className="overflow-hidden shadow-card">
-                    <div className="aspect-video bg-muted">
-                      {listing.photos && listing.photos.length > 0 ? (
-                        <img src={listing.photos[0]} alt="" className="h-full w-full object-cover" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center text-muted-foreground">No photo</div>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className="font-semibold text-foreground line-clamp-1">{listing.headline || "Untitled"}</h3>
-                        <Badge variant={statusVariant(listing.status)} className="capitalize text-xs">
-                          {listing.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-1">{listing.address || "No address"}</p>
-                      {listing.monthly_rent && (
-                        <p className="mt-1 font-semibold text-foreground">${listing.monthly_rent}/mo</p>
-                      )}
-                      <div className="mt-3 flex gap-2">
-                        {(listing.status === "draft" || listing.status === "rejected") && (
-                          <Button size="sm" variant="outline" onClick={() => navigate(`/listings/edit/${listing.id}`)}>
-                            <Pencil className="mr-1 h-3 w-3" /> Edit
-                          </Button>
-                        )}
-                        {listing.status === "active" && (
-                          <>
-                            <Button size="sm" variant="outline" onClick={() => navigate(`/listings/edit/${listing.id}`)}>
-                              <Pencil className="mr-1 h-3 w-3" /> Edit
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <Users className="mr-1 h-3 w-3" /> Applicants
-                            </Button>
-                          </>
-                        )}
-                        <Button size="sm" variant="ghost">
-                          <Eye className="mr-1 h-3 w-3" /> View
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
 
           <TabsContent value="documents">
             <div className="space-y-4">
@@ -200,10 +144,6 @@ const TenantDashboard = () => {
               <DocumentUpload label="Sublet Request Letter" description="Formal request to your property manager" status="pending" fileName="sublet_request.pdf" />
               <DocumentUpload label="Additional Documents" description="Any other supporting documents" status="empty" />
             </div>
-          </TabsContent>
-
-          <TabsContent value="applicants">
-            <EmptyState icon={Users} title="No applicants yet" description="Once your listing goes live, applicants will appear here." />
           </TabsContent>
 
           <TabsContent value="payments">
@@ -247,6 +187,11 @@ const TenantDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Onboarding Overlay */}
+      {showOnboarding && (
+        <SubletOnboardingOverlay onClose={() => setShowOnboarding(false)} />
+      )}
     </div>
   );
 };

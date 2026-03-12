@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, Loader2, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Home } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import StepProgress from "@/components/StepProgress";
 import ListingStep1 from "@/components/listing/ListingStep1";
@@ -10,6 +10,8 @@ import ListingStep2 from "@/components/listing/ListingStep2";
 import ListingStep3 from "@/components/listing/ListingStep3";
 import ListingStep4 from "@/components/listing/ListingStep4";
 import ListingStep5 from "@/components/listing/ListingStep5";
+import PublishChecklist from "@/components/listing/PublishChecklist";
+import PublishSuccess from "@/components/listing/PublishSuccess";
 import { ListingFormData, defaultListingForm } from "@/types/listing";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -27,10 +29,9 @@ const CreateListingPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [confirmed, setConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [published, setPublished] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(editId || null);
 
-  // Load existing listing data for editing
   useEffect(() => {
     if (!editId) return;
     const load = async () => {
@@ -67,7 +68,6 @@ const CreateListingPage = () => {
 
   const onChange = (partial: Partial<ListingFormData>) => {
     setForm((prev) => ({ ...prev, ...partial }));
-    // Clear related errors
     const keys = Object.keys(partial);
     setErrors((prev) => {
       const next = { ...prev };
@@ -103,15 +103,12 @@ const CreateListingPage = () => {
   };
 
   const uploadPhotos = async (listingId: string): Promise<string[]> => {
-    const urls: string[] = [...form.photoUrls]; // keep existing URLs
+    const urls: string[] = [...form.photoUrls];
     for (const file of form.photos) {
       const ext = file.name.split(".").pop();
       const path = `${listingId}/${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("listing-photos").upload(path, file);
-      if (error) {
-        console.error("Upload error:", error);
-        continue;
-      }
+      if (error) { console.error("Upload error:", error); continue; }
       const { data: urlData } = supabase.storage.from("listing-photos").getPublicUrl(path);
       urls.push(urlData.publicUrl);
     }
@@ -142,11 +139,8 @@ const CreateListingPage = () => {
     };
 
     if (draftId) {
-      // Upload any new photos
       let photos = form.photoUrls;
-      if (form.photos.length > 0) {
-        photos = await uploadPhotos(draftId);
-      }
+      if (form.photos.length > 0) photos = await uploadPhotos(draftId);
       await supabase.from("listings").update({ ...payload, photos }).eq("id", draftId);
     } else {
       const { data } = await supabase.from("listings").insert(payload).select("id").single();
@@ -166,15 +160,16 @@ const CreateListingPage = () => {
     setStep((s) => s + 1);
   };
 
-  const handleSubmit = async () => {
-    if (!confirmed || !user) return;
+  // Publish checklist
+  const checklist = PublishChecklist({ data: form, onGoToStep: setStep });
+
+  const handlePublish = async () => {
+    if (!confirmed || !user || !checklist.allDone) return;
     setLoading(true);
     try {
       const id = draftId || crypto.randomUUID();
       let photos = form.photoUrls;
-      if (form.photos.length > 0) {
-        photos = await uploadPhotos(id);
-      }
+      if (form.photos.length > 0) photos = await uploadPhotos(id);
 
       const payload = {
         tenant_id: user.id,
@@ -195,54 +190,35 @@ const CreateListingPage = () => {
         house_rules: form.house_rules || null,
         guest_policy: form.guest_policy || null,
         photos,
-        status: "pending" as const,
+        status: "active" as const,
+        published_at: new Date().toISOString(),
       };
 
       if (draftId) {
-        await supabase.from("listings").update(payload).eq("id", draftId);
+        const { error } = await supabase.from("listings").update(payload).eq("id", draftId);
+        if (error) throw error;
       } else {
-        await supabase.from("listings").insert({ ...payload, id }).select("id").single();
+        const { error } = await supabase.from("listings").insert({ ...payload, id }).select("id").single();
+        if (error) throw error;
+        setDraftId(id);
       }
 
-      // Insert notification for managers (in a real app, you'd query the manager linked to this tenant)
-      // For now, insert a generic notification
-      await supabase.from("notifications").insert({
-        user_id: user.id, // placeholder — would be manager's ID in production
-        title: "New listing pending review",
-        message: `A new listing "${form.headline}" has been submitted for review.`,
-        type: "listing_review",
-        link: `/listings/${draftId || id}`,
-      });
-
-      toast.success("Listing submitted for review!");
-      setSubmitted(true);
+      setPublished(true);
     } catch (err: any) {
-      console.error("Submit error:", err);
-      toast.error(err.message || "Failed to submit listing");
+      console.error("Publish error:", err);
+      toast.error(err.message || "Failed to publish listing");
     } finally {
       setLoading(false);
     }
   };
 
-  if (submitted) {
+  if (published) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container flex items-center justify-center py-16">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <CheckCircle className="h-8 w-8 text-primary" />
-            </div>
-            <h1 className="mt-6 text-3xl font-bold text-foreground">Listing Submitted!</h1>
-            <p className="mt-3 text-muted-foreground">
-              Your listing has been submitted for review. The property manager will review it within 24–48 hours.
-            </p>
-            <Button className="mt-8" onClick={() => navigate("/dashboard/tenant")}>
-              Back to Dashboard
-            </Button>
-          </motion.div>
-        </div>
-      </div>
+      <PublishSuccess
+        listingId={draftId || ""}
+        headline={form.headline}
+        onDashboard={() => navigate("/dashboard/tenant")}
+      />
     );
   }
 
@@ -265,7 +241,14 @@ const CreateListingPage = () => {
             {step === 1 && <ListingStep2 data={form} onChange={onChange} errors={errors} />}
             {step === 2 && <ListingStep3 data={form} onChange={onChange} errors={errors} />}
             {step === 3 && <ListingStep4 data={form} onChange={onChange} errors={errors} />}
-            {step === 4 && <ListingStep5 data={form} confirmed={confirmed} onConfirmChange={setConfirmed} onGoToStep={setStep} />}
+            {step === 4 && (
+              <>
+                <ListingStep5 data={form} confirmed={confirmed} onConfirmChange={setConfirmed} onGoToStep={setStep} />
+                <div className="mt-6">
+                  {checklist.ChecklistUI}
+                </div>
+              </>
+            )}
 
             <div className="mt-8 flex items-center justify-between">
               <Button variant="outline" onClick={() => step === 0 ? navigate(-1) : setStep((s) => s - 1)}>
@@ -278,14 +261,22 @@ const CreateListingPage = () => {
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               ) : (
-                <Button onClick={handleSubmit} disabled={!confirmed || loading}>
+                <Button
+                  onClick={handlePublish}
+                  disabled={!confirmed || loading || !checklist.allDone}
+                  className="bg-primary text-primary-foreground"
+                  size="lg"
+                >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
+                      Publishing...
                     </>
                   ) : (
-                    "Submit for Review"
+                    <>
+                      <Home className="mr-2 h-4 w-4" />
+                      Publish Your Property
+                    </>
                   )}
                 </Button>
               )}
