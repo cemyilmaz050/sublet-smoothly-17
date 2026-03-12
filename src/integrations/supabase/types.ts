@@ -28,11 +28,13 @@ export type Database = {
           headline: string | null
           house_rules: string | null
           id: string
+          manager_id: string | null
           min_duration: number | null
           monthly_rent: number | null
           photos: string[] | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           security_deposit: number | null
+          source: string
           sqft: number | null
           status: Database["public"]["Enums"]["listing_status"]
           tenant_id: string
@@ -52,11 +54,13 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
+          manager_id?: string | null
           min_duration?: number | null
           monthly_rent?: number | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           security_deposit?: number | null
+          source?: string
           sqft?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
           tenant_id: string
@@ -76,15 +80,53 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
+          manager_id?: string | null
           min_duration?: number | null
           monthly_rent?: number | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           security_deposit?: number | null
+          source?: string
           sqft?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
           tenant_id?: string
           unit_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      manager_integrations: {
+        Row: {
+          appfolio_url: string
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          manager_id: string
+          status: string
+          sync_error: string | null
+          synced_count: number
+          updated_at: string
+        }
+        Insert: {
+          appfolio_url: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          manager_id: string
+          status?: string
+          sync_error?: string | null
+          synced_count?: number
+          updated_at?: string
+        }
+        Update: {
+          appfolio_url?: string
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          manager_id?: string
+          status?: string
+          sync_error?: string | null
+          synced_count?: number
           updated_at?: string
         }
         Relationships: []

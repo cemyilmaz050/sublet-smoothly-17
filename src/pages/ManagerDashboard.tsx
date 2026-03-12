@@ -1,10 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, CheckCircle2, Clock, AlertTriangle, Eye, MessageSquare, Users } from "lucide-react";
+import { FileText, CheckCircle2, Clock, AlertTriangle, Eye, MessageSquare, Users, Settings, Building2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmptyState from "@/components/EmptyState";
+import { Link } from "react-router-dom";
 
 const ManagerDashboard = () => {
   const pendingRequests = [
@@ -17,9 +18,17 @@ const ManagerDashboard = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Property Manager Dashboard</h1>
-          <p className="mt-1 text-muted-foreground">Review and manage sublet requests</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Property Manager Dashboard</h1>
+            <p className="mt-1 text-muted-foreground">Review and manage sublet requests</p>
+          </div>
+          <Link to="/dashboard/manager/integrations">
+            <Button variant="outline">
+              <Settings className="mr-1 h-4 w-4" />
+              Integrations
+            </Button>
+          </Link>
         </div>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
