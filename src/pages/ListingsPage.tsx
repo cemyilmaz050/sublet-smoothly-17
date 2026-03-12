@@ -508,7 +508,10 @@ const ListingsPage = () => {
                           </div>
                         </div>
                       ) : (
-                        <Button variant="outline" className="w-full" size="lg" onClick={() => setShowApplyForm(true)}>
+                        <Button variant="outline" className="w-full" size="lg" onClick={() => {
+                          if (!user) { requireAuth(() => setShowApplyForm(true)); return; }
+                          setShowApplyForm(true);
+                        }}>
                           <Zap className="mr-1 h-4 w-4" /> Apply Now
                         </Button>
                       )}
