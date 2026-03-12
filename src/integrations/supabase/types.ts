@@ -14,6 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      catalog_properties: {
+        Row: {
+          address: string
+          created_at: string | null
+          id: string
+          manager_id: string
+          name: string | null
+          photo_url: string | null
+          property_type: string | null
+          units_count: number | null
+        }
+        Insert: {
+          address: string
+          created_at?: string | null
+          id?: string
+          manager_id: string
+          name?: string | null
+          photo_url?: string | null
+          property_type?: string | null
+          units_count?: number | null
+        }
+        Update: {
+          address?: string
+          created_at?: string | null
+          id?: string
+          manager_id?: string
+          name?: string | null
+          photo_url?: string | null
+          property_type?: string | null
+          units_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_properties_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "property_managers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_units: {
+        Row: {
+          amenities: string[] | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string | null
+          description: string | null
+          floor: number | null
+          id: string
+          occupancy_status: string | null
+          photos: string[] | null
+          property_id: string
+          sqft: number | null
+          unit_number: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          description?: string | null
+          floor?: number | null
+          id?: string
+          occupancy_status?: string | null
+          photos?: string[] | null
+          property_id: string
+          sqft?: number | null
+          unit_number: string
+        }
+        Update: {
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string | null
+          description?: string | null
+          floor?: number | null
+          id?: string
+          occupancy_status?: string | null
+          photos?: string[] | null
+          property_id?: string
+          sqft?: number | null
+          unit_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_units_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cosigners: {
         Row: {
           address: string | null
@@ -96,21 +190,25 @@ export type Database = {
           available_until: string | null
           bathrooms: number | null
           bedrooms: number | null
+          catalog_unit_id: string | null
           created_at: string
           description: string | null
           guest_policy: Database["public"]["Enums"]["guest_policy"] | null
           headline: string | null
           house_rules: string | null
           id: string
+          management_group_id: string | null
           manager_id: string | null
           min_duration: number | null
           monthly_rent: number | null
+          path: string | null
           photos: string[] | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           published_at: string | null
           save_count: number
           security_deposit: number | null
           source: string
+          space_type: string | null
           sqft: number | null
           status: Database["public"]["Enums"]["listing_status"]
           tenant_id: string
@@ -125,21 +223,25 @@ export type Database = {
           available_until?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          catalog_unit_id?: string | null
           created_at?: string
           description?: string | null
           guest_policy?: Database["public"]["Enums"]["guest_policy"] | null
           headline?: string | null
           house_rules?: string | null
           id?: string
+          management_group_id?: string | null
           manager_id?: string | null
           min_duration?: number | null
           monthly_rent?: number | null
+          path?: string | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           published_at?: string | null
           save_count?: number
           security_deposit?: number | null
           source?: string
+          space_type?: string | null
           sqft?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
           tenant_id: string
@@ -154,21 +256,25 @@ export type Database = {
           available_until?: string | null
           bathrooms?: number | null
           bedrooms?: number | null
+          catalog_unit_id?: string | null
           created_at?: string
           description?: string | null
           guest_policy?: Database["public"]["Enums"]["guest_policy"] | null
           headline?: string | null
           house_rules?: string | null
           id?: string
+          management_group_id?: string | null
           manager_id?: string | null
           min_duration?: number | null
           monthly_rent?: number | null
+          path?: string | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           published_at?: string | null
           save_count?: number
           security_deposit?: number | null
           source?: string
+          space_type?: string | null
           sqft?: number | null
           status?: Database["public"]["Enums"]["listing_status"]
           tenant_id?: string
@@ -176,7 +282,22 @@ export type Database = {
           updated_at?: string
           view_count?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "listings_catalog_unit_id_fkey"
+            columns: ["catalog_unit_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_management_group_id_fkey"
+            columns: ["management_group_id"]
+            isOneToOne: false
+            referencedRelation: "property_managers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       manager_integrations: {
         Row: {
@@ -280,6 +401,33 @@ export type Database = {
           phone?: string | null
           role?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      property_managers: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          properties_count: number | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          properties_count?: number | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          properties_count?: number | null
         }
         Relationships: []
       }
