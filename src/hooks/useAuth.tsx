@@ -59,24 +59,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let initialReady = false;
 
-    // Set up auth listener FIRST
+    // Set up auth listener FIRST (before getSession)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
+      (_event, newSession) => {
         if (!mounted) return;
-        
+
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
         if (newSession?.user) {
-          // Fetch profile and only mark ready after it completes
-          await fetchProfile(newSession.user.id);
-          if (mounted) setIsReady(true);
+          // Non-blocking profile fetch — don't await in the callback
+          fetchProfile(newSession.user.id).then(() => {
+            if (mounted && !initialReady) {
+              initialReady = true;
+              setIsReady(true);
+            }
+          });
         } else {
           setRole(null);
           setOnboardingComplete(null);
           setDocumentsStatus(null);
-          if (mounted) setIsReady(true);
+          if (mounted && !initialReady) {
+            initialReady = true;
+            setIsReady(true);
+          }
         }
       }
     );
@@ -88,12 +96,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(existingSession?.user ?? null);
       if (existingSession?.user) {
         await fetchProfile(existingSession.user.id);
+      } else {
+        setRole(null);
+        setOnboardingComplete(null);
+        setDocumentsStatus(null);
       }
-      if (mounted) setIsReady(true);
+      if (mounted && !initialReady) {
+        initialReady = true;
+        setIsReady(true);
+      }
     });
+
+    // Safety: ensure isReady is set even if something goes wrong
+    const safetyTimeout = setTimeout(() => {
+      if (mounted && !initialReady) {
+        initialReady = true;
+        setIsReady(true);
+      }
+    }, 5000);
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimeout);
       subscription.unsubscribe();
     };
   }, [fetchProfile]);
