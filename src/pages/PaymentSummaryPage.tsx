@@ -1,24 +1,41 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Lock, ShieldCheck } from "lucide-react";
+import { ShieldCheck, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import PlatformFeeTooltip, { PLATFORM_FEE_PERCENT } from "@/components/PlatformFeeTooltip";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const PaymentSummaryPage = () => {
-  const navigate = useNavigate();
   const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Mock data
   const monthlyRent = 2500;
   const securityDeposit = 2500;
   const serviceFee = monthlyRent * PLATFORM_FEE_PERCENT / 100;
   const totalDueToday = monthlyRent + securityDeposit + serviceFee;
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (err: any) {
+      console.error("Checkout error:", err);
+      toast.error(err.message || "Failed to start checkout. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,33 +76,9 @@ const PaymentSummaryPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="mb-6 shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <CreditCard className="h-5 w-5 text-primary" /> Payment Method
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>Card Number</Label>
-              <Input placeholder="4242 4242 4242 4242" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Expiry</Label>
-                <Input placeholder="MM / YY" />
-              </div>
-              <div>
-                <Label>CVC</Label>
-                <Input placeholder="123" />
-              </div>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Lock className="h-3.5 w-3.5" />
-              Stripe Elements placeholder — card data is never stored on our servers.
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mb-6 rounded-lg border bg-accent/30 p-4 text-sm text-muted-foreground">
+          <ShieldCheck className="mb-1 inline h-4 w-4 text-primary" /> You'll be redirected to Stripe's secure checkout to enter your payment details. Your card information is never stored on our servers.
+        </div>
 
         <div className="mb-6 flex items-start gap-3">
           <Checkbox id="terms" checked={agreed} onCheckedChange={(v) => setAgreed(v === true)} />
@@ -97,11 +90,15 @@ const PaymentSummaryPage = () => {
         <Button
           size="lg"
           className="w-full"
-          disabled={!agreed}
-          onClick={() => navigate("/payments/confirmation")}
+          disabled={!agreed || loading}
+          onClick={handleCheckout}
         >
-          <ShieldCheck className="mr-1 h-4 w-4" />
-          Confirm & Pay ${totalDueToday.toFixed(2)}
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <ShieldCheck className="mr-1 h-4 w-4" />
+          )}
+          {loading ? "Redirecting to Stripe..." : `Subscribe & Pay`}
         </Button>
       </div>
     </div>
