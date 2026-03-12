@@ -41,8 +41,7 @@ const SignUpPage = () => {
 
   // Auto-redirect if already logged in
   if (isReady && user) {
-    const dest = role === "subtenant" ? "/dashboard/subtenant" : role === "manager" ? "/dashboard/manager" : "/dashboard/tenant";
-    return <Navigate to={dest} replace />;
+    return <Navigate to="/listings" replace />;
   }
 
   const roles = [
