@@ -1,13 +1,13 @@
-import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, FileCheck, MessageSquare, Clock, Search, MapPin, Calendar } from "lucide-react";
+import { Heart, FileCheck, MessageSquare, Clock, Search, MapPin, Calendar, DollarSign, CreditCard } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import StepProgress from "@/components/StepProgress";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "react-router-dom";
+import PaymentStatusBadge from "@/components/PaymentStatusBadge";
 
 const SubtenantDashboard = () => {
   return (
@@ -24,7 +24,7 @@ const SubtenantDashboard = () => {
             { label: "Verification", value: "Complete", icon: FileCheck, color: "text-emerald" },
             { label: "Applications", value: "2", icon: Clock, color: "text-primary" },
             { label: "Saved Listings", value: "7", icon: Heart, color: "text-destructive" },
-            { label: "Messages", value: "1 new", icon: MessageSquare, color: "text-cyan" },
+            { label: "Next Payment", value: "$2,650", icon: CreditCard, color: "text-cyan" },
           ].map((stat) => (
             <Card key={stat.label} className="shadow-card">
               <CardContent className="flex items-center gap-4 p-5">
@@ -42,10 +42,7 @@ const SubtenantDashboard = () => {
 
         <Card className="mb-8 shadow-card">
           <CardContent className="py-8">
-            <StepProgress
-              steps={["Verify Identity", "Browse Listings", "Apply", "Get Matched"]}
-              currentStep={2}
-            />
+            <StepProgress steps={["Verify Identity", "Browse Listings", "Apply", "Get Matched"]} currentStep={2} />
           </CardContent>
         </Card>
 
@@ -53,6 +50,7 @@ const SubtenantDashboard = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="applications">My Applications</TabsTrigger>
             <TabsTrigger value="saved">Saved Listings</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
           </TabsList>
 
           <TabsContent value="applications">
@@ -66,12 +64,10 @@ const SubtenantDashboard = () => {
                     <div>
                       <h3 className="font-semibold text-foreground">{app.title}</h3>
                       <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" />
-                        {app.location}
+                        <MapPin className="h-3.5 w-3.5" /> {app.location}
                       </p>
                       <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {app.date}
+                        <Calendar className="h-3 w-3" /> {app.date}
                       </p>
                     </div>
                     <Badge variant="pending">{app.status}</Badge>
@@ -82,21 +78,60 @@ const SubtenantDashboard = () => {
           </TabsContent>
 
           <TabsContent value="saved">
-            <EmptyState
-              icon={Heart}
-              title="No saved listings yet"
-              description="Browse available listings and save the ones you're interested in."
-              actionLabel="Browse Listings"
-              onAction={() => {}}
-            />
+            <EmptyState icon={Heart} title="No saved listings yet" description="Browse available listings and save the ones you're interested in." actionLabel="Browse Listings" onAction={() => {}} />
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <div className="space-y-4">
+              {/* Upcoming */}
+              <Card className="border-primary/20 shadow-card">
+                <CardContent className="flex items-center justify-between p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
+                      <Calendar className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Next Payment — April 1, 2026</p>
+                      <p className="text-xl font-bold text-foreground">$2,650.00</p>
+                    </div>
+                  </div>
+                  <Link to="/payments/summary">
+                    <Button>
+                      <DollarSign className="mr-1 h-4 w-4" /> Pay Now
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {/* Recent */}
+              {[
+                { desc: "Monthly Rent — March", amount: "$2,650.00", status: "paid" as const },
+                { desc: "Security Deposit", amount: "$2,500.00", status: "deposit_held" as const },
+              ].map((p, i) => (
+                <Card key={i} className="shadow-card">
+                  <CardContent className="flex items-center justify-between p-5">
+                    <div>
+                      <p className="font-medium text-foreground">{p.desc}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium text-foreground">{p.amount}</span>
+                      <PaymentStatusBadge status={p.status} />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              <Link to="/payments">
+                <Button variant="outline" className="w-full">View All Payments</Button>
+              </Link>
+            </div>
           </TabsContent>
         </Tabs>
 
         <div className="mt-8 text-center">
           <Link to="/listings">
             <Button variant="outline" size="lg">
-              <Search className="mr-1 h-4 w-4" />
-              Browse All Listings
+              <Search className="mr-1 h-4 w-4" /> Browse All Listings
             </Button>
           </Link>
         </div>
