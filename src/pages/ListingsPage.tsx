@@ -177,7 +177,7 @@ const ListingsPage = () => {
   }, [user]);
 
   const handleApply = async (listing: ListingItem) => {
-    if (!user) { toast.info("Please sign in to apply for this property."); navigate("/login"); return; }
+    if (!user) { requireAuth(() => handleApply(listing)); return; }
     if (appliedListings.has(listing.id)) { toast.info("You've already applied to this listing."); return; }
     setApplyingId(listing.id);
     const { error } = await supabase.from("applications").insert({
