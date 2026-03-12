@@ -18,6 +18,7 @@ import ListingsMap from "@/components/discover/ListingsMap";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 
 interface ListingItem {
