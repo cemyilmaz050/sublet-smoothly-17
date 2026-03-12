@@ -11,6 +11,11 @@ import TenantDashboard from "./pages/TenantDashboard";
 import SubtenantDashboard from "./pages/SubtenantDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import MessagesPage from "./pages/MessagesPage";
+import PricingSetupPage from "./pages/PricingSetupPage";
+import PaymentSummaryPage from "./pages/PaymentSummaryPage";
+import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
+import SubtenantPaymentsPage from "./pages/SubtenantPaymentsPage";
+import TenantEarningsPage from "./pages/TenantEarningsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +35,11 @@ const App = () => (
           <Route path="/dashboard/subtenant" element={<SubtenantDashboard />} />
           <Route path="/dashboard/manager" element={<ManagerDashboard />} />
           <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/pricing-setup" element={<PricingSetupPage />} />
+          <Route path="/payments/summary" element={<PaymentSummaryPage />} />
+          <Route path="/payments/confirmation" element={<PaymentConfirmationPage />} />
+          <Route path="/payments" element={<SubtenantPaymentsPage />} />
+          <Route path="/earnings" element={<TenantEarningsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

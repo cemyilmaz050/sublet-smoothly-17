@@ -2,12 +2,13 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Users, MessageSquare, Eye, Upload, CheckCircle2, Clock, ArrowRight, Plus } from "lucide-react";
+import { FileText, Users, MessageSquare, Eye, Upload, CheckCircle2, Clock, ArrowRight, Plus, DollarSign, TrendingUp } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import DocumentUpload from "@/components/DocumentUpload";
 import StepProgress from "@/components/StepProgress";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
 
 const TenantDashboard = () => {
   return (
@@ -31,7 +32,7 @@ const TenantDashboard = () => {
             { label: "Listing Status", value: "Under Review", icon: Clock, variant: "pending" as const },
             { label: "Documents", value: "3 of 4", icon: FileText, variant: "amber" as const },
             { label: "Applicants", value: "5", icon: Users, variant: "cyan" as const },
-            { label: "Messages", value: "2 new", icon: MessageSquare, variant: "secondary" as const },
+            { label: "Earnings", value: "$7,050", icon: TrendingUp, variant: "emerald" as const },
           ].map((stat) => (
             <Card key={stat.label} className="shadow-card">
               <CardContent className="flex items-center gap-4 p-5">
@@ -65,51 +66,64 @@ const TenantDashboard = () => {
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="applicants">Applicants</TabsTrigger>
             <TabsTrigger value="listing">Listing</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
           </TabsList>
 
           <TabsContent value="documents">
             <div className="space-y-4">
-              <DocumentUpload
-                label="Lease Agreement"
-                description="Upload your current lease agreement (PDF)"
-                status="approved"
-                fileName="lease_agreement_2026.pdf"
-              />
-              <DocumentUpload
-                label="Proof of Residence"
-                description="Utility bill or bank statement"
-                status="approved"
-                fileName="utility_bill_june.pdf"
-              />
-              <DocumentUpload
-                label="Sublet Request Letter"
-                description="Formal request to your property manager"
-                status="pending"
-                fileName="sublet_request.pdf"
-              />
-              <DocumentUpload
-                label="Additional Documents"
-                description="Any other supporting documents"
-                status="empty"
-              />
+              <DocumentUpload label="Lease Agreement" description="Upload your current lease agreement (PDF)" status="approved" fileName="lease_agreement_2026.pdf" />
+              <DocumentUpload label="Proof of Residence" description="Utility bill or bank statement" status="approved" fileName="utility_bill_june.pdf" />
+              <DocumentUpload label="Sublet Request Letter" description="Formal request to your property manager" status="pending" fileName="sublet_request.pdf" />
+              <DocumentUpload label="Additional Documents" description="Any other supporting documents" status="empty" />
             </div>
           </TabsContent>
 
           <TabsContent value="applicants">
-            <EmptyState
-              icon={Users}
-              title="No applicants yet"
-              description="Once your listing goes live, applicants will appear here. You'll be able to review their profiles and documents."
-            />
+            <EmptyState icon={Users} title="No applicants yet" description="Once your listing goes live, applicants will appear here." />
           </TabsContent>
 
           <TabsContent value="listing">
-            <EmptyState
-              icon={Eye}
-              title="Listing not yet created"
-              description="Complete your document uploads and get manager approval to create your listing."
-              actionLabel="Upload Documents"
-            />
+            <EmptyState icon={Eye} title="Listing not yet created" description="Complete your document uploads and get manager approval to create your listing." actionLabel="Upload Documents" />
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <div className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Card className="shadow-card">
+                  <CardContent className="flex items-center gap-4 p-5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald/15">
+                      <TrendingUp className="h-6 w-6 text-emerald" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Earned</p>
+                      <p className="text-xl font-bold text-foreground">$7,050.00</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-card">
+                  <CardContent className="flex items-center gap-4 p-5">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber/15">
+                      <Clock className="h-6 w-6 text-amber" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pending Payout</p>
+                      <p className="text-xl font-bold text-foreground">$2,350.00</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="flex gap-3">
+                <Link to="/earnings">
+                  <Button>
+                    <DollarSign className="mr-1 h-4 w-4" />
+                    View Full Earnings
+                  </Button>
+                </Link>
+                <Link to="/pricing-setup">
+                  <Button variant="outline">Set Up Pricing</Button>
+                </Link>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
