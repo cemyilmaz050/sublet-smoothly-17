@@ -34,6 +34,9 @@ const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [emailSent, setEmailSent] = useState(false);
+  const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
 
   // Auto-redirect if already logged in
   if (isReady && user) {
