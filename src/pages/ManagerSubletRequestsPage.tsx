@@ -90,6 +90,197 @@ const statusLabel = (status: string) => {
   }
 };
 
+const OnboardingDocumentsTab = () => {
+  const { user } = useAuth();
+
+  const { data: tenantDocs = [], isLoading: docsLoading } = useQuery({
+    queryKey: ["manager-onboarding-docs", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      // Get all tenant documents visible to manager
+      const { data, error } = await supabase
+        .from("tenant_documents" as any)
+        .select("*")
+        .order("uploaded_at", { ascending: false }) as any;
+      if (error) throw error;
+
+      // Group by tenant_id
+      const grouped: Record<string, any[]> = {};
+      for (const doc of (data || [])) {
+        if (!grouped[doc.tenant_id]) grouped[doc.tenant_id] = [];
+        grouped[doc.tenant_id].push(doc);
+      }
+
+      // Get profiles for those tenants
+      const tenantIds = Object.keys(grouped);
+      if (tenantIds.length === 0) return [];
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, documents_status")
+        .in("id", tenantIds) as any;
+
+      // Get cosigners
+      const { data: cosigners } = await supabase
+        .from("cosigners" as any)
+        .select("*")
+        .in("tenant_id", tenantIds) as any;
+
+      return tenantIds.map((tid) => ({
+        tenantId: tid,
+        profile: (profiles || []).find((p: any) => p.id === tid),
+        documents: grouped[tid],
+        cosigner: (cosigners || []).find((c: any) => c.tenant_id === tid),
+      }));
+    },
+  });
+
+  const queryClient = useQueryClient();
+
+  const handleDocAction = async (docId: string, status: string, comment?: string) => {
+    await supabase
+      .from("tenant_documents" as any)
+      .update({ status, review_comment: comment || null } as any)
+      .eq("id", docId);
+    queryClient.invalidateQueries({ queryKey: ["manager-onboarding-docs"] });
+    toast.success(`Document ${status}`);
+  };
+
+  const handleApproveAll = async (tenantId: string, docs: any[]) => {
+    for (const doc of docs) {
+      await supabase
+        .from("tenant_documents" as any)
+        .update({ status: "approved" } as any)
+        .eq("id", doc.id);
+    }
+    await supabase
+      .from("profiles")
+      .update({ documents_status: "approved" } as any)
+      .eq("id", tenantId);
+    
+    await supabase.from("notifications").insert({
+      user_id: tenantId,
+      title: "Documents Approved",
+      message: "Your onboarding documents have been approved! You can now create listings.",
+      type: "approval",
+      link: "/dashboard/tenant",
+    });
+    
+    queryClient.invalidateQueries({ queryKey: ["manager-onboarding-docs"] });
+    toast.success("All documents approved");
+  };
+
+  const docTypeLabel = (type: string) => {
+    switch (type) {
+      case "photo_id_front": return "Photo ID (Front)";
+      case "photo_id_back": return "Photo ID (Back)";
+      case "application_form": return "Application Form";
+      case "cosigner_document": return "Co-Signer Document";
+      default: return type;
+    }
+  };
+
+  if (docsLoading) {
+    return <div className="py-12 text-center text-muted-foreground">Loading...</div>;
+  }
+
+  if (tenantDocs.length === 0) {
+    return (
+      <Card className="shadow-card">
+        <CardContent className="py-12 text-center text-muted-foreground">
+          No onboarding documents submitted yet. They will appear here when tenants complete their onboarding.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {tenantDocs.map((tenant: any) => (
+        <Card key={tenant.tenantId} className="shadow-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
+                  <User className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <div>
+                  <CardTitle className="text-base">
+                    {tenant.profile?.first_name || ""} {tenant.profile?.last_name || "Tenant"}
+                  </CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    Submitted {new Date(tenant.documents[0]?.uploaded_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="emerald"
+                size="sm"
+                onClick={() => handleApproveAll(tenant.tenantId, tenant.documents)}
+              >
+                <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
+                Approve All
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Document</TableHead>
+                  <TableHead>File</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tenant.documents.map((doc: any) => (
+                  <TableRow key={doc.id}>
+                    <TableCell className="font-medium">{docTypeLabel(doc.document_type)}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{doc.file_name}</TableCell>
+                    <TableCell>
+                      <Badge variant={statusBadgeVariant(doc.status) as any}>
+                        {statusLabel(doc.status)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button variant="outline" size="sm" onClick={() => window.open(doc.file_url, "_blank")}>
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="emerald" size="sm" onClick={() => handleDocAction(doc.id, "approved")}>
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleDocAction(doc.id, "rejected", "Please re-upload")}>
+                          <XCircle className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {tenant.cosigner && (
+                  <TableRow>
+                    <TableCell className="font-medium">Co-Signer</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {tenant.cosigner.full_name} ({tenant.cosigner.email})
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={statusBadgeVariant(tenant.cosigner.confirmation_status) as any}>
+                        {tenant.cosigner.confirmation_status === "confirmed" ? "Confirmed" : "Pending"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
 const ManagerSubletRequestsPage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -255,9 +446,17 @@ const ManagerSubletRequestsPage = () => {
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Sublet Requests</h1>
-            <p className="text-sm text-muted-foreground">Review and manage tenant sublet requests</p>
+            <p className="text-sm text-muted-foreground">Review and manage tenant sublet requests and onboarding documents</p>
           </div>
         </div>
+
+        <Tabs defaultValue="requests" className="mb-6">
+          <TabsList>
+            <TabsTrigger value="requests">Sublet Requests</TabsTrigger>
+            <TabsTrigger value="onboarding">Onboarding Documents</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="requests">
 
         {/* Filters */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -346,9 +545,13 @@ const ManagerSubletRequestsPage = () => {
             </Table>
           </CardContent>
         </Card>
-      </div>
+        </TabsContent>
 
-      {/* Review Panel Dialog */}
+        <TabsContent value="onboarding">
+          <OnboardingDocumentsTab />
+        </TabsContent>
+        </Tabs>
+      </div>
       <Dialog open={reviewOpen} onOpenChange={(open) => { if (!open) { setReviewOpen(false); resetDecisionState(); } }}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>

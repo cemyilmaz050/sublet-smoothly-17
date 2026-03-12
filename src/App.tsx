@@ -25,6 +25,7 @@ import ManagerIntegrationsPage from "./pages/ManagerIntegrationsPage";
 import ManagerSubletRequestsPage from "./pages/ManagerSubletRequestsPage";
 import ManagerPropertiesPage from "./pages/ManagerPropertiesPage";
 import ManagerActiveSublets from "./pages/ManagerActiveSublets";
+import TenantOnboardingPage from "./pages/TenantOnboardingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
 
             {/* Protected routes */}
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/tenant/onboarding" element={<ProtectedRoute><TenantOnboardingPage /></ProtectedRoute>} />
             <Route path="/dashboard/tenant" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/subtenant" element={<ProtectedRoute><SubtenantDashboard /></ProtectedRoute>} />
             <Route path="/dashboard/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />

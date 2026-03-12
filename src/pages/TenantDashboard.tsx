@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Users, MessageSquare, Eye, Clock, Plus, DollarSign, TrendingUp, ArrowRight, Pencil, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import DocumentUpload from "@/components/DocumentUpload";
+import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
 import StepProgress from "@/components/StepProgress";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,12 +36,11 @@ const statusVariant = (status: string) => {
 };
 
 const TenantDashboard = () => {
-  const { user } = useAuth();
+  const { user, documentsStatus } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  // Mock: approval status (in production, this would come from a sublet_requests table)
-  const [isApproved] = useState(true);
+  const isApproved = documentsStatus === "approved";
 
   useEffect(() => {
     if (!user) return;
@@ -86,6 +86,9 @@ const TenantDashboard = () => {
             </Tooltip>
           )}
         </div>
+
+        {/* Document Review Status */}
+        <DocumentReviewStatusCard />
 
         {/* Draft Banner */}
         {draftListing && (
