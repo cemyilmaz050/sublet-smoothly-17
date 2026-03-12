@@ -7,6 +7,9 @@ interface AuthContextType {
   session: Session | null;
   isReady: boolean;
   role: string | null;
+  onboardingComplete: boolean | null;
+  documentsStatus: string | null;
+  refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -15,6 +18,9 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   isReady: false,
   role: null,
+  onboardingComplete: null,
+  documentsStatus: null,
+  refreshProfile: async () => {},
   signOut: async () => {},
 });
 
@@ -25,37 +31,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isReady, setIsReady] = useState(false);
   const [role, setRole] = useState<string | null>(null);
+  const [onboardingComplete, setOnboardingComplete] = useState<boolean | null>(null);
+  const [documentsStatus, setDocumentsStatus] = useState<string | null>(null);
 
-  const fetchRole = async (userId: string) => {
+  const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, onboarding_complete, documents_status")
       .eq("id", userId)
-      .single();
+      .single() as any;
     setRole(data?.role ?? null);
+    setOnboardingComplete(data?.onboarding_complete ?? false);
+    setDocumentsStatus(data?.documents_status ?? null);
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id);
+    }
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          // Use setTimeout to avoid async in callback
-          setTimeout(() => fetchRole(session.user.id), 0);
+          setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setRole(null);
+          setOnboardingComplete(null);
+          setDocumentsStatus(null);
         }
       }
     );
 
-    // THEN restore session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchRole(session.user.id).finally(() => setIsReady(true));
+        fetchProfile(session.user.id).finally(() => setIsReady(true));
       } else {
         setIsReady(true);
       }
@@ -69,10 +84,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setSession(null);
     setRole(null);
+    setOnboardingComplete(null);
+    setDocumentsStatus(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, isReady, role, signOut }}>
+    <AuthContext.Provider value={{ user, session, isReady, role, onboardingComplete, documentsStatus, refreshProfile, signOut }}>
       {children}
     </AuthContext.Provider>
   );
