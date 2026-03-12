@@ -19,6 +19,7 @@ interface FormErrors {
 }
 
 const SignUpPage = () => {
+  const { user, isReady, role } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialRole = searchParams.get("role") as "tenant" | "subtenant" | null;
