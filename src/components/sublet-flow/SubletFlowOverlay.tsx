@@ -245,7 +245,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
               : "Your listing is now visible to thousands of potential subtenants."}
           </p>
           <div className="flex flex-col gap-2 mt-4 w-full max-w-xs">
-            <Button onClick={() => { <Button onClick={() => { handleClose(); navigate("/tenant/dashboard"); }}>Go to My Dashboard</Button> }}>Go to My Dashboard</Button>
+            <Button onClick={() => { handleClose(); navigate("/tenant/dashboard"); }}>Go to My Dashboard</Button>
             <Button variant="outline" onClick={handleClose}>Close</Button>
           </div>
         </motion.div>
