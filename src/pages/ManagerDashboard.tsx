@@ -1,10 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, CheckCircle2, Clock, AlertTriangle, Eye, MessageSquare, Users } from "lucide-react";
+import { FileText, CheckCircle2, Clock, AlertTriangle, Eye, MessageSquare, Users, Settings, Building2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EmptyState from "@/components/EmptyState";
+import { Link } from "react-router-dom";
 
 const ManagerDashboard = () => {
   const pendingRequests = [
