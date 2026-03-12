@@ -21,6 +21,7 @@ import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import SubtenantPaymentsPage from "./pages/SubtenantPaymentsPage";
 import TenantEarningsPage from "./pages/TenantEarningsPage";
 import CreateListingPage from "./pages/CreateListingPage";
+import ManagerIntegrationsPage from "./pages/ManagerIntegrationsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
