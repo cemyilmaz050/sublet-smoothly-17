@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS active_mode text NOT NULL DEFAULT 'subtenant';
