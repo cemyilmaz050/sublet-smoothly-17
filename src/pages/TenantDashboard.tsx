@@ -1,20 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
+import { Plus, AlertCircle, ArrowRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FileText, Users, Eye, Clock, Plus, DollarSign, TrendingUp, ArrowRight, AlertCircle } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import DocumentUpload from "@/components/DocumentUpload";
-import StepProgress from "@/components/StepProgress";
-import EmptyState from "@/components/EmptyState";
-import YourListingsSection from "@/components/tenant/YourListingsSection";
-import SubtenantActivitySection from "@/components/tenant/SubtenantActivitySection";
-import SubletOnboardingOverlay from "@/components/SubletOnboardingOverlay";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import TenantSidebar from "@/components/tenant/TenantSidebar";
+import DashboardStats from "@/components/tenant/DashboardStats";
+import YourListingsSection from "@/components/tenant/YourListingsSection";
+import DashboardMessages from "@/components/tenant/DashboardMessages";
+import RecentApplicants from "@/components/tenant/RecentApplicants";
+import DashboardCalendarWidget from "@/components/tenant/DashboardCalendarWidget";
+import OnboardingChecklist from "@/components/tenant/OnboardingChecklist";
+import UserMenu from "@/components/UserMenu";
+import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 
 interface Listing {
   id: string;
@@ -30,167 +31,252 @@ interface Listing {
 }
 
 const TenantDashboard = () => {
-  const { user } = useAuth();
+  const { user, onboardingComplete, documentsStatus } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSublet, setShowSublet] = useState(false);
+  const [conversations, setConversations] = useState<any[]>([]);
+  const [applicants, setApplicants] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  useEffect(() => {
+  const firstName = user?.user_metadata?.first_name || "there";
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
+  const fetchData = useCallback(async () => {
     if (!user) return;
-    const fetchListings = async () => {
-      const { data } = await supabase
-        .from("listings")
-        .select("id, headline, address, monthly_rent, photos, status, available_from, available_until, view_count, save_count")
-        .eq("tenant_id", user.id)
-        .order("created_at", { ascending: false });
-      setListings((data as Listing[]) || []);
-      setLoading(false);
-    };
-    fetchListings();
+
+    // Fetch listings
+    const { data: listingsData } = await supabase
+      .from("listings")
+      .select("id, headline, address, monthly_rent, photos, status, available_from, available_until, view_count, save_count")
+      .eq("tenant_id", user.id)
+      .order("created_at", { ascending: false });
+    setListings((listingsData as Listing[]) || []);
+
+    // Fetch conversations
+    const { data: convos } = await supabase
+      .from("conversations")
+      .select("*")
+      .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
+      .order("last_message_at", { ascending: false })
+      .limit(5) as any;
+
+    if (convos && convos.length > 0) {
+      // Get last message for each
+      const enriched = await Promise.all(
+        convos.map(async (c: any) => {
+          const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
+          const { data: lastMsg } = await supabase
+            .from("messages")
+            .select("content, read, sender_id")
+            .eq("conversation_id", c.id)
+            .order("created_at", { ascending: false })
+            .limit(1) as any;
+
+          const { count } = await supabase
+            .from("messages")
+            .select("id", { count: "exact", head: true })
+            .eq("conversation_id", c.id)
+            .eq("read", false)
+            .neq("sender_id", user.id) as any;
+
+          // Fetch listing address
+          let listingAddress = "";
+          if (c.listing_id) {
+            const { data: l } = await supabase.from("listings").select("address").eq("id", c.listing_id).single() as any;
+            listingAddress = l?.address || "";
+          }
+
+          return {
+            ...c,
+            other_name: `User ${otherId.slice(0, 6)}`,
+            other_initial: "U",
+            last_message: lastMsg?.[0]?.content || "",
+            unread_count: count || 0,
+            listing_address: listingAddress,
+          };
+        })
+      );
+      setConversations(enriched);
+      setUnreadCount(enriched.reduce((sum: number, c: any) => sum + c.unread_count, 0));
+    }
+
+    // Fetch applications
+    if (listingsData && listingsData.length > 0) {
+      const listingIds = listingsData.map((l: any) => l.id);
+      const { data: apps } = await supabase
+        .from("applications")
+        .select("*")
+        .in("listing_id", listingIds)
+        .order("created_at", { ascending: false })
+        .limit(10) as any;
+
+      if (apps) {
+        const enrichedApps = apps.map((a: any) => {
+          const listing = listingsData.find((l: any) => l.id === a.listing_id);
+          return {
+            id: a.id,
+            name: `Applicant ${a.applicant_id.slice(0, 6)}`,
+            initial: "A",
+            verified: false,
+            listing_headline: listing?.headline || "Listing",
+            listing_address: listing?.address || "",
+            message: a.message,
+            status: a.status,
+            created_at: a.created_at,
+          };
+        });
+        setApplicants(enrichedApps);
+      }
+    }
+
+    setLoading(false);
   }, [user]);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Realtime subscriptions
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel("tenant-dashboard-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => {
+        fetchData();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, () => {
+        fetchData();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "listings" }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user, fetchData]);
+
+  // 60s polling fallback
+  useEffect(() => {
+    const interval = setInterval(fetchData, 60000);
+    return () => clearInterval(interval);
+  }, [fetchData]);
+
+  const activeListings = listings.filter((l) => l.status === "active").length;
+  const isNewTenant = listings.length === 0 && conversations.length === 0 && applicants.length === 0;
   const draftListing = listings.find((l) => l.status === "draft");
 
+  const docBanner = documentsStatus && documentsStatus !== "approved" && documentsStatus !== "not_started";
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="container py-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Tenant Dashboard</h1>
-            <p className="mt-1 text-muted-foreground">Manage your sublet listing and applications</p>
-          </div>
-          <Button size="lg" onClick={() => navigate("/listings/create")}>
-            <Plus className="mr-1 h-4 w-4" />
-            Create Listing
-          </Button>
-        </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <TenantSidebar />
 
-        {/* Draft Banner */}
-        {draftListing && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="mb-6 border-primary/30 bg-accent/50 shadow-card">
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="h-5 w-5 text-primary" />
-                  <div>
-                    <p className="font-medium text-foreground">You have an unfinished draft</p>
-                    <p className="text-sm text-muted-foreground">{draftListing.headline || draftListing.address || "Untitled listing"}</p>
-                  </div>
-                </div>
-                <Button onClick={() => navigate(`/listings/edit/${draftListing.id}`)}>
-                  Continue Draft
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
+        <div className="flex flex-1 flex-col">
+          {/* Top bar */}
+          <header className="flex h-14 items-center justify-between border-b bg-card px-4">
+            <SidebarTrigger className="lg:hidden" />
+            <div />
+            <UserMenu />
+          </header>
 
-        {/* Status Cards */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { label: "Total Listings", value: String(listings.length), icon: Eye },
-            { label: "Active", value: String(listings.filter((l) => l.status === "active").length), icon: FileText },
-            { label: "Pending Review", value: String(listings.filter((l) => l.status === "pending").length), icon: Clock },
-            { label: "Earnings", value: "$7,050", icon: TrendingUp },
-          ].map((stat) => (
-            <Card key={stat.label} className="shadow-card">
-              <CardContent className="flex items-center gap-4 p-5">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent">
-                  <stat.icon className="h-6 w-6 text-accent-foreground" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Step Progress */}
-        <Card className="mb-8 shadow-card">
-          <CardContent className="py-8">
-            <StepProgress
-              steps={["Upload Documents", "Manager Review", "Create Listing", "Find Subtenant"]}
-              currentStep={1}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Your Listings Section */}
-        <YourListingsSection
-          listings={listings}
-          loading={loading}
-          onOpenOnboarding={() => setShowOnboarding(true)}
-        />
-
-        {/* Subtenant Activity Section */}
-        <SubtenantActivitySection listings={listings} />
-
-        {/* Tabs for Documents, Payments etc */}
-        <Tabs defaultValue="documents">
-          <TabsList className="mb-6">
-            <TabsTrigger value="documents">Documents</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="documents">
-            <div className="space-y-4">
-              <DocumentUpload label="Lease Agreement" description="Upload your current lease agreement (PDF)" status="approved" fileName="lease_agreement_2026.pdf" />
-              <DocumentUpload label="Proof of Residence" description="Utility bill or bank statement" status="approved" fileName="utility_bill_june.pdf" />
-              <DocumentUpload label="Sublet Request Letter" description="Formal request to your property manager" status="pending" fileName="sublet_request.pdf" />
-              <DocumentUpload label="Additional Documents" description="Any other supporting documents" status="empty" />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <div className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Card className="shadow-card">
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald/15">
-                      <TrendingUp className="h-6 w-6 text-emerald" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Earned</p>
-                      <p className="text-xl font-bold text-foreground">$7,050.00</p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card className="shadow-card">
-                  <CardContent className="flex items-center gap-4 p-5">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber/15">
-                      <Clock className="h-6 w-6 text-amber" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Pending Payout</p>
-                      <p className="text-xl font-bold text-foreground">$2,350.00</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              <div className="flex gap-3">
-                <Link to="/earnings">
-                  <Button>
-                    <DollarSign className="mr-1 h-4 w-4" />
-                    View Full Earnings
-                  </Button>
-                </Link>
-                <Link to="/pricing-setup">
-                  <Button variant="outline">Set Up Pricing</Button>
-                </Link>
+          {/* Document status banner */}
+          {docBanner && (
+            <div className={`px-6 py-3 text-sm font-medium ${
+              documentsStatus === "rejected" ? "bg-destructive/10 text-destructive" : "bg-amber/10 text-amber"
+            }`}>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4" />
+                {documentsStatus === "pending" && "Your documents are under review. You will be notified once approved."}
+                {documentsStatus === "rejected" && (
+                  <>Some documents need attention. <button className="underline font-semibold">View Details</button></>
+                )}
+                {documentsStatus === "more_info" && (
+                  <>Your property manager has requested more information. <button className="underline font-semibold">Respond Now</button></>
+                )}
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+
+          {/* Main content */}
+          <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+            {/* Welcome header */}
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground lg:text-3xl">
+                  Welcome back, {firstName} 👋
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">{today}</p>
+              </div>
+              <Button onClick={() => setShowSublet(true)}>
+                <Plus className="mr-1.5 h-4 w-4" />
+                Sublet Another Property
+              </Button>
+            </div>
+
+            {isNewTenant && !loading ? (
+              <OnboardingChecklist
+                identityVerified={onboardingComplete === true}
+                documentsSubmitted={documentsStatus === "pending" || documentsStatus === "approved"}
+                hasListing={false}
+                onSublet={() => setShowSublet(true)}
+              />
+            ) : (
+              <div className="space-y-8">
+                {/* Stats */}
+                <DashboardStats
+                  activeListings={activeListings}
+                  totalApplicants={applicants.length}
+                  unreadMessages={unreadCount}
+                  earningsThisMonth={0}
+                />
+
+                {/* Draft banner */}
+                {draftListing && (
+                  <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+                    <Card className="border-primary/30 bg-accent/50 shadow-card">
+                      <CardContent className="flex items-center justify-between p-4">
+                        <div className="flex items-center gap-3">
+                          <AlertCircle className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="font-medium text-foreground">You have an unfinished draft</p>
+                            <p className="text-sm text-muted-foreground">{draftListing.headline || draftListing.address || "Untitled listing"}</p>
+                          </div>
+                        </div>
+                        <Button size="sm" onClick={() => navigate(`/listings/edit/${draftListing.id}`)}>
+                          Continue Draft <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Listings */}
+                <YourListingsSection
+                  listings={listings}
+                  loading={loading}
+                  onOpenOnboarding={() => setShowSublet(true)}
+                />
+
+                {/* Messages */}
+                <DashboardMessages conversations={conversations} unreadCount={unreadCount} />
+
+                {/* Recent Applicants */}
+                <RecentApplicants applicants={applicants} />
+
+                {/* Calendar */}
+                <DashboardCalendarWidget listings={listings} />
+              </div>
+            )}
+          </main>
+        </div>
       </div>
 
-      {/* Onboarding Overlay */}
-      <SubletOnboardingOverlay open={showOnboarding} onClose={() => setShowOnboarding(false)} />
-    </div>
+      <SubletFlowOverlay open={showSublet} onClose={() => setShowSublet(false)} />
+    </SidebarProvider>
   );
 };
 
