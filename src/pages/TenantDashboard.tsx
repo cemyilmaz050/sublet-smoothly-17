@@ -72,8 +72,6 @@ const TenantDashboard = () => {
           </Button>
         </div>
 
-        {/* Document Review Status */}
-        <DocumentReviewStatusCard />
 
         {/* Draft Banner */}
         {draftListing && (
