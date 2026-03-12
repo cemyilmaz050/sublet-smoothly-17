@@ -502,10 +502,11 @@ const ListingsPage = () => {
                   </div>
                 )}
                 <div className="space-y-3 pt-2">
-                  {(role === "subtenant" || (!user && !role)) && !isOwnListing(selectedListing) && (
+                  {!isOwnListing(selectedListing) && (
+                    <SecureThisPlace listing={selectedListing} userId={user?.id} />
+                  )}
+                  {!isOwnListing(selectedListing) && (
                     <>
-                      <SecureThisPlace listing={selectedListing} userId={user?.id} />
-
                       {appliedListings.has(selectedListing.id) ? (
                         <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald/30 bg-emerald/10 py-3 text-sm font-medium text-emerald">
                           <CheckCircle2 className="h-4 w-4" /> Application Submitted
