@@ -114,7 +114,7 @@ const DashboardMessages = ({ conversations, unreadCount }: Props) => {
         </div>
       ) : (
         <div className="divide-y rounded-xl border bg-card">
-          {conversations.slice(0, 5).map((convo) => (
+          {conversations.map((convo) => (
             <button
               key={convo.id}
               onClick={() => setOpenConvo(convo)}
