@@ -33,6 +33,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [emailSent, setEmailSent] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -79,16 +80,39 @@ const SignUpPage = () => {
 
   const handleSignUp = async () => {
     console.log("Sign up button clicked");
+    console.log("Form values:", {
+      firstName,
+      lastName,
+      email,
+      phone,
+      selectedRole,
+      hasPassword: Boolean(password),
+      passwordLength: password.length,
+    });
+    console.log("Supabase client:", supabase);
 
     if (!isReady) {
+      setSubmitError("Authentication is still initializing. Please try again in a moment.");
       toast.info("Auth is still initializing. Please try again in a second.");
       return;
     }
 
-    if (!validate()) return;
+    if (!selectedRole) {
+      setSubmitError("Please choose whether you're a tenant or looking for a place.");
+      setStep(1);
+      return;
+    }
+
+    if (!validate()) {
+      setSubmitError("Please fix the highlighted fields and try again.");
+      return;
+    }
 
     setLoading(true);
+    setSubmitError(null);
+
     try {
+      console.log("Before supabase.auth.signUp()");
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -97,49 +121,52 @@ const SignUpPage = () => {
             first_name: firstName,
             last_name: lastName,
             phone,
-            role: selectedRole || "tenant",
+            role: selectedRole,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
+      console.log("After supabase.auth.signUp():", { data, error });
 
       if (error) {
         console.error("Signup error:", error);
         if (error.message.includes("already registered") || error.message.includes("already exists")) {
+          setSubmitError(null);
           setDuplicateEmail(email);
           return;
         }
+        setSubmitError(error.message);
         toast.error(error.message);
         return;
       }
 
-      // Supabase returns an obfuscated success for existing users (user_repeated_signup)
       const identities = data.user?.identities ?? [];
       const isRepeatedSignup = data.user && !data.session && identities.length === 0;
       if (isRepeatedSignup) {
+        setSubmitError(null);
         setDuplicateEmail(email);
         return;
       }
 
-      // If email confirmation is required, user won't have a session yet
       if (data.user && !data.session) {
+        setSubmitError(null);
         setEmailSent(true);
         toast.success("Confirmation email sent. Please check your inbox.");
         return;
       }
 
-      // If auto-confirm is on, user is logged in immediately
       if (data.session) {
         toast.success("Account created successfully!");
-        const role = selectedRole || "tenant";
-        navigate(role === "tenant" ? "/dashboard/tenant" : "/dashboard/subtenant");
+        navigate(selectedRole === "tenant" ? "/dashboard/tenant" : "/dashboard/subtenant");
         return;
       }
 
+      setSubmitError("Could not complete signup. Please try again.");
       toast.error("Could not complete signup. Please try again.");
     } catch (err: any) {
-      console.error("Unexpected signup error:", err);
-      toast.error(err.message || "An unexpected error occurred");
+      console.error("Sign up error:", err);
+      setSubmitError("Something went wrong. Please try again.");
+      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -171,8 +198,8 @@ const SignUpPage = () => {
         <Navbar />
         <div className="container flex items-center justify-center py-16">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center space-y-6">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-              <AlertCircle className="h-8 w-8 text-amber-600" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+              <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Account already exists</h1>
             <p className="text-muted-foreground">
@@ -350,16 +377,22 @@ const SignUpPage = () => {
                   />
                   {errors.password && <p className="mt-1 text-sm text-destructive">{errors.password}</p>}
                 </div>
+                {submitError && (
+                  <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                    {submitError}
+                  </div>
+                )}
                 <Button
                   className="mt-2 w-full"
                   size="lg"
+                  type="button"
                   onClick={handleSignUp}
                   disabled={loading}
                 >
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
+                      Creating your account...
                     </>
                   ) : (
                     <>
