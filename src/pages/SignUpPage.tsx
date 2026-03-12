@@ -3,16 +3,35 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Home, Search, User, Mail, Phone, ArrowRight } from "lucide-react";
+import { Home, Search, Mail, Phone, ArrowRight, Loader2, CheckCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface FormErrors {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  password?: string;
+}
 
 const SignUpPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialRole = searchParams.get("role") as "tenant" | "subtenant" | null;
   const [selectedRole, setSelectedRole] = useState<"tenant" | "subtenant" | null>(initialRole);
   const [step, setStep] = useState(initialRole ? 2 : 1);
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [emailSent, setEmailSent] = useState(false);
 
   const roles = [
     {
@@ -28,6 +47,103 @@ const SignUpPage = () => {
       description: "I want to browse approved sublets and apply as a subtenant",
     },
   ];
+
+  const validate = (): boolean => {
+    const newErrors: FormErrors = {};
+    if (!firstName.trim()) newErrors.firstName = "First name is required";
+    if (!lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    if (!password) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSignUp = async () => {
+    if (!validate()) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            phone,
+            role: selectedRole || "tenant",
+          },
+          emailRedirectTo: window.location.origin,
+        },
+      });
+
+      if (error) {
+        console.error("Signup error:", error);
+        toast.error(error.message);
+        return;
+      }
+
+      // If email confirmation is required, user won't have a session yet
+      if (data.user && !data.session) {
+        setEmailSent(true);
+        return;
+      }
+
+      // If auto-confirm is on, user is logged in immediately
+      if (data.session) {
+        toast.success("Account created successfully!");
+        const role = selectedRole || "tenant";
+        navigate(role === "tenant" ? "/dashboard/tenant" : "/dashboard/subtenant");
+      }
+    } catch (err: any) {
+      console.error("Unexpected signup error:", err);
+      toast.error(err.message || "An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (emailSent) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container flex items-center justify-center py-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-lg text-center"
+          >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <CheckCircle className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="mt-6 text-3xl font-bold text-foreground">Check your email</h1>
+            <p className="mt-3 text-muted-foreground">
+              We've sent a confirmation link to <strong className="text-foreground">{email}</strong>.
+              Please click the link to verify your account and get started.
+            </p>
+            <Button
+              variant="outline"
+              className="mt-8"
+              onClick={() => {
+                setEmailSent(false);
+                setStep(2);
+              }}
+            >
+              ← Back to sign up
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,34 +196,85 @@ const SignUpPage = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="John" className="mt-1.5" />
+                    <Input
+                      id="firstName"
+                      placeholder="John"
+                      className="mt-1.5"
+                      value={firstName}
+                      onChange={(e) => { setFirstName(e.target.value); setErrors((p) => ({ ...p, firstName: undefined })); }}
+                    />
+                    {errors.firstName && <p className="mt-1 text-sm text-destructive">{errors.firstName}</p>}
                   </div>
                   <div>
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Doe" className="mt-1.5" />
+                    <Input
+                      id="lastName"
+                      placeholder="Doe"
+                      className="mt-1.5"
+                      value={lastName}
+                      onChange={(e) => { setLastName(e.target.value); setErrors((p) => ({ ...p, lastName: undefined })); }}
+                    />
+                    {errors.lastName && <p className="mt-1 text-sm text-destructive">{errors.lastName}</p>}
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <div className="relative mt-1.5">
                     <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="email" type="email" placeholder="john@example.com" className="pl-10" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="john@example.com"
+                      className="pl-10"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
+                    />
                   </div>
+                  {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
                 </div>
                 <div>
                   <Label htmlFor="phone">Phone</Label>
                   <div className="relative mt-1.5">
                     <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input id="phone" type="tel" placeholder="+1 (555) 000-0000" className="pl-10" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      className="pl-10"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" placeholder="Create a password" className="mt-1.5" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Create a password"
+                    className="mt-1.5"
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                  />
+                  {errors.password && <p className="mt-1 text-sm text-destructive">{errors.password}</p>}
                 </div>
-                <Button className="mt-2 w-full" size="lg">
-                  Create Account
-                  <ArrowRight className="ml-1 h-4 w-4" />
+                <Button
+                  className="mt-2 w-full"
+                  size="lg"
+                  onClick={handleSignUp}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
                 <button
                   onClick={() => setStep(1)}
