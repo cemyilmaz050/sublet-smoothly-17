@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -16,7 +15,6 @@ import {
   CalendarIcon,
   Clock,
   ShieldCheck,
-  User,
   Loader2,
   CheckCircle2,
   CreditCard,
@@ -26,7 +24,8 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 
 interface SecureThisPlaceProps {
   listing: {
@@ -35,14 +34,14 @@ interface SecureThisPlaceProps {
     monthly_rent: number | null;
     tenant_id: string;
   };
-  userId: string | undefined;
 }
 
 const PLATFORM_FEE_PERCENT = 6;
-const DEPOSIT_MONTHS = 1; // 1 month deposit
+const DEPOSIT_MONTHS = 1;
 
-const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
-  const navigate = useNavigate();
+const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
+  const { user } = useAuth();
+  const { requireAuth } = useAuthModal();
   const [tenantProfile, setTenantProfile] = useState<{
     first_name: string | null;
     last_name: string | null;
@@ -58,15 +57,12 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
 
   useEffect(() => {
     if (!listing.tenant_id) return;
-    const fetchProfile = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("id", listing.tenant_id)
-        .maybeSingle();
-      if (data) setTenantProfile(data);
-    };
-    fetchProfile();
+    supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", listing.tenant_id)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setTenantProfile(data); });
   }, [listing.tenant_id]);
 
   const monthlyRent = listing.monthly_rent ?? 0;
@@ -74,25 +70,32 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
   const platformFee = Math.round(monthlyRent * (PLATFORM_FEE_PERCENT / 100));
   const totalDue = depositAmount + platformFee;
 
+  const withAuth = (action: () => void) => {
+    if (!user) {
+      requireAuth(action);
+      return;
+    }
+    action();
+  };
+
+  const handleScheduleClick = () => {
+    withAuth(() => setShowScheduleModal(true));
+  };
+
+  const handlePaymentClick = () => {
+    withAuth(() => setShowPaymentModal(true));
+  };
+
   const handleScheduleSubmit = async () => {
-    if (!userId) {
-      toast.info("Please sign in to schedule a meeting.");
-      navigate("/login");
-      return;
-    }
-    if (!schedulingDate) {
-      toast.error("Please pick a date.");
-      return;
-    }
+    if (!user) return;
+    if (!schedulingDate) { toast.error("Please pick a date."); return; }
 
     setSubmittingSchedule(true);
 
-    // Create or find conversation, then send a scheduling message
     const { data: existing } = await supabase
-      .from("conversations")
-      .select("id")
+      .from("conversations").select("id")
       .eq("listing_id", listing.id)
-      .or(`participant_1.eq.${userId},participant_2.eq.${userId}`)
+      .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
       .maybeSingle();
 
     let convoId = existing?.id;
@@ -100,36 +103,20 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
     if (!convoId) {
       const { data: newConvo, error } = await supabase
         .from("conversations")
-        .insert({
-          participant_1: userId,
-          participant_2: listing.tenant_id,
-          listing_id: listing.id,
-        })
-        .select("id")
-        .single();
-      if (error || !newConvo) {
-        toast.error("Failed to create conversation.");
-        setSubmittingSchedule(false);
-        return;
-      }
+        .insert({ participant_1: user.id, participant_2: listing.tenant_id, listing_id: listing.id })
+        .select("id").single();
+      if (error || !newConvo) { toast.error("Failed to create conversation."); setSubmittingSchedule(false); return; }
       convoId = newConvo.id;
     }
 
     const dateStr = format(schedulingDate, "EEEE, MMMM d, yyyy");
     const content = `📅 Meeting Request\n\nI'd like to schedule a visit on ${dateStr} at ${schedulingTime}.${scheduleMessage ? `\n\n${scheduleMessage}` : ""}`;
 
-    await supabase.from("messages").insert({
-      conversation_id: convoId,
-      sender_id: userId,
-      content,
-    });
-
+    await supabase.from("messages").insert({ conversation_id: convoId, sender_id: user.id, content });
     await supabase.from("notifications").insert({
-      user_id: listing.tenant_id,
-      title: "Meeting Request",
+      user_id: listing.tenant_id, title: "Meeting Request",
       message: `Someone wants to visit "${listing.headline || "your apartment"}" on ${dateStr}`,
-      type: "meeting",
-      link: "/messages",
+      type: "meeting", link: "/messages",
     });
 
     setSubmittingSchedule(false);
@@ -138,20 +125,13 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
   };
 
   const handleSecureNow = async () => {
-    if (!userId) {
-      toast.info("Please sign in to secure this place.");
-      navigate("/login");
-      return;
-    }
-
+    if (!user) return;
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: { listingId: listing.id },
       });
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      }
+      if (data?.url) window.open(data.url, "_blank");
     } catch {
       toast.error("Payment setup failed. Please try again.");
     }
@@ -168,15 +148,12 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
 
   return (
     <div className="space-y-4 rounded-xl border-2 border-primary/20 bg-gradient-to-b from-primary/5 to-transparent p-5">
-      {/* Tenant Profile Snippet */}
       <div className="flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg">
           {tenantInitial}
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-foreground">
-            Listed by {tenantName}
-          </p>
+          <p className="text-sm font-semibold text-foreground">Listed by {tenantName}</p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" /> Usually responds within a few hours
           </p>
@@ -187,15 +164,9 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
       </div>
 
       <div className="h-px bg-border" />
-
       <h4 className="text-base font-bold text-foreground">Secure This Place</h4>
 
-      {/* Schedule a Meeting */}
-      <Button
-        variant="outline"
-        className="w-full justify-start gap-2 h-12 text-sm"
-        onClick={() => setShowScheduleModal(true)}
-      >
+      <Button variant="outline" className="w-full justify-start gap-2 h-12 text-sm" onClick={handleScheduleClick}>
         <CalendarDays className="h-4 w-4 text-primary" />
         <div className="text-left">
           <span className="font-semibold">Schedule a Meeting</span>
@@ -203,11 +174,7 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
         </div>
       </Button>
 
-      {/* Secure the Place Now */}
-      <Button
-        className="w-full justify-start gap-2 h-12 text-sm"
-        onClick={() => setShowPaymentModal(true)}
-      >
+      <Button className="w-full justify-start gap-2 h-12 text-sm" onClick={handlePaymentClick}>
         <CreditCard className="h-4 w-4" />
         <div className="text-left">
           <span className="font-semibold">Secure the Place Now</span>
@@ -215,7 +182,6 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
         </div>
       </Button>
 
-      {/* Reassurance */}
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5 text-emerald shrink-0" />
         Your deposit is protected until your move-in is confirmed.
@@ -226,120 +192,68 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Schedule a Meeting</DialogTitle>
-            <DialogDescription>
-              Pick a date and time to visit {listing.headline || "this apartment"}.
-            </DialogDescription>
+            <DialogDescription>Pick a date and time to visit {listing.headline || "this apartment"}.</DialogDescription>
           </DialogHeader>
-
           {scheduleSent ? (
             <div className="flex flex-col items-center gap-3 py-6">
               <CheckCircle2 className="h-12 w-12 text-emerald" />
               <p className="text-sm font-semibold text-foreground">Request Sent!</p>
-              <p className="text-xs text-muted-foreground text-center">
-                {tenantName} will get back to you soon. Check your messages for updates.
-              </p>
+              <p className="text-xs text-muted-foreground text-center">{tenantName} will get back to you soon.</p>
               <Button variant="outline" onClick={() => setShowScheduleModal(false)}>Done</Button>
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Date Picker */}
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">Date</label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !schedulingDate && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !schedulingDate && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {schedulingDate ? format(schedulingDate, "PPP") : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={schedulingDate}
-                      onSelect={setSchedulingDate}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
+                    <Calendar mode="single" selected={schedulingDate} onSelect={setSchedulingDate} disabled={(date) => date < new Date()} initialFocus className="p-3 pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
               </div>
-
-              {/* Time Picker */}
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">Time</label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {timeSlots.map((t) => (
-                    <Button
-                      key={t}
-                      variant={schedulingTime === t ? "default" : "outline"}
-                      size="sm"
-                      className="text-xs h-8"
-                      onClick={() => setSchedulingTime(t)}
-                    >
-                      {t}
-                    </Button>
+                    <Button key={t} variant={schedulingTime === t ? "default" : "outline"} size="sm" className="text-xs h-8" onClick={() => setSchedulingTime(t)}>{t}</Button>
                   ))}
                 </div>
               </div>
-
-              {/* Message */}
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">
                   Introduce yourself <span className="text-muted-foreground font-normal">(optional)</span>
                 </label>
-                <Textarea
-                  placeholder="Hi! I'm looking for a summer sublet and your place looks great..."
-                  value={scheduleMessage}
-                  onChange={(e) => setScheduleMessage(e.target.value)}
-                  rows={3}
-                  className="resize-none"
-                />
+                <Textarea placeholder="Hi! I'm looking for a summer sublet..." value={scheduleMessage} onChange={(e) => setScheduleMessage(e.target.value)} rows={3} className="resize-none" />
               </div>
-
-              <Button
-                className="w-full"
-                onClick={handleScheduleSubmit}
-                disabled={submittingSchedule || !schedulingDate}
-              >
-                {submittingSchedule ? (
-                  <><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Sending...</>
-                ) : (
-                  <><CalendarDays className="mr-1 h-4 w-4" /> Send Meeting Request</>
-                )}
+              <Button className="w-full" onClick={handleScheduleSubmit} disabled={submittingSchedule || !schedulingDate}>
+                {submittingSchedule ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Sending...</> : <><CalendarDays className="mr-1 h-4 w-4" /> Send Meeting Request</>}
               </Button>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Payment Breakdown Modal */}
+      {/* Payment Modal */}
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>Secure This Place</DialogTitle>
-            <DialogDescription>
-              Reserve {listing.headline || "this apartment"} with an initial deposit.
-            </DialogDescription>
+            <DialogDescription>Reserve {listing.headline || "this apartment"} with an initial deposit.</DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4">
-            {/* Cost Breakdown */}
             <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Security Deposit ({DEPOSIT_MONTHS} month)</span>
                 <span className="font-semibold text-foreground">${depositAmount.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">
-                  Platform Service Fee ({PLATFORM_FEE_PERCENT}%)
-                </span>
+                <span className="text-muted-foreground">Platform Service Fee ({PLATFORM_FEE_PERCENT}%)</span>
                 <span className="font-semibold text-foreground">${platformFee.toLocaleString()}</span>
               </div>
               <div className="h-px bg-border" />
@@ -348,23 +262,14 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
                 <span className="text-lg font-bold text-primary">${totalDue.toLocaleString()}</span>
               </div>
             </div>
-
-            {/* Reassurance */}
             <div className="flex items-start gap-2 rounded-lg bg-emerald/10 p-3">
               <ShieldCheck className="h-4 w-4 text-emerald shrink-0 mt-0.5" />
-              <p className="text-xs text-emerald leading-relaxed">
-                Your deposit is fully protected. If move-in isn't confirmed, you'll receive a full refund.
-              </p>
+              <p className="text-xs text-emerald leading-relaxed">Your deposit is fully protected. If move-in isn't confirmed, you'll receive a full refund.</p>
             </div>
-
             <Button className="w-full" size="lg" onClick={handleSecureNow}>
-              <CreditCard className="mr-2 h-4 w-4" />
-              Pay ${totalDue.toLocaleString()} & Reserve
+              <CreditCard className="mr-2 h-4 w-4" /> Pay ${totalDue.toLocaleString()} & Reserve
             </Button>
-
-            <p className="text-center text-xs text-muted-foreground">
-              Secure checkout powered by Stripe
-            </p>
+            <p className="text-center text-xs text-muted-foreground">Secure checkout powered by Stripe</p>
           </div>
         </DialogContent>
       </Dialog>
