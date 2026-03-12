@@ -59,6 +59,35 @@ export type Database = {
         }
         Relationships: []
       }
+      listing_views: {
+        Row: {
+          id: string
+          listing_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_views_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listings: {
         Row: {
           address: string | null
@@ -78,6 +107,8 @@ export type Database = {
           monthly_rent: number | null
           photos: string[] | null
           property_type: Database["public"]["Enums"]["property_type"] | null
+          published_at: string | null
+          save_count: number
           security_deposit: number | null
           source: string
           sqft: number | null
@@ -85,6 +116,7 @@ export type Database = {
           tenant_id: string
           unit_number: string | null
           updated_at: string
+          view_count: number
         }
         Insert: {
           address?: string | null
@@ -104,6 +136,8 @@ export type Database = {
           monthly_rent?: number | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
+          published_at?: string | null
+          save_count?: number
           security_deposit?: number | null
           source?: string
           sqft?: number | null
@@ -111,6 +145,7 @@ export type Database = {
           tenant_id: string
           unit_number?: string | null
           updated_at?: string
+          view_count?: number
         }
         Update: {
           address?: string | null
@@ -130,6 +165,8 @@ export type Database = {
           monthly_rent?: number | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
+          published_at?: string | null
+          save_count?: number
           security_deposit?: number | null
           source?: string
           sqft?: number | null
@@ -137,6 +174,7 @@ export type Database = {
           tenant_id?: string
           unit_number?: string | null
           updated_at?: string
+          view_count?: number
         }
         Relationships: []
       }
@@ -282,6 +320,35 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "sublet_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_listings: {
+        Row: {
+          id: string
+          listing_id: string
+          saved_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          listing_id: string
+          saved_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          listing_id?: string
+          saved_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_listings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
             referencedColumns: ["id"]
           },
         ]
