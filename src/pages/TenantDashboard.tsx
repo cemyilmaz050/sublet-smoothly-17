@@ -66,41 +66,10 @@ const TenantDashboard = () => {
             <h1 className="text-3xl font-bold text-foreground">Tenant Dashboard</h1>
             <p className="mt-1 text-muted-foreground">Manage your sublet listing and applications</p>
           </div>
-          {isApproved ? (
-            <Button size="lg" onClick={() => navigate("/listings/create")}>
-              <Plus className="mr-1 h-4 w-4" />
-              Create Listing
-            </Button>
-          ) : needsOnboarding ? (
-            <Button size="lg" onClick={() => navigate("/tenant/onboarding")}>
-              <FileText className="mr-1 h-4 w-4" />
-              Get Verified to List
-            </Button>
-          ) : isPendingReview ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="lg" disabled>
-                  <Clock className="mr-1 h-4 w-4" />
-                  Verification In Progress
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Your documents are under review. You'll be able to list once verified.</p>
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="lg" disabled>
-                  <Plus className="mr-1 h-4 w-4" />
-                  Create Listing
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>You need document approval before listing your property</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
+          <Button size="lg" onClick={() => navigate("/listings/create")}>
+            <Plus className="mr-1 h-4 w-4" />
+            Create Listing
+          </Button>
         </div>
 
         {/* Document Review Status */}
