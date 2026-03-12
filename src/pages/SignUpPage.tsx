@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Home, Search, Mail, Phone, ArrowRight, Loader2, CheckCircle } from "lucide-react";
+import { Home, Search, Mail, Phone, ArrowRight, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useNavigate, Navigate } from "react-router-dom";
@@ -34,6 +34,9 @@ const SignUpPage = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [emailSent, setEmailSent] = useState(false);
+  const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
 
   // Auto-redirect if already logged in
   if (isReady && user) {
@@ -96,12 +99,16 @@ const SignUpPage = () => {
             phone,
             role: selectedRole || "tenant",
           },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
       if (error) {
         console.error("Signup error:", error);
+        if (error.message.includes("already registered") || error.message.includes("already exists")) {
+          setDuplicateEmail(email);
+          return;
+        }
         toast.error(error.message);
         return;
       }
@@ -110,8 +117,7 @@ const SignUpPage = () => {
       const identities = data.user?.identities ?? [];
       const isRepeatedSignup = data.user && !data.session && identities.length === 0;
       if (isRepeatedSignup) {
-        toast.error("An account with this email already exists. Please sign in instead.");
-        navigate("/login");
+        setDuplicateEmail(email);
         return;
       }
 
@@ -139,6 +145,59 @@ const SignUpPage = () => {
     }
   };
 
+  const handleResendVerification = async (targetEmail: string) => {
+    if (resendCooldown > 0) return;
+    setResending(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email: targetEmail });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Verification email resent! Check your inbox.");
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(interval); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    setResending(false);
+  };
+
+  // Duplicate account screen
+  if (duplicateEmail) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container flex items-center justify-center py-16">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center space-y-6">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
+              <AlertCircle className="h-8 w-8 text-amber-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">Account already exists</h1>
+            <p className="text-muted-foreground">
+              An account with <strong className="text-foreground">{duplicateEmail}</strong> already exists.
+              If you haven't verified your email yet, check your inbox or resend the verification email.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button onClick={() => handleResendVerification(duplicateEmail)} disabled={resending || resendCooldown > 0}>
+                {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/login")}>
+                Log In Instead
+              </Button>
+              <button onClick={() => setDuplicateEmail(null)} className="text-sm text-muted-foreground hover:text-primary">
+                ← Try a different email
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
+  // Email sent confirmation screen
   if (emailSent) {
     return (
       <div className="min-h-screen bg-background">
@@ -147,26 +206,31 @@ const SignUpPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-lg text-center"
+            className="w-full max-w-lg text-center space-y-6"
           >
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <CheckCircle className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="mt-6 text-3xl font-bold text-foreground">Check your email</h1>
-            <p className="mt-3 text-muted-foreground">
-              We've sent a confirmation link to <strong className="text-foreground">{email}</strong>.
-              Please click the link to verify your account and get started.
+            <h1 className="text-3xl font-bold text-foreground">Check your email!</h1>
+            <p className="text-muted-foreground">
+              We sent a verification link to <strong className="text-foreground">{email}</strong>.
+              Click the link in the email to activate your account.
             </p>
-            <Button
-              variant="outline"
-              className="mt-8"
-              onClick={() => {
-                setEmailSent(false);
-                setStep(2);
-              }}
-            >
-              ← Back to sign up
-            </Button>
+            <div className="flex flex-col gap-3">
+              <Button onClick={() => handleResendVerification(email)} disabled={resending || resendCooldown > 0} variant="outline">
+                {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Email"}
+              </Button>
+              <button
+                onClick={() => {
+                  setEmailSent(false);
+                  setStep(2);
+                }}
+                className="text-sm text-muted-foreground hover:text-primary"
+              >
+                Wrong email address? ← Go back
+              </button>
+            </div>
           </motion.div>
         </div>
       </div>
