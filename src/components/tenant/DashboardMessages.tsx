@@ -15,10 +15,12 @@ interface Conversation {
   participant_2: string;
   last_message_at: string;
   last_message?: string;
+  last_message_time?: string;
   unread_count: number;
   other_name: string;
   other_initial: string;
   listing_address?: string;
+  listing_headline?: string;
 }
 
 interface Message {
@@ -32,11 +34,20 @@ interface Message {
 interface Props {
   conversations: Conversation[];
   unreadCount: number;
+  autoOpenConversationId?: string;
 }
 
-const DashboardMessages = ({ conversations, unreadCount }: Props) => {
+const DashboardMessages = ({ conversations, unreadCount, autoOpenConversationId }: Props) => {
   const { user } = useAuth();
   const [openConvo, setOpenConvo] = useState<Conversation | null>(null);
+
+  // Auto-open conversation from URL param
+  useEffect(() => {
+    if (autoOpenConversationId && conversations.length > 0 && !openConvo) {
+      const found = conversations.find((c) => c.id === autoOpenConversationId);
+      if (found) setOpenConvo(found);
+    }
+  }, [autoOpenConversationId, conversations]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
@@ -132,8 +143,10 @@ const DashboardMessages = ({ conversations, unreadCount }: Props) => {
                   </p>
                   <span className="text-xs text-muted-foreground">{formatTime(convo.last_message_at)}</span>
                 </div>
-                {convo.listing_address && (
-                  <p className="text-[10px] text-muted-foreground">re: {convo.listing_address}</p>
+                {(convo.listing_headline || convo.listing_address) && (
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    re: {convo.listing_headline || convo.listing_address}
+                  </p>
                 )}
                 <p className={`mt-0.5 text-xs truncate ${convo.unread_count > 0 ? "font-semibold text-foreground" : "text-muted-foreground"}`}>
                   {convo.last_message || "Start a conversation"}
@@ -157,8 +170,10 @@ const DashboardMessages = ({ conversations, unreadCount }: Props) => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-foreground">{openConvo?.other_name}</p>
-              {openConvo?.listing_address && (
-                <p className="text-[10px] text-muted-foreground">re: {openConvo.listing_address}</p>
+              {(openConvo?.listing_headline || openConvo?.listing_address) && (
+                <p className="text-[10px] text-muted-foreground truncate">
+                  re: {openConvo?.listing_headline || openConvo?.listing_address}
+                </p>
               )}
             </div>
           </div>

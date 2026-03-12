@@ -68,9 +68,21 @@ const TenantDashboard = () => {
       const enriched = await Promise.all(
         convos.map(async (c: any) => {
           const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
+
+          // Fetch other user's profile
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("first_name, last_name")
+            .eq("id", otherId)
+            .maybeSingle();
+
+          const otherFirstName = profile?.first_name || "User";
+          const otherLastName = profile?.last_name || "";
+          const otherName = otherLastName ? `${otherFirstName} ${otherLastName}` : otherFirstName;
+
           const { data: lastMsg } = await supabase
             .from("messages")
-            .select("content, read, sender_id")
+            .select("content, read, sender_id, created_at")
             .eq("conversation_id", c.id)
             .order("created_at", { ascending: false })
             .limit(1) as any;
@@ -82,18 +94,23 @@ const TenantDashboard = () => {
             .eq("read", false)
             .neq("sender_id", user.id) as any;
 
+          let listingHeadline = "";
           let listingAddress = "";
           if (c.listing_id) {
-            const { data: l } = await supabase.from("listings").select("address").eq("id", c.listing_id).single() as any;
+            const { data: l } = await supabase.from("listings").select("headline, address").eq("id", c.listing_id).maybeSingle() as any;
+            listingHeadline = l?.headline || "";
             listingAddress = l?.address || "";
           }
 
           return {
             ...c,
-            other_name: `User ${otherId.slice(0, 6)}`,
-            other_initial: otherId.charAt(0).toUpperCase(),
+            other_id: otherId,
+            other_name: otherName,
+            other_initial: otherFirstName.charAt(0).toUpperCase(),
             last_message: lastMsg?.[0]?.content || "",
+            last_message_time: lastMsg?.[0]?.created_at || c.last_message_at,
             unread_count: count || 0,
+            listing_headline: listingHeadline,
             listing_address: listingAddress,
           };
         })
