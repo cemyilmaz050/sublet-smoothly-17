@@ -26,7 +26,12 @@ const SignUpPage = () => {
   const [selectedRole, setSelectedRole] = useState<"tenant" | "subtenant" | null>(initialRole);
   const [step, setStep] = useState(initialRole ? 2 : 1);
 
-  const [firstName, setFirstName] = useState("");
+  // Auto-redirect if already logged in
+  if (isReady && user) {
+    const dest = role === "subtenant" ? "/dashboard/subtenant" : role === "manager" ? "/dashboard/manager" : "/dashboard/tenant";
+    return <Navigate to={dest} replace />;
+  }
+
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
