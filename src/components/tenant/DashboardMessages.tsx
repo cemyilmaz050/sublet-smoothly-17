@@ -37,9 +37,17 @@ interface Props {
   autoOpenConversationId?: string;
 }
 
-const DashboardMessages = ({ conversations, unreadCount }: Props) => {
+const DashboardMessages = ({ conversations, unreadCount, autoOpenConversationId }: Props) => {
   const { user } = useAuth();
   const [openConvo, setOpenConvo] = useState<Conversation | null>(null);
+
+  // Auto-open conversation from URL param
+  useEffect(() => {
+    if (autoOpenConversationId && conversations.length > 0 && !openConvo) {
+      const found = conversations.find((c) => c.id === autoOpenConversationId);
+      if (found) setOpenConvo(found);
+    }
+  }, [autoOpenConversationId, conversations]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMsg, setNewMsg] = useState("");
   const [sending, setSending] = useState(false);
