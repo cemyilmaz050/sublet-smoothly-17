@@ -39,15 +39,6 @@ const Navbar = () => {
               </div>
               <span className="text-xl font-bold text-foreground">SubletSafe</span>
             </Link>
-            {isTenantBrowsing && (
-              <Link
-                to="/tenant/dashboard"
-                className="ml-2 flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Back to My Dashboard</span>
-              </Link>
-            )}
           </div>
 
           {/* Right: Dynamic sublet/listings button + User Menu */}
