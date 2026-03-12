@@ -1,16 +1,31 @@
 import { Building2, ArrowLeft } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import useHasPublishedListing from "@/hooks/useHasPublishedListing";
 import UserMenu from "@/components/UserMenu";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, role } = useAuth();
+  const { hasListing } = useHasPublishedListing();
   const [subletOpen, setSubletOpen] = useState(false);
 
   const isTenantBrowsing = role === "tenant" && (location.pathname === "/listings" || location.pathname === "/discover");
+
+  const handleSubletClick = () => {
+    if (!user) {
+      navigate("/sign-up");
+      return;
+    }
+    if (hasListing) {
+      navigate("/tenant/dashboard");
+    } else {
+      setSubletOpen(true);
+    }
+  };
 
   return (
     <>
@@ -35,16 +50,14 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Right: Sublet button + User Menu */}
+          {/* Right: Dynamic sublet/listings button + User Menu */}
           <div className="flex items-center gap-3">
-            {user && (
-              <button
-                onClick={() => setSubletOpen(true)}
-                className="hidden text-sm font-semibold text-primary transition-colors hover:text-primary/80 sm:block"
-              >
-                Sublet Your Apartment
-              </button>
-            )}
+            <button
+              onClick={handleSubletClick}
+              className="hidden text-sm font-semibold text-primary transition-colors hover:text-primary/80 sm:block"
+            >
+              {user && hasListing ? "Go to Your Listings" : "Sublet Your Apartment"}
+            </button>
             <UserMenu />
           </div>
         </div>
