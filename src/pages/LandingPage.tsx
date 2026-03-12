@@ -2,10 +2,20 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShieldCheck, Users, FileCheck, ArrowRight, Upload, CheckCircle2, Home } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import heroImage from "@/assets/hero-apartment.jpg";
+import { useAuth } from "@/hooks/useAuth";
 
 const LandingPage = () => {
+  const { user, isReady, role } = useAuth();
+
+  // Redirect logged-in users to their dashboard
+  if (isReady && user) {
+    const dest = role === "subtenant" ? "/dashboard/subtenant" : role === "manager" ? "/dashboard/manager" : "/dashboard/tenant";
+    return <Navigate to={dest} replace />;
+  }
+
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
