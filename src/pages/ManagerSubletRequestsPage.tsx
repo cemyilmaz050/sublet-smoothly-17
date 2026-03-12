@@ -354,9 +354,13 @@ const ManagerSubletRequestsPage = () => {
             </Table>
           </CardContent>
         </Card>
-      </div>
+        </TabsContent>
 
-      {/* Review Panel Dialog */}
+        <TabsContent value="onboarding">
+          <OnboardingDocumentsTab />
+        </TabsContent>
+        </Tabs>
+      </div>
       <Dialog open={reviewOpen} onOpenChange={(open) => { if (!open) { setReviewOpen(false); resetDecisionState(); } }}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
