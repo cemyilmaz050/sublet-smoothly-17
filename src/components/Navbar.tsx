@@ -1,4 +1,4 @@
-import { Bell, Home, Building2, Search, MessageSquare, Menu, X, LogOut } from "lucide-react";
+import { Bell, Building2, Search, MessageSquare, LayoutDashboard, Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
@@ -8,13 +8,20 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, role, signOut } = useAuth();
+
+  const getDashboardPath = () => {
+    if (role === "subtenant") return "/dashboard/subtenant";
+    if (role === "manager") return "/dashboard/manager";
+    return "/dashboard/tenant";
+  };
 
   const navItems = [
-    { label: "Home", href: "/", icon: Home },
     { label: "Listings", href: "/listings", icon: Search },
-    { label: "Dashboard", href: "/dashboard", icon: Building2 },
-    { label: "Messages", href: "/messages", icon: MessageSquare },
+    ...(user ? [
+      { label: "Dashboard", href: getDashboardPath(), icon: LayoutDashboard },
+      { label: "Messages", href: "/messages", icon: MessageSquare },
+    ] : []),
   ];
 
   const handleSignOut = async () => {

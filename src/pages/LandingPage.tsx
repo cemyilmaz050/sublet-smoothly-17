@@ -11,8 +11,7 @@ const LandingPage = () => {
 
   // Redirect logged-in users to their dashboard
   if (isReady && user) {
-    const dest = role === "subtenant" ? "/dashboard/subtenant" : role === "manager" ? "/dashboard/manager" : "/dashboard/tenant";
-    return <Navigate to={dest} replace />;
+    return <Navigate to="/listings" replace />;
   }
 
 

@@ -78,19 +78,8 @@ const AuthCallbackPage = () => {
     handleCallback();
   }, []);
 
-  const redirectByRole = (profile: any) => {
-    const role = profile?.role;
-    const onboarded = profile?.onboarding_complete;
-
-    if (role === "subtenant") {
-      navigate("/dashboard/subtenant", { replace: true });
-    } else if (role === "manager") {
-      navigate("/dashboard/manager", { replace: true });
-    } else if (role === "tenant" && !onboarded) {
-      navigate("/dashboard/tenant", { replace: true });
-    } else {
-      navigate("/dashboard/tenant", { replace: true });
-    }
+  const redirectByRole = (_profile: any) => {
+    navigate("/listings", { replace: true });
   };
 
   const handleResend = async () => {
