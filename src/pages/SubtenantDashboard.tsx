@@ -1,15 +1,23 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, FileCheck, MessageSquare, Clock, Search, MapPin, Calendar, DollarSign, CreditCard } from "lucide-react";
+import { Heart, FileCheck, MessageSquare, Clock, Search, MapPin, Calendar, DollarSign, CreditCard, ShieldCheck, AlertCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
 import StepProgress from "@/components/StepProgress";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import PaymentStatusBadge from "@/components/PaymentStatusBadge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const SubtenantDashboard = () => {
+  const { documentsStatus, onboardingComplete } = useAuth();
+  const navigate = useNavigate();
+  const isApproved = documentsStatus === "approved";
+  const isPendingReview = documentsStatus === "pending_review";
+  const needsVerification = !onboardingComplete;
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
