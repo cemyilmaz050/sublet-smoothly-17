@@ -425,32 +425,12 @@ const ListingsPage = () => {
               />
             </div>
           ) : (
-            <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden bg-muted/30">
-              <div className="absolute inset-0" style={{
-                backgroundImage: `linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px)`,
-                backgroundSize: "60px 60px",
-              }} />
-              <div className="absolute left-[20%] top-0 h-full w-px bg-border/40" />
-              <div className="absolute left-[50%] top-0 h-full w-px bg-border/40" />
-              <div className="absolute left-[75%] top-0 h-full w-px bg-border/40" />
-              <div className="absolute top-[30%] left-0 w-full h-px bg-border/40" />
-              <div className="absolute top-[60%] left-0 w-full h-px bg-border/40" />
-              {filtered.slice(0, pinPositions.length).map((listing, i) => {
-                const pos = pinPositions[i];
-                const isHovered = hoveredId === listing.id;
-                return (
-                  <motion.div key={listing.id} className="absolute z-10 cursor-pointer" style={{ left: `${pos.x}%`, top: `${pos.y}%` }} animate={isHovered ? { scale: 1.3 } : { scale: 1 }} onClick={() => setSelectedListing(listing)}>
-                    <div className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold shadow-md transition-colors ${isHovered ? "bg-primary text-primary-foreground scale-110" : "bg-card text-foreground border"}`}>
-                      ${listing.monthly_rent ? listing.monthly_rent.toLocaleString() : "???"}
-                    </div>
-                    <div className={`mx-auto h-2 w-0.5 ${isHovered ? "bg-primary" : "bg-border"}`} />
-                    <div className={`mx-auto h-1.5 w-1.5 rounded-full ${isHovered ? "bg-primary" : "bg-border"}`} />
-                  </motion.div>
-                );
-              })}
-              <div className="absolute bottom-4 left-4 rounded-lg border bg-card/90 px-3 py-2 text-xs text-muted-foreground backdrop-blur-sm">
-                <MapPin className="mr-1 inline h-3 w-3" />Interactive map coming soon
-              </div>
+            <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden">
+              <ListingsMap
+                listings={filtered}
+                hoveredId={hoveredId}
+                onSelect={(l) => setSelectedListing(l as any)}
+              />
             </div>
           )}
         </div>
