@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, Mail, ArrowRight, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
 const LoginPage = () => {
-  const { user, isReady, role } = useAuth();
+  const { user, isReady } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -38,9 +39,8 @@ const LoginPage = () => {
     if (!validate()) return;
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        console.error("Login error:", error);
         if (error.message.includes("Invalid login credentials")) {
           toast.error("Invalid email or password. Please try again.");
         } else if (error.message.includes("Email not confirmed")) {
@@ -50,10 +50,12 @@ const LoginPage = () => {
         }
         return;
       }
-      toast.success("Logged in successfully!");
-      // Redirect handled by auth state change + Navigate above
+      if (data.session) {
+        toast.success("Logged in successfully!");
+        // Explicit redirect — don't rely solely on state re-render
+        navigate("/listings", { replace: true });
+      }
     } catch (err: any) {
-      console.error("Unexpected login error:", err);
       toast.error(err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -114,6 +116,7 @@ const LoginPage = () => {
                         className="mt-1.5"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleForgotPassword()}
                       />
                     </div>
                     <Button className="w-full" onClick={handleForgotPassword} disabled={forgotLoading}>
@@ -147,7 +150,10 @@ const LoginPage = () => {
           </div>
 
           <div className="mt-8 rounded-xl border bg-card p-8 shadow-card">
-            <div className="space-y-4">
+            <form
+              onSubmit={(e) => { e.preventDefault(); handleLogin(); }}
+              className="space-y-4"
+            >
               <div>
                 <Label htmlFor="login-email">Email</Label>
                 <div className="relative mt-1.5">
@@ -166,7 +172,7 @@ const LoginPage = () => {
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="login-password">Password</Label>
-                  <button onClick={() => { setForgotMode(true); setForgotEmail(email); }} className="text-xs text-primary hover:underline">
+                  <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(email); }} className="text-xs text-primary hover:underline">
                     Forgot password?
                   </button>
                 </div>
@@ -180,7 +186,7 @@ const LoginPage = () => {
                 />
                 {errors.password && <p className="mt-1 text-sm text-destructive">{errors.password}</p>}
               </div>
-              <Button className="w-full" size="lg" onClick={handleLogin} disabled={loading}>
+              <Button className="w-full" size="lg" type="submit" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -193,7 +199,7 @@ const LoginPage = () => {
                   </>
                 )}
               </Button>
-            </div>
+            </form>
             <p className="mt-6 text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link to="/signup" className="font-medium text-primary hover:underline">Sign up</Link>

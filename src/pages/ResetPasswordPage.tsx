@@ -15,20 +15,47 @@ const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [ready, setReady] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
 
   useEffect(() => {
-    // The recovery link sets the session automatically via the URL hash
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const type = hashParams.get("type");
-    if (type !== "recovery") {
-      // Also check for access_token which indicates a valid recovery flow
-      const accessToken = hashParams.get("access_token");
-      if (!accessToken) {
-        toast.error("Invalid or expired reset link.");
-        navigate("/login");
+    // Listen for PASSWORD_RECOVERY event from Supabase (handles both hash and PKCE flows)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        if (session) {
+          setReady(true);
+        }
       }
-    }
+    });
+
+    // Also check if session already exists (user may have landed with valid recovery token)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setReady(true);
+      } else {
+        // Check URL hash for recovery params (legacy flow)
+        const hash = window.location.hash;
+        if (hash) {
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get("access_token");
+          const type = params.get("type");
+          if (accessToken || type === "recovery") {
+            // Supabase will handle session from hash automatically
+            return;
+          }
+        }
+        // Give a brief moment for auth state to settle
+        const timeout = setTimeout(() => {
+          if (!ready) {
+            toast.error("Invalid or expired reset link.");
+            navigate("/login");
+          }
+        }, 3000);
+        return () => clearTimeout(timeout);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const handleReset = async () => {
@@ -56,6 +83,14 @@ const ResetPasswordPage = () => {
     }
   };
 
+  if (!ready && !success) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -72,7 +107,7 @@ const ResetPasswordPage = () => {
               <>
                 <h2 className="text-2xl font-bold text-foreground">Set a new password</h2>
                 <p className="mt-1 text-sm text-muted-foreground">Enter and confirm your new password below.</p>
-                <div className="mt-6 space-y-4">
+                <form onSubmit={(e) => { e.preventDefault(); handleReset(); }} className="mt-6 space-y-4">
                   <div>
                     <Label htmlFor="new-password">New Password</Label>
                     <Input
@@ -97,11 +132,11 @@ const ResetPasswordPage = () => {
                     />
                     {errors.confirm && <p className="mt-1 text-sm text-destructive">{errors.confirm}</p>}
                   </div>
-                  <Button className="w-full" onClick={handleReset} disabled={loading}>
+                  <Button className="w-full" type="submit" disabled={loading}>
                     {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Update Password
                   </Button>
-                </div>
+                </form>
               </>
             )}
           </div>

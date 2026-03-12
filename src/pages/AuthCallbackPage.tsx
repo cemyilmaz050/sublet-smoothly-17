@@ -12,87 +12,89 @@ const AuthCallbackPage = () => {
   const [resent, setResent] = useState(false);
 
   useEffect(() => {
-    const handleCallback = async () => {
-      // Check for error in URL hash (e.g. expired link)
-      const hash = window.location.hash;
-      const params = new URLSearchParams(hash.replace("#", ""));
-      const errorDescription = params.get("error_description");
-      if (errorDescription) {
-        setError(errorDescription);
-        return;
-      }
+    let mounted = true;
 
-      // Wait for session to be established
-      const timeout = setTimeout(() => {
+    // Check for error in URL hash (e.g. expired link)
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.replace("#", ""));
+    const errorDescription = params.get("error_description");
+    if (errorDescription) {
+      setError(errorDescription);
+      return;
+    }
+
+    // Set a timeout for safety
+    const timeout = setTimeout(() => {
+      if (mounted && !error) {
         setError("Verification failed or link has expired.");
-      }, 5000);
+      }
+    }, 8000);
 
+    const tryRedirect = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      if (!mounted) return;
 
       if (session) {
         clearTimeout(timeout);
-        // Check profile and redirect
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role, onboarding_complete")
-          .eq("id", session.user.id)
-          .single();
-
-        if (!profile) {
-          // Profile will be created by the trigger, wait a moment
-          await new Promise((r) => setTimeout(r, 1000));
-          const { data: retryProfile } = await supabase
-            .from("profiles")
-            .select("role, onboarding_complete")
-            .eq("id", session.user.id)
-            .single();
-          redirectByRole(retryProfile);
-        } else {
-          redirectByRole(profile);
-        }
+        await redirectUser(session.user.id);
         return;
       }
 
       // Listen for auth state change if session not ready yet
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          if (session) {
-            clearTimeout(timeout);
-            subscription.unsubscribe();
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("role, onboarding_complete")
-              .eq("id", session.user.id)
-              .single();
-            redirectByRole(profile);
-          }
+        async (_event, newSession) => {
+          if (!mounted || !newSession) return;
+          clearTimeout(timeout);
+          subscription.unsubscribe();
+          await redirectUser(newSession.user.id);
         }
       );
 
+      // Cleanup subscription on unmount
       return () => {
-        clearTimeout(timeout);
         subscription.unsubscribe();
       };
     };
 
-    handleCallback();
-  }, []);
+    const redirectUser = async (userId: string) => {
+      if (!mounted) return;
+      // Fetch profile with retry for trigger-created profiles
+      let profile = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const { data } = await supabase
+          .from("profiles")
+          .select("role, onboarding_complete")
+          .eq("id", userId)
+          .single();
+        if (data) {
+          profile = data;
+          break;
+        }
+        await new Promise((r) => setTimeout(r, 800));
+      }
+      if (mounted) {
+        navigate("/listings", { replace: true });
+      }
+    };
 
-  const redirectByRole = (_profile: any) => {
-    navigate("/listings", { replace: true });
-  };
+    tryRedirect();
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+    };
+  }, [navigate]);
 
   const handleResend = async () => {
     setResending(true);
-    // Try to get email from URL or prompt
     const email = prompt("Enter your email address to resend the verification link:");
     if (!email) {
       setResending(false);
       return;
     }
-    const { error } = await supabase.auth.resend({ type: "signup", email });
-    if (error) {
-      toast.error(error.message);
+    const { error: resendError } = await supabase.auth.resend({ type: "signup", email });
+    if (resendError) {
+      toast.error(resendError.message);
     } else {
       setResent(true);
       toast.success("Verification email resent! Check your inbox.");
@@ -103,7 +105,7 @@ const AuthCallbackPage = () => {
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="w-full max-w-md text-center space-y-6">
+        <div className="w-full max-w-md text-center space-y-6 px-4">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
             <AlertCircle className="h-8 w-8 text-destructive" />
           </div>
