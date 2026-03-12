@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,6 +13,18 @@ import { toast } from "sonner";
 const PaymentSummaryPage = () => {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Please sign in to proceed with payment.");
+        navigate("/sign-up");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   // Mock data
   const monthlyRent = 2500;
