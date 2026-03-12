@@ -18,6 +18,7 @@ import ListingsMap from "@/components/discover/ListingsMap";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 
 interface ListingItem {
@@ -72,6 +73,7 @@ const mockListings: ListingItem[] = [
 
 const ListingsPage = () => {
   const { user, role } = useAuth();
+  const { requireAuth } = useAuthModal();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
@@ -138,7 +140,7 @@ const ListingsPage = () => {
   const isManagedListing = (listing: ListingItem) => user && listing.manager_id === user.id;
 
   const toggleSave = async (id: string) => {
-    if (!user) { toast.info("Please sign in to save listings."); navigate("/login"); return; }
+    if (!user) { requireAuth(() => toggleSave(id)); return; }
     const isSaved = savedListings.has(id);
     setSavedListings((prev) => {
       const next = new Set(prev);
@@ -175,7 +177,7 @@ const ListingsPage = () => {
   }, [user]);
 
   const handleApply = async (listing: ListingItem) => {
-    if (!user) { toast.info("Please sign in to apply for this property."); navigate("/login"); return; }
+    if (!user) { requireAuth(() => handleApply(listing)); return; }
     if (appliedListings.has(listing.id)) { toast.info("You've already applied to this listing."); return; }
     setApplyingId(listing.id);
     const { error } = await supabase.from("applications").insert({
@@ -202,7 +204,7 @@ const ListingsPage = () => {
   };
 
   const handleContact = async (listing: ListingItem) => {
-    if (!user) { toast.info("Please sign in to contact the tenant."); navigate("/login"); return; }
+    if (!user) { requireAuth(() => handleContact(listing)); return; }
     setContactingId(listing.id);
     // Check if a conversation already exists
     const { data: existing } = await supabase
@@ -480,7 +482,7 @@ const ListingsPage = () => {
                 )}
                 <div className="space-y-3 pt-2">
                   {!isOwnListing(selectedListing) && (
-                    <SecureThisPlace listing={selectedListing} userId={user?.id} />
+                    <SecureThisPlace listing={selectedListing} />
                   )}
                   {!isOwnListing(selectedListing) && (
                     <>
@@ -506,7 +508,10 @@ const ListingsPage = () => {
                           </div>
                         </div>
                       ) : (
-                        <Button variant="outline" className="w-full" size="lg" onClick={() => setShowApplyForm(true)}>
+                        <Button variant="outline" className="w-full" size="lg" onClick={() => {
+                          if (!user) { requireAuth(() => setShowApplyForm(true)); return; }
+                          setShowApplyForm(true);
+                        }}>
                           <Zap className="mr-1 h-4 w-4" /> Apply Now
                         </Button>
                       )}

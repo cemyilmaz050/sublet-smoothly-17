@@ -4,11 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, MessageSquare, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/hooks/useAuthModal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
+  const { requireAuth } = useAuthModal();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
@@ -52,8 +54,8 @@ const UserMenu = () => {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/login")}>Sign In</Button>
-        <Button size="sm" onClick={() => navigate("/signup")}>Get Started</Button>
+        <Button variant="ghost" size="sm" onClick={() => requireAuth()}>Sign In</Button>
+        <Button size="sm" onClick={() => requireAuth()}>Get Started</Button>
       </div>
     );
   }
