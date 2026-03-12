@@ -10,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
+  const { requireAuth } = useAuthModal();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
