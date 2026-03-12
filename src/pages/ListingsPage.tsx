@@ -204,7 +204,7 @@ const ListingsPage = () => {
   };
 
   const handleContact = async (listing: ListingItem) => {
-    if (!user) { toast.info("Please sign in to contact the tenant."); navigate("/login"); return; }
+    if (!user) { requireAuth(() => handleContact(listing)); return; }
     setContactingId(listing.id);
     // Check if a conversation already exists
     const { data: existing } = await supabase
