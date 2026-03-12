@@ -23,19 +23,6 @@ const Navbar = () => {
             <span className="text-xl font-bold text-foreground">SubletSafe</span>
           </Link>
 
-          {/* Center: Listings link */}
-          <div className="hidden md:flex">
-            <Link to="/listings">
-              <Button
-                variant={location.pathname === "/listings" ? "default" : "ghost"}
-                size="sm"
-                className="gap-2"
-              >
-                <Search className="h-4 w-4" />
-                Listings
-              </Button>
-            </Link>
-          </div>
 
           {/* Right: Sublet button + User Menu */}
           <div className="flex items-center gap-3">
