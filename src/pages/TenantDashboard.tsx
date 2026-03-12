@@ -178,7 +178,7 @@ const TenantDashboard = () => {
           ) : (
             /* Listing cards */
             <div className="space-y-4">
-              {listings.map((listing) => (
+              {listings.slice(0, 1).map((listing) => (
                 <div
                   key={listing.id}
                   className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:flex-row"
