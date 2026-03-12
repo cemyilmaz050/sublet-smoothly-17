@@ -60,7 +60,7 @@ interface UploadedFile {
 }
 
 const TenantOnboardingPage = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -199,6 +199,9 @@ const TenantOnboardingPage = () => {
       } catch (emailErr) {
         console.warn("Co-signer email could not be sent:", emailErr);
       }
+
+      // Refresh auth context so route guard allows dashboard access
+      await refreshProfile();
 
       toast.success("Documents submitted successfully! Your documents are under review.");
       navigate("/dashboard/tenant");
