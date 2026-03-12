@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
+import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import CalendarView from "@/components/discover/CalendarView";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
