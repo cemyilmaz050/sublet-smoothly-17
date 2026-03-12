@@ -57,6 +57,7 @@ const SecureThisPlace = ({ listing, userId }: SecureThisPlaceProps) => {
   const [scheduleSent, setScheduleSent] = useState(false);
 
   useEffect(() => {
+    if (!listing.tenant_id) return;
     const fetchProfile = async () => {
       const { data } = await supabase
         .from("profiles")
