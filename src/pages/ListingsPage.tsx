@@ -480,7 +480,7 @@ const ListingsPage = () => {
                 )}
                 <div className="space-y-3 pt-2">
                   {!isOwnListing(selectedListing) && (
-                    <SecureThisPlace listing={selectedListing} userId={user?.id} />
+                    <SecureThisPlace listing={selectedListing} />
                   )}
                   {!isOwnListing(selectedListing) && (
                     <>
