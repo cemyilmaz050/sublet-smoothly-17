@@ -140,14 +140,12 @@ const TenantDashboard = () => {
             <span className="text-xl font-bold text-foreground">SubletSafe</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-primary/40 text-primary hover:bg-primary/5"
+            <button
               onClick={() => navigate("/listings")}
+              className="text-sm font-semibold text-primary transition-colors hover:text-primary/80"
             >
-              🔍 Browse Properties
-            </Button>
+              Browse Properties
+            </button>
             <UserMenu />
           </div>
         </div>
