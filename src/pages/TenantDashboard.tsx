@@ -36,11 +36,13 @@ const statusVariant = (status: string) => {
 };
 
 const TenantDashboard = () => {
-  const { user, documentsStatus } = useAuth();
+  const { user, documentsStatus, onboardingComplete } = useAuth();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const isApproved = documentsStatus === "approved";
+  const isPendingReview = documentsStatus === "pending_review";
+  const needsOnboarding = !onboardingComplete;
 
   useEffect(() => {
     if (!user) return;
