@@ -60,7 +60,7 @@ interface UploadedFile {
 }
 
 const TenantOnboardingPage = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
