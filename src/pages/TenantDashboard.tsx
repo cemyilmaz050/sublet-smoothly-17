@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import DashboardMessages from "@/components/tenant/DashboardMessages";
 import UserMenu from "@/components/UserMenu";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
+import ProfileCompleteness from "@/components/ProfileCompleteness";
+import TenantIdVerification from "@/components/TenantIdVerification";
 
 interface Listing {
   id: string;
