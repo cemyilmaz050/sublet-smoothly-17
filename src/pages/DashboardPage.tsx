@@ -15,7 +15,7 @@ const DashboardPage = () => {
 
   // Default to listings, but also support direct role dashboards
   if (role === "subtenant") return <Navigate to="/dashboard/subtenant" replace />;
-  if (role === "manager") return <Navigate to="/dashboard/manager" replace />;
+  if (role === "manager") return <Navigate to="/manager" replace />;
   return <Navigate to="/tenant/dashboard" replace />;
 };
 
