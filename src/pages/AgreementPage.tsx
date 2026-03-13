@@ -162,7 +162,6 @@ const AgreementPage = () => {
   if (!agreement) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="flex flex-col items-center justify-center py-32 text-center px-4">
           <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
           <h1 className="text-xl font-bold text-foreground">Agreement Not Found</h1>
