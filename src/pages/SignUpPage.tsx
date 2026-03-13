@@ -249,7 +249,7 @@ const SignUpPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container flex items-center justify-center px-4 py-10 sm:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

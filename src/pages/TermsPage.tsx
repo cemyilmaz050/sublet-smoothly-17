@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 const TermsPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      
       <div className="flex-1 container max-w-3xl px-4 py-10 sm:py-16">
         <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Terms of Service</h1>
         <p className="text-sm text-muted-foreground mb-8">Last updated: March 13, 2026</p>

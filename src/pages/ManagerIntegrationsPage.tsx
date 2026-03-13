@@ -147,7 +147,7 @@ const ManagerIntegrationsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-2xl py-8">
         <Button variant="ghost" className="mb-4" asChild>
           <a href="/dashboard/manager">

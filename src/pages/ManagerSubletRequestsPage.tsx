@@ -31,7 +31,7 @@ import {
   FileText, CheckCircle2, Clock, XCircle, Eye, MessageSquare,
   Search, ArrowLeft, User, Calendar, AlertTriangle, Send
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";

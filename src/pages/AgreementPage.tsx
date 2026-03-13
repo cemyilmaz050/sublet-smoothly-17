@@ -186,7 +186,7 @@ const AgreementPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      
       <div className="flex-1 container max-w-2xl px-4 py-8 sm:py-12">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">

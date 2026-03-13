@@ -67,7 +67,7 @@ const ManagerProfilePage = () => {
 
   return (
     <>
-      <Navbar />
+      
       <div className="min-h-screen bg-background">
         {/* Cover photo */}
         <div className="relative h-48 sm:h-64 bg-gradient-to-br from-primary/20 via-accent to-primary/10 overflow-hidden">
