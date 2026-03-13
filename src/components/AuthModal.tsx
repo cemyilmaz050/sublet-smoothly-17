@@ -162,6 +162,25 @@ const AuthModal = () => {
     setForgotLoading(false);
   };
 
+  const handleResendVerification = async () => {
+    if (resendCooldown > 0 || resending) return;
+    setResending(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email: signupEmail });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Verification email resent! Check your inbox.");
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(interval); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    setResending(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
