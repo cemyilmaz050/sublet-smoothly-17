@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import useHasPublishedListing from "@/hooks/useHasPublishedListing";
 import UserMenu from "@/components/UserMenu";
+import NotificationBell from "@/components/NotificationBell";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import logo from "@/assets/subin-logo.png";
 
