@@ -430,6 +430,11 @@ const ListingsPage = () => {
                         </div>
                         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" />{listing.address || "Unknown"}</p>
                         <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{formatDates(listing.available_from, listing.available_until)}</p>
+                        {(listing.avg_rating ?? 0) > 0 && (
+                          <div className="mt-1.5">
+                            <StarRating rating={listing.avg_rating || 0} size="sm" showCount count={listing.review_count} />
+                          </div>
+                        )}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         {role === "subtenant" && (
