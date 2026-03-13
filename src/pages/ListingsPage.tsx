@@ -533,6 +533,9 @@ const ListingsPage = () => {
                     <p className="text-sm text-muted-foreground leading-relaxed">{selectedListing.description}</p>
                   </div>
                 )}
+                {/* Reviews */}
+                <ReviewSection listingId={selectedListing.id} tenantId={selectedListing.tenant_id} />
+
                 <div className="space-y-3 pt-2">
                   {!isOwnListing(selectedListing) && (
                     <SecureThisPlace listing={selectedListing} />
