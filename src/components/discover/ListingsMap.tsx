@@ -141,7 +141,7 @@ function createClusterIcon(count: number, animDelay: number = 0) {
     html: `<div style="${CLUSTER_STYLE} ${delayStyle}"
       onmouseenter="this.style.background='#4845D2';this.style.color='#ffffff';this.style.transform='translate(-50%,-100%) scale(1.08)';"
       onmouseleave="this.style.background='#ffffff';this.style.color='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';"
-    >${count} listings</div>`,
+    >${count}</div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
   });
