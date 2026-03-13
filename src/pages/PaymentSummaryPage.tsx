@@ -5,6 +5,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ShieldCheck, Loader2, Lock, CreditCard } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import CancellationPolicy from "@/components/CancellationPolicy";
 import PlatformFeeTooltip, { PLATFORM_FEE_PERCENT } from "@/components/PlatformFeeTooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -76,6 +78,11 @@ const PaymentSummaryPage = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Cancellation policy */}
+          <div className="mb-5 sm:mb-6">
+            <CancellationPolicy />
+          </div>
 
           {/* Security badge */}
           <div className="mb-5 sm:mb-6 rounded-lg border bg-accent/30 p-3 sm:p-4 text-sm text-muted-foreground">

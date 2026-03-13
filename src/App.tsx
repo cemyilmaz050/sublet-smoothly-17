@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AuthModalProvider } from "@/hooks/useAuthModal";
 import AuthModal from "@/components/AuthModal";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import ListingsPage from "./pages/ListingsPage";
@@ -21,6 +22,8 @@ import ManagerProfilePage from "./pages/ManagerProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 import CreateListingPage from "./pages/CreateListingPage";
 import ReferPage from "./pages/ReferPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import NotFound from "./pages/NotFound";
 
 // Manager layout + pages
@@ -42,6 +45,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ErrorBoundary>
         <AuthProvider>
           <AuthModalProvider>
             <AuthModal />
@@ -54,6 +58,8 @@ const App = () => (
               <Route path="/sign-up" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/managers/:slug" element={<ManagerProfilePage />} />
               <Route path="/refer" element={<ReferPage />} />
@@ -88,6 +94,7 @@ const App = () => (
             </Routes>
           </AuthModalProvider>
         </AuthProvider>
+        </ErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

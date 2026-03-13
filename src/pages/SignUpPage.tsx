@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Home, Search, Mail, ArrowRight, Loader2, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +18,7 @@ interface FormErrors {
   lastName?: string;
   email?: string;
   password?: string;
+  terms?: string;
 }
 
 const SignUpPage = () => {
@@ -38,6 +41,7 @@ const SignUpPage = () => {
   const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   if (isReady && user) {
     return <Navigate to="/listings" replace />;
@@ -71,6 +75,9 @@ const SignUpPage = () => {
       newErrors.password = "Password is required";
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
+    }
+    if (!agreedToTerms) {
+      newErrors.terms = "You must agree to the Terms of Service and Privacy Policy";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -363,6 +370,24 @@ const SignUpPage = () => {
                     <p className="mt-1 text-xs text-muted-foreground">Must be at least 6 characters</p>
                   )}
                 </div>
+                {/* Terms checkbox */}
+                <div className="space-y-1">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="signup-terms"
+                      checked={agreedToTerms}
+                      onCheckedChange={(v) => { setAgreedToTerms(v === true); setErrors((p) => ({ ...p, terms: undefined })); }}
+                      className="mt-0.5 h-4 w-4 shrink-0"
+                    />
+                    <label htmlFor="signup-terms" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">
+                      I agree to the{" "}
+                      <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</Link>
+                      {" "}and{" "}
+                      <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</Link>
+                    </label>
+                  </div>
+                  {errors.terms && <p className="ml-7 text-sm text-destructive">{errors.terms}</p>}
+                </div>
                 {submitError && (
                   <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                     {submitError}
@@ -404,6 +429,7 @@ const SignUpPage = () => {
           )}
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };

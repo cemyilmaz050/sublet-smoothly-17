@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
+import CancellationPolicy from "@/components/CancellationPolicy";
 
 interface SecureThisPlaceProps {
   listing: {
@@ -268,6 +269,9 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
                 <span className="text-lg font-bold text-primary">${totalDue.toLocaleString()}</span>
               </div>
             </div>
+
+            {/* Cancellation policy */}
+            <CancellationPolicy compact />
 
             {/* Trust & security */}
             <div className="flex items-start gap-2 rounded-lg bg-emerald/10 p-3">

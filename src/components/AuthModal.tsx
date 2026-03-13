@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building2, Mail, ArrowRight, Loader2, Home, Search, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +11,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" className="h-5 w-5 mr-2" aria-hidden="true">
@@ -45,6 +47,7 @@ const AuthModal = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Forgot password
   const [forgotMode, setForgotMode] = useState(false);
@@ -71,6 +74,7 @@ const AuthModal = () => {
     setSelectedRole(null); setFirstName(""); setLastName("");
     setSignupEmail(""); setSignupPassword("");
     setSignupErrors({}); setEmailSent(false); setResendCooldown(0); setShowSignupPassword(false);
+    setAgreedToTerms(false);
     setForgotMode(false); setForgotEmail(""); setForgotSent(false); setForgotError(null);
     setTab("login");
   };
@@ -138,6 +142,7 @@ const AuthModal = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupEmail)) errs.email = "Please enter a valid email";
     if (!signupPassword) errs.password = "Password is required";
     else if (signupPassword.length < 6) errs.password = "Must be at least 6 characters";
+    if (!agreedToTerms) errs.terms = "You must agree to the Terms and Privacy Policy";
     setSignupErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
@@ -465,6 +470,25 @@ const AuthModal = () => {
                     ) : (
                       <p className="mt-1 text-xs text-muted-foreground">Must be at least 6 characters</p>
                     )}
+                  </div>
+
+                  {/* Terms checkbox */}
+                  <div className="space-y-1">
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id="modal-signup-terms"
+                        checked={agreedToTerms}
+                        onCheckedChange={(v) => { setAgreedToTerms(v === true); setSignupErrors((p) => ({ ...p, terms: "" })); }}
+                        className="mt-0.5 h-4 w-4 shrink-0"
+                      />
+                      <label htmlFor="modal-signup-terms" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">
+                        I agree to the{" "}
+                        <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</Link>
+                        {" "}and{" "}
+                        <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</Link>
+                      </label>
+                    </div>
+                    {signupErrors.terms && <p className="ml-7 text-sm text-destructive">{signupErrors.terms}</p>}
                   </div>
 
                   <Button className="w-full h-12" size="lg" onClick={handleSignUp} disabled={signupLoading}>
