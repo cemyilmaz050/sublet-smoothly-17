@@ -501,8 +501,14 @@ const ListingsPage = () => {
                   ) : (
                     <Badge variant="approved"><ShieldCheck className="mr-1 h-3 w-3" />Manager Approved</Badge>
                   )}
+                  <VerifiedBadge verified={selectedListing.tenant_verified || false} />
                   {isOwnListing(selectedListing) && role === "tenant" && <Badge className="bg-primary text-primary-foreground">This is your listing</Badge>}
                   {isManagedListing(selectedListing) && role === "manager" && <Badge className="bg-accent text-accent-foreground">Managed by you</Badge>}
+                  {(selectedListing.avg_rating ?? 0) > 0 && (
+                    <div className="ml-auto">
+                      <StarRating rating={selectedListing.avg_rating || 0} size="md" showCount count={selectedListing.review_count} />
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
