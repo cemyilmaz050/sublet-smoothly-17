@@ -270,6 +270,9 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
               </div>
             </div>
 
+            {/* Cancellation policy */}
+            <CancellationPolicy compact />
+
             {/* Trust & security */}
             <div className="flex items-start gap-2 rounded-lg bg-emerald/10 p-3">
               <ShieldCheck className="h-4 w-4 text-emerald shrink-0 mt-0.5" />

@@ -79,6 +79,11 @@ const PaymentSummaryPage = () => {
             </CardContent>
           </Card>
 
+          {/* Cancellation policy */}
+          <div className="mb-5 sm:mb-6">
+            <CancellationPolicy />
+          </div>
+
           {/* Security badge */}
           <div className="mb-5 sm:mb-6 rounded-lg border bg-accent/30 p-3 sm:p-4 text-sm text-muted-foreground">
             <ShieldCheck className="mb-1 inline h-4 w-4 text-primary" /> You'll be redirected to Stripe's secure checkout. Your card information is never stored on our servers.
