@@ -331,6 +331,7 @@ const ListingsPage = () => {
                 </span>
               )}
             </p>
+            <div className="space-y-4">
               {filtered.map((listing, index) => (
                 <motion.div
                   key={listing.id}
@@ -392,10 +393,9 @@ const ListingsPage = () => {
                   </div>
                 </motion.div>
               ))}
-              {filtered.length === 0 && !loading && (
-                <div className="py-16 text-center text-muted-foreground">No listings found matching your search.</div>
-              )}
             </div>
+              </>
+            )}
           </div>
         </div>
 
