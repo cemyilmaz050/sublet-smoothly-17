@@ -407,6 +407,9 @@ const ListingsPage = () => {
                         ) : (
                           <Badge variant="approved" className="text-xs shadow-sm"><ShieldCheck className="mr-1 h-3 w-3" />Approved</Badge>
                         )}
+                        {listing.tenant_verified && (
+                          <Badge className="bg-emerald text-emerald-foreground text-xs shadow-sm"><ShieldCheck className="mr-1 h-3 w-3" />Verified Tenant</Badge>
+                        )}
                       </div>
                       {isOwnListing(listing) && role === "tenant" && (
                         <div className="absolute right-2 top-2"><Badge className="bg-primary text-primary-foreground text-xs">Your listing</Badge></div>
