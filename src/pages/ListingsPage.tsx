@@ -106,7 +106,7 @@ const ListingsPage = () => {
         const { data: profiles } = await supabase
           .from("profiles")
           .select("id, id_verified")
-          .in("id", tenantIds);
+          .in("id", tenantIds) as any;
         const verifiedMap = new Map((profiles || []).map((p: any) => [p.id, p.id_verified]));
 
         // Fetch avg ratings per listing
