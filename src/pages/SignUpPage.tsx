@@ -41,6 +41,7 @@ const SignUpPage = () => {
   const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   if (isReady && user) {
     return <Navigate to="/listings" replace />;
