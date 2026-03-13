@@ -40,6 +40,9 @@ interface ListingItem {
   tenant_id: string;
   manager_id: string | null;
   property_type?: string | null;
+  tenant_verified?: boolean;
+  avg_rating?: number;
+  review_count?: number;
 }
 
 const mockListings: ListingItem[] = [
