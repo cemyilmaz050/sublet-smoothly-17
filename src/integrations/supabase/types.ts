@@ -603,10 +603,14 @@ export type Database = {
       profiles: {
         Row: {
           active_mode: string
+          avatar_url: string | null
+          bio: string | null
           created_at: string
           documents_status: string
           first_name: string | null
           id: string
+          id_document_url: string | null
+          id_verified: boolean
           last_name: string | null
           onboarding_complete: boolean
           phone: string | null
@@ -615,10 +619,14 @@ export type Database = {
         }
         Insert: {
           active_mode?: string
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           documents_status?: string
           first_name?: string | null
           id: string
+          id_document_url?: string | null
+          id_verified?: boolean
           last_name?: string | null
           onboarding_complete?: boolean
           phone?: string | null
@@ -627,10 +635,14 @@ export type Database = {
         }
         Update: {
           active_mode?: string
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           documents_status?: string
           first_name?: string | null
           id?: string
+          id_document_url?: string | null
+          id_verified?: boolean
           last_name?: string | null
           onboarding_complete?: boolean
           phone?: string | null
@@ -736,6 +748,57 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "sublet_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          booking_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          reviewer_role: string
+        }
+        Insert: {
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          reviewer_role?: string
+        }
+        Update: {
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          rating?: number
+          reviewee_id?: string
+          reviewer_id?: string
+          reviewer_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
             referencedColumns: ["id"]
           },
         ]
