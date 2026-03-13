@@ -54,15 +54,15 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg w-full">
         <div className="flex h-16 items-center justify-between px-6 w-full">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center rounded-lg px-2 py-1.5 transition-all duration-150 ease-in-out hover:bg-[#F3F4F6]">
               <img src={logo} alt="SubIn" className="h-8" />
             </Link>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
             <button
               onClick={navAction.onClick}
-              className="hidden text-sm font-semibold text-primary transition-colors hover:text-primary/80 sm:block"
+              className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] hover:text-foreground sm:block"
             >
               {navAction.label}
             </button>
