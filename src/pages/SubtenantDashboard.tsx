@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Search, MapPin, Calendar, ShieldCheck, Clock, MessageSquare } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import ProfileCompleteness from "@/components/ProfileCompleteness";
 import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
