@@ -61,6 +61,14 @@ const TenantDashboard = () => {
       .order("created_at", { ascending: false });
     setListings((listingsData as Listing[]) || []);
 
+    // Check ID verification
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("id_verified")
+      .eq("id", user.id)
+      .single() as any;
+    setIdVerified(profileData?.id_verified || false);
+
     const { data: convos } = await supabase
       .from("conversations")
       .select("*")
