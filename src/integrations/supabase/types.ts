@@ -102,6 +102,68 @@ export type Database = {
           },
         ]
       }
+      bookings: {
+        Row: {
+          created_at: string
+          deposit_amount: number
+          id: string
+          listing_id: string
+          platform_fee: number
+          refund_eligible_until: string | null
+          refund_reason: string | null
+          refunded_at: string | null
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
+          subtenant_id: string
+          tenant_id: string
+          total_paid: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deposit_amount: number
+          id?: string
+          listing_id: string
+          platform_fee: number
+          refund_eligible_until?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtenant_id: string
+          tenant_id: string
+          total_paid: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deposit_amount?: number
+          id?: string
+          listing_id?: string
+          platform_fee?: number
+          refund_eligible_until?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtenant_id?: string
+          tenant_id?: string
+          total_paid?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_properties: {
         Row: {
           address: string
@@ -700,6 +762,84 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "saved_listings_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sublet_agreements: {
+        Row: {
+          booking_id: string
+          created_at: string
+          deposit_amount: number
+          end_date: string
+          id: string
+          listing_id: string
+          monthly_rent: number
+          property_address: string
+          start_date: string
+          status: string
+          subtenant_id: string
+          subtenant_name: string
+          subtenant_signed_at: string | null
+          tenant_id: string
+          tenant_name: string
+          tenant_signed_at: string | null
+          unit_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          deposit_amount: number
+          end_date: string
+          id?: string
+          listing_id: string
+          monthly_rent: number
+          property_address: string
+          start_date: string
+          status?: string
+          subtenant_id: string
+          subtenant_name: string
+          subtenant_signed_at?: string | null
+          tenant_id: string
+          tenant_name: string
+          tenant_signed_at?: string | null
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          deposit_amount?: number
+          end_date?: string
+          id?: string
+          listing_id?: string
+          monthly_rent?: number
+          property_address?: string
+          start_date?: string
+          status?: string
+          subtenant_id?: string
+          subtenant_name?: string
+          subtenant_signed_at?: string | null
+          tenant_id?: string
+          tenant_name?: string
+          tenant_signed_at?: string | null
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sublet_agreements_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sublet_agreements_listing_id_fkey"
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
