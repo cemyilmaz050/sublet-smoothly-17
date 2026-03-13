@@ -78,6 +78,7 @@ const App = () => (
               <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
               <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
               <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
               {/* Manager Dashboard — unified layout */}
               <Route path="/manager" element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>
