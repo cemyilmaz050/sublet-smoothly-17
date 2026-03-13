@@ -142,6 +142,7 @@ const AuthModal = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupEmail)) errs.email = "Please enter a valid email";
     if (!signupPassword) errs.password = "Password is required";
     else if (signupPassword.length < 6) errs.password = "Must be at least 6 characters";
+    if (!agreedToTerms) errs.terms = "You must agree to the Terms and Privacy Policy";
     setSignupErrors(errs);
     if (Object.keys(errs).length > 0) return;
 
