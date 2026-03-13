@@ -117,17 +117,18 @@ const ListingsPage = () => {
           .select("listing_id, rating")
           .in("listing_id", listingIds) as any;
 
-        const ratingMap = new Map<string, { sum: number; count: number }>();
+        const ratingMap: Record<string, { sum: number; count: number }> = {};
         (reviews || []).forEach((r: any) => {
-          const existing = ratingMap.get(r.listing_id) || { sum: 0, count: 0 };
-          ratingMap.set(r.listing_id, { sum: existing.sum + r.rating, count: existing.count + 1 });
+          if (!ratingMap[r.listing_id]) ratingMap[r.listing_id] = { sum: 0, count: 0 };
+          ratingMap[r.listing_id].sum += r.rating;
+          ratingMap[r.listing_id].count += 1;
         });
 
         const enriched = data.map((l: any) => ({
           ...l,
-          tenant_verified: verifiedMap.get(l.tenant_id) || false,
-          avg_rating: ratingMap.has(l.id) ? ratingMap.get(l.id)!.sum / ratingMap.get(l.id)!.count : 0,
-          review_count: ratingMap.get(l.id)?.count || 0,
+          tenant_verified: verifiedMap[l.tenant_id] || false,
+          avg_rating: ratingMap[l.id] ? ratingMap[l.id].sum / ratingMap[l.id].count : 0,
+          review_count: ratingMap[l.id]?.count || 0,
         }));
 
         setDbListings(enriched as ListingItem[]);
