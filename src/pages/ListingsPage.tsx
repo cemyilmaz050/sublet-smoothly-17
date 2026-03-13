@@ -166,6 +166,15 @@ const ListingsPage = () => {
       if (priceFilter === "1500-2500" && (rent < 1500 || rent > 2500)) return false;
       if (priceFilter === "2500+" && rent < 2500) return false;
     }
+    // Date range filter
+    if (moveInDate || moveOutDate) {
+      const from = l.available_from ? new Date(l.available_from) : null;
+      const until = l.available_until ? new Date(l.available_until) : null;
+      if (moveInDate && from && from > moveInDate) return false;
+      if (moveInDate && until && until < moveInDate) return false;
+      if (moveOutDate && until && until < moveOutDate) return false;
+      if (moveOutDate && from && from > moveOutDate) return false;
+    }
     // Calendar date filter
     if (calendarSelectedDate && viewMode === "calendar") {
       const date = new Date(calendarSelectedDate);
