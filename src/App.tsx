@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AuthModalProvider } from "@/hooks/useAuthModal";
 import AuthModal from "@/components/AuthModal";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import LandingPage from "./pages/LandingPage";
 import ListingsPage from "./pages/ListingsPage";
@@ -21,6 +22,8 @@ import ManagerProfilePage from "./pages/ManagerProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 import CreateListingPage from "./pages/CreateListingPage";
 import ReferPage from "./pages/ReferPage";
+import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import NotFound from "./pages/NotFound";
 
 // Manager layout + pages
