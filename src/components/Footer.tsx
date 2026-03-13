@@ -9,15 +9,15 @@ const Footer = () => {
         <div className="flex items-center gap-0 text-[13px] text-muted-foreground">
           <span>© 2026 SubIn</span>
           <span className="mx-2">·</span>
-          <Link to="/privacy" className="hover:text-foreground transition-colors hover:underline">
+          <Link to="/privacy" className="rounded px-1.5 py-0.5 transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] hover:text-foreground">
             Privacy
           </Link>
           <span className="mx-2">·</span>
-          <Link to="/terms" className="hover:text-foreground transition-colors hover:underline">
+          <Link to="/terms" className="rounded px-1.5 py-0.5 transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] hover:text-foreground">
             Terms
           </Link>
           <span className="mx-2">·</span>
-          <button className="hover:text-foreground transition-colors hover:underline">
+          <button className="rounded px-1.5 py-0.5 transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] hover:text-foreground">
             Your Privacy Choices
           </button>
         </div>
