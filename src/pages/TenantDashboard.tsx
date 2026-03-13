@@ -181,6 +181,12 @@ const TenantDashboard = () => {
 
       {/* Main content */}
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 space-y-8">
+        {/* Profile Completeness */}
+        <ProfileCompleteness />
+
+        {/* ID Verification */}
+        <TenantIdVerification idVerified={idVerified} onVerified={() => setIdVerified(true)} />
+
         {/* SECTION 1: My Listing */}
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">My Listing</h2>
