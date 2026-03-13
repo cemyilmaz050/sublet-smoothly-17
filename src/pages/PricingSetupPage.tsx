@@ -32,7 +32,7 @@ const PricingSetupPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-2xl py-8">
         <h1 className="mb-1 text-3xl font-bold text-foreground">Pricing & Payments</h1>
         <p className="mb-8 text-muted-foreground">Set your rent, deposit, and payout preferences</p>
