@@ -8,6 +8,7 @@ import { AuthModalProvider } from "@/hooks/useAuthModal";
 import AuthModal from "@/components/AuthModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Footer from "@/components/Footer";
 import LandingPage from "./pages/LandingPage";
 import ListingsPage from "./pages/ListingsPage";
 import SignUpPage from "./pages/SignUpPage";
