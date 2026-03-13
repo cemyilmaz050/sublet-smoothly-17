@@ -53,7 +53,7 @@ const LoginPage = () => {
       }
       if (data.session) {
         toast.success("Logged in successfully!");
-        navigate("/listings", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     } catch (err: any) {
       toast.error(err.message || "An unexpected error occurred");
