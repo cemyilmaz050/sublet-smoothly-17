@@ -43,7 +43,7 @@ const UserMenu = () => {
         <HelpCircle className="h-4 w-4 text-muted-foreground" /> Help Center
       </button>
       <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); }} className={menuItemClass}>
+      <button onClick={() => { setOpen(false); navigate("/refer"); }} className={menuItemClass}>
         <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
       </button>
       <div className="mx-4 border-t" />
