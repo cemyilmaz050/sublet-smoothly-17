@@ -116,7 +116,7 @@ const OnboardingDocumentsTab = () => {
       if (tenantIds.length === 0) return [];
 
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("id, first_name, last_name, documents_status")
         .in("id", tenantIds) as any;
 

@@ -65,7 +65,7 @@ const AdminDashboard = () => {
       { data: profilesForSignups },
       { data: listingsForDaily },
     ] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("profiles_public" as any).select("id", { count: "exact", head: true }) as any,
       supabase.from("listings").select("id", { count: "exact", head: true }),
       supabase.from("listings").select("id", { count: "exact", head: true }).eq("status", "active"),
       supabase.from("bookings").select("id", { count: "exact", head: true }),
@@ -73,9 +73,9 @@ const AdminDashboard = () => {
       supabase.from("applications").select("id", { count: "exact", head: true }),
       supabase.from("applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
       supabase.from("profiles").select("id", { count: "exact", head: true }).eq("id_verified", true),
-      supabase.from("profiles").select("id, first_name, last_name, role, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("profiles_public" as any).select("id, first_name, last_name, role, created_at").order("created_at", { ascending: false }).limit(10) as any,
       supabase.from("bookings").select("id, total_paid, platform_fee, status, created_at").order("created_at", { ascending: false }).limit(10),
-      supabase.from("profiles").select("created_at").gte("created_at", subDays(new Date(), 30).toISOString()).order("created_at", { ascending: true }),
+      supabase.from("profiles_public" as any).select("created_at").gte("created_at", subDays(new Date(), 30).toISOString()).order("created_at", { ascending: true }) as any,
       supabase.from("listings").select("created_at").gte("created_at", subDays(new Date(), 30).toISOString()).order("created_at", { ascending: true }),
     ]);
 

@@ -36,9 +36,9 @@ const ManagerListings = () => {
       // Fetch tenant names
       const tenantIds = [...new Set(data.map(l => l.tenant_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("id, first_name, last_name")
-        .in("id", tenantIds);
+        .in("id", tenantIds) as { data: { id: string; first_name: string | null; last_name: string | null }[] | null };
       const pm = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
       return data.map(l => ({

@@ -34,8 +34,8 @@ const ManagerBackgroundChecks = () => {
 
       // Get profiles
       const applicantIds = [...new Set(apps.map(a => a.applicant_id))];
-      const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name").in("id", applicantIds);
-      const pm = Object.fromEntries((profiles || []).map(p => [p.id, p]));
+      const { data: profiles } = await supabase.from("profiles_public" as any).select("id, first_name, last_name").in("id", applicantIds) as { data: { id: string; first_name: string | null; last_name: string | null }[] | null };
+      const pm = Object.fromEntries((profiles || []).map((p: any) => [p.id, p]));
       const appMap = Object.fromEntries(apps.map(a => [a.id, a]));
       const lm = Object.fromEntries(listings.map(l => [l.id, l]));
 
