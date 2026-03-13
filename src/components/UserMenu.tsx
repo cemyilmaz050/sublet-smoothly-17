@@ -59,20 +59,20 @@ const UserMenu = () => {
 
   const authedMenuItems = (
     <div className="flex flex-col py-1">
-      <button onClick={() => { setOpen(false); }} className={menuItemClass}>
-        <HelpCircle className="h-4 w-4 text-muted-foreground" /> Help Center
-      </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); navigate("/refer"); }} className={menuItemClass}>
-        <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
+      <button onClick={() => handleNav("/dashboard")} className={menuItemClass}>
+        <User className="h-4 w-4 text-muted-foreground" /> My Dashboard
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => handleNav("/messages")} className={menuItemClass}>
         <MessageSquare className="h-4 w-4 text-muted-foreground" /> Messages
       </button>
       <div className="mx-4 border-t" />
-      <button onClick={() => handleNav("/manager")} className={menuItemClass}>
-        <User className="h-4 w-4 text-muted-foreground" /> Are you a Property Manager?
+      <button onClick={() => { setOpen(false); navigate("/refer"); }} className={menuItemClass}>
+        <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
+      </button>
+      <div className="mx-4 border-t" />
+      <button onClick={() => { setOpen(false); }} className={menuItemClass}>
+        <HelpCircle className="h-4 w-4 text-muted-foreground" /> Help Center
       </button>
       <div className="mx-4 border-t" />
       <button onClick={handleSignOut} className="flex items-center gap-2.5 px-4 py-3 text-sm text-destructive transition-colors hover:bg-destructive/10 w-full text-left">

@@ -112,7 +112,7 @@ const ListingsPage = () => {
 
   const filtered = allListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    if (priceFilter) {
+    if (priceFilter && priceFilter !== "all") {
       const rent = l.monthly_rent ?? 0;
       if (priceFilter === "0-1500" && rent > 1500) return false;
       if (priceFilter === "1500-2500" && (rent < 1500 || rent > 2500)) return false;

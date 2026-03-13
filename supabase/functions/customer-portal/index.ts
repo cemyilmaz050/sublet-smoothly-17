@@ -39,7 +39,7 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
-    const origin = req.headers.get("origin") || "https://sublet-smoothly-17.lovable.app";
+    const origin = req.headers.get("origin") || "https://subin.com";
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerId,
