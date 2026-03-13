@@ -76,6 +76,9 @@ const SignUpPage = () => {
     } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
+    if (!agreedToTerms) {
+      newErrors.terms = "You must agree to the Terms of Service and Privacy Policy";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
