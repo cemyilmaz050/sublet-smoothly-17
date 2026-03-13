@@ -20,6 +20,7 @@ import AuthCallbackPage from "./pages/AuthCallbackPage";
 import ManagerProfilePage from "./pages/ManagerProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 import CreateListingPage from "./pages/CreateListingPage";
+import ReferPage from "./pages/ReferPage";
 import NotFound from "./pages/NotFound";
 
 // Manager layout + pages
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/managers/:slug" element={<ManagerProfilePage />} />
+              <Route path="/refer" element={<ReferPage />} />
 
               {/* Protected routes */}
               <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
