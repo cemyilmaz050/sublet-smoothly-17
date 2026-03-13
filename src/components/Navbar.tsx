@@ -52,6 +52,7 @@ const Navbar = () => {
             >
               {user && hasListing ? "Go to Your Listings" : "Sublet Your Apartment"}
             </button>
+            <NotificationBell />
             <UserMenu />
           </div>
         </div>
