@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
+import CancellationPolicy from "@/components/CancellationPolicy";
 
 interface SecureThisPlaceProps {
   listing: {
