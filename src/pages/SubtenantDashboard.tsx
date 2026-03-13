@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Search, MapPin, Calendar, ShieldCheck, Clock, MessageSquare } from "lucide-react";
 import Navbar from "@/components/Navbar";
+import ProfileCompleteness from "@/components/ProfileCompleteness";
 import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -78,8 +79,11 @@ const SubtenantDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container max-w-4xl py-8">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="container max-w-4xl py-8 space-y-6">
+        {/* Profile Completeness */}
+        <ProfileCompleteness />
+
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Subtenant Dashboard</h1>
             <p className="mt-1 text-muted-foreground">Track your applications and find your next home</p>

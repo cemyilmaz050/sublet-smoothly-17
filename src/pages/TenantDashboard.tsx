@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import DashboardMessages from "@/components/tenant/DashboardMessages";
 import UserMenu from "@/components/UserMenu";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
+import ProfileCompleteness from "@/components/ProfileCompleteness";
+import TenantIdVerification from "@/components/TenantIdVerification";
 
 interface Listing {
   id: string;
@@ -47,6 +49,7 @@ const TenantDashboard = () => {
   const [showSublet, setShowSublet] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [idVerified, setIdVerified] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -57,6 +60,14 @@ const TenantDashboard = () => {
       .eq("tenant_id", user.id)
       .order("created_at", { ascending: false });
     setListings((listingsData as Listing[]) || []);
+
+    // Check ID verification
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("id_verified")
+      .eq("id", user.id)
+      .single() as any;
+    setIdVerified(profileData?.id_verified || false);
 
     const { data: convos } = await supabase
       .from("conversations")
@@ -170,6 +181,12 @@ const TenantDashboard = () => {
 
       {/* Main content */}
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 space-y-8">
+        {/* Profile Completeness */}
+        <ProfileCompleteness />
+
+        {/* ID Verification */}
+        <TenantIdVerification idVerified={idVerified} onVerified={() => setIdVerified(true)} />
+
         {/* SECTION 1: My Listing */}
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">My Listing</h2>

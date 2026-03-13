@@ -13,6 +13,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
+import ReviewSection from "@/components/ReviewSection";
+import VerifiedBadge from "@/components/VerifiedBadge";
+import StarRating from "@/components/StarRating";
 import CalendarView from "@/components/discover/CalendarView";
 import ListingsMap from "@/components/discover/ListingsMap";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +40,9 @@ interface ListingItem {
   tenant_id: string;
   manager_id: string | null;
   property_type?: string | null;
+  tenant_verified?: boolean;
+  avg_rating?: number;
+  review_count?: number;
 }
 
 const mockListings: ListingItem[] = [
@@ -93,7 +99,42 @@ const ListingsPage = () => {
         .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, property_type")
         .eq("status", "active")
         .order("created_at", { ascending: false });
-      setDbListings((data as ListingItem[]) || []);
+
+      if (data && data.length > 0) {
+        // Fetch tenant verification status
+        const tenantIds = [...new Set(data.map((l: any) => l.tenant_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, id_verified")
+          .in("id", tenantIds) as any;
+        const verifiedMap: Record<string, boolean> = {};
+        (profiles || []).forEach((p: any) => { verifiedMap[p.id] = p.id_verified; });
+
+        // Fetch avg ratings per listing
+        const listingIds = data.map((l: any) => l.id);
+        const { data: reviews } = await supabase
+          .from("reviews")
+          .select("listing_id, rating")
+          .in("listing_id", listingIds) as any;
+
+        const ratingMap: Record<string, { sum: number; count: number }> = {};
+        (reviews || []).forEach((r: any) => {
+          if (!ratingMap[r.listing_id]) ratingMap[r.listing_id] = { sum: 0, count: 0 };
+          ratingMap[r.listing_id].sum += r.rating;
+          ratingMap[r.listing_id].count += 1;
+        });
+
+        const enriched = data.map((l: any) => ({
+          ...l,
+          tenant_verified: verifiedMap[l.tenant_id] || false,
+          avg_rating: ratingMap[l.id] ? ratingMap[l.id].sum / ratingMap[l.id].count : 0,
+          review_count: ratingMap[l.id]?.count || 0,
+        }));
+
+        setDbListings(enriched as ListingItem[]);
+      } else {
+        setDbListings([]);
+      }
       setLoading(false);
     };
     fetchListings();
@@ -368,6 +409,9 @@ const ListingsPage = () => {
                         ) : (
                           <Badge variant="approved" className="text-xs shadow-sm"><ShieldCheck className="mr-1 h-3 w-3" />Approved</Badge>
                         )}
+                        {listing.tenant_verified && (
+                          <Badge className="bg-emerald text-emerald-foreground text-xs shadow-sm"><ShieldCheck className="mr-1 h-3 w-3" />Verified Tenant</Badge>
+                        )}
                       </div>
                       {isOwnListing(listing) && role === "tenant" && (
                         <div className="absolute right-2 top-2"><Badge className="bg-primary text-primary-foreground text-xs">Your listing</Badge></div>
@@ -388,6 +432,11 @@ const ListingsPage = () => {
                         </div>
                         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" />{listing.address || "Unknown"}</p>
                         <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{formatDates(listing.available_from, listing.available_until)}</p>
+                        {(listing.avg_rating ?? 0) > 0 && (
+                          <div className="mt-1.5">
+                            <StarRating rating={listing.avg_rating || 0} size="sm" showCount count={listing.review_count} />
+                          </div>
+                        )}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         {role === "subtenant" && (
@@ -454,8 +503,14 @@ const ListingsPage = () => {
                   ) : (
                     <Badge variant="approved"><ShieldCheck className="mr-1 h-3 w-3" />Manager Approved</Badge>
                   )}
+                  <VerifiedBadge verified={selectedListing.tenant_verified || false} />
                   {isOwnListing(selectedListing) && role === "tenant" && <Badge className="bg-primary text-primary-foreground">This is your listing</Badge>}
                   {isManagedListing(selectedListing) && role === "manager" && <Badge className="bg-accent text-accent-foreground">Managed by you</Badge>}
+                  {(selectedListing.avg_rating ?? 0) > 0 && (
+                    <div className="ml-auto">
+                      <StarRating rating={selectedListing.avg_rating || 0} size="md" showCount count={selectedListing.review_count} />
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
@@ -480,6 +535,9 @@ const ListingsPage = () => {
                     <p className="text-sm text-muted-foreground leading-relaxed">{selectedListing.description}</p>
                   </div>
                 )}
+                {/* Reviews */}
+                <ReviewSection listingId={selectedListing.id} tenantId={selectedListing.tenant_id} />
+
                 <div className="space-y-3 pt-2">
                   {!isOwnListing(selectedListing) && (
                     <SecureThisPlace listing={selectedListing} />
