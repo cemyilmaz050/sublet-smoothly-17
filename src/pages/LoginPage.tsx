@@ -170,7 +170,7 @@ const LoginPage = () => {
               <Building2 className="h-6 w-6 text-primary-foreground" />
             </div>
             <h1 className="mt-4 text-3xl font-bold text-foreground">Welcome back</h1>
-            <p className="mt-1 text-muted-foreground">Sign in to your SubletSafe account</p>
+            <p className="mt-1 text-muted-foreground">Sign in to your SubIn account</p>
           </div>
 
           <div className="mt-8 rounded-xl border bg-card p-8 shadow-card">

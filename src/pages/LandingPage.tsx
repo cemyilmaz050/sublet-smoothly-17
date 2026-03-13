@@ -182,7 +182,7 @@ const LandingPage = () => {
         <div className="container text-center">
           <h2 className="text-3xl font-bold text-foreground">Ready to sublet the right way?</h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            Join thousands of tenants and subtenants who trust SubletSafe for secure, manager-approved sublets.
+            Join thousands of tenants and subtenants who trust SubIn for secure, manager-approved sublets.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link to="/signup">
@@ -202,9 +202,9 @@ const LandingPage = () => {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
               <Home className="h-4 w-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-foreground">SubletSafe</span>
+            <span className="font-bold text-foreground">SubIn</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 SubletSafe. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2026 SubIn. All rights reserved.</p>
         </div>
       </footer>
     </div>

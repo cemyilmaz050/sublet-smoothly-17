@@ -12,7 +12,7 @@ const ReferPage = () => {
   const [copied, setCopied] = useState(false);
   const [howItWorksOpen, setHowItWorksOpen] = useState(false);
 
-  const referralLink = `https://subletsafe.com/r/${crypto.randomUUID().slice(0, 8)}`;
+  const referralLink = `https://subin.com/r/${crypto.randomUUID().slice(0, 8)}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);

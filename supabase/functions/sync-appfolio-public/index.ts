@@ -192,7 +192,7 @@ serve(async (req) => {
       logStep("Fetching listings from", { listingsUrl });
       const response = await fetch(listingsUrl, {
         headers: {
-          "User-Agent": "Mozilla/5.0 (compatible; SubletSafe/1.0)",
+          "User-Agent": "Mozilla/5.0 (compatible; SubIn/1.0)",
           "Accept": "text/html",
         },
       });

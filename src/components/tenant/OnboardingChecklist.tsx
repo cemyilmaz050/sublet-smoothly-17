@@ -24,7 +24,7 @@ const OnboardingChecklist = ({ identityVerified, documentsSubmitted, hasListing,
     <div className="flex justify-center py-8">
       <Card className="w-full max-w-lg shadow-elevated">
         <CardContent className="p-8">
-          <h2 className="text-2xl font-bold text-foreground mb-1">Get started with SubletSafe</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-1">Get started with SubIn</h2>
           <p className="text-sm text-muted-foreground mb-8">Complete these steps to list your property</p>
 
           <div className="space-y-4">
