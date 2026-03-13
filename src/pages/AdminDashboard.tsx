@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
+import Navbar from "@/components/Navbar";
 
 // Hardcoded founder user IDs — only these can access
 const FOUNDER_IDS = [
@@ -140,17 +141,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="text-xl font-bold text-foreground">SubIn</Link>
-            <Badge className="bg-destructive text-destructive-foreground text-[10px]">ADMIN</Badge>
-          </div>
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Back to app
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
         <div>
