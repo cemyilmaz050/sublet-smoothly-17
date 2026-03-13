@@ -48,21 +48,21 @@ const AuthModal = () => {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  
 
   const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
+    // Don't set loading state BEFORE the OAuth call — setting state triggers
+    // a React re-render which breaks the browser's "user gesture" chain,
+    // causing the popup to be blocked and showing "Sign in was cancelled".
     try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
-      if (error) {
-        toast.error(error.message || "Google sign-in failed");
+      if (result?.error) {
+        toast.error(result.error.message || "Google sign-in failed");
       }
     } catch (err: any) {
       toast.error(err.message || "Google sign-in failed");
-    } finally {
-      setGoogleLoading(false);
     }
   };
 
@@ -306,8 +306,8 @@ const AuthModal = () => {
 
               {/* LOGIN TAB */}
               <TabsContent value="login" className="mt-0 space-y-4">
-                <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignIn} disabled={googleLoading}>
-                  {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignIn}>
+                  <GoogleIcon />
                   Continue with Google
                 </Button>
                 <div className="relative">
@@ -347,8 +347,8 @@ const AuthModal = () => {
 
               {/* SIGNUP TAB */}
               <TabsContent value="signup" className="mt-0 space-y-4">
-                <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignIn} disabled={googleLoading}>
-                  {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignIn}>
+                  <GoogleIcon />
                   Continue with Google
                 </Button>
                 <div className="relative">
