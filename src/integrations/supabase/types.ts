@@ -999,7 +999,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          active_mode: string | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          role: string | null
+        }
+        Insert: {
+          active_mode?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          role?: string | null
+        }
+        Update: {
+          active_mode?: string | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          id?: string | null
+          last_name?: string | null
+          role?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
