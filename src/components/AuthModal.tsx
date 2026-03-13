@@ -30,6 +30,8 @@ const AuthModal = () => {
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupErrors, setSignupErrors] = useState<Record<string, string>>({});
   const [emailSent, setEmailSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
 
   // Forgot password
   const [forgotMode, setForgotMode] = useState(false);
@@ -41,7 +43,7 @@ const AuthModal = () => {
     setLoginEmail(""); setLoginPassword(""); setLoginErrors({});
     setSelectedRole(null); setFirstName(""); setLastName("");
     setSignupEmail(""); setPhone(""); setSignupPassword("");
-    setSignupErrors({}); setEmailSent(false);
+    setSignupErrors({}); setEmailSent(false); setResendCooldown(0);
     setForgotMode(false); setForgotEmail(""); setForgotSent(false);
     setTab("login");
   };
@@ -70,7 +72,16 @@ const AuthModal = () => {
         if (error.message.includes("Invalid login credentials")) {
           toast.error("Invalid email or password. Please try again.");
         } else if (error.message.includes("Email not confirmed")) {
-          toast.error("Please confirm your email before logging in.");
+          toast.error("Please confirm your email before logging in. Check your inbox and spam folder.", {
+            action: {
+              label: "Resend",
+              onClick: async () => {
+                const { error: resendErr } = await supabase.auth.resend({ type: "signup", email: loginEmail });
+                if (resendErr) toast.error(resendErr.message);
+                else toast.success("Verification email resent!");
+              },
+            },
+          });
         } else {
           toast.error(error.message);
         }
@@ -160,6 +171,25 @@ const AuthModal = () => {
     setForgotLoading(false);
   };
 
+  const handleResendVerification = async () => {
+    if (resendCooldown > 0 || resending) return;
+    setResending(true);
+    const { error } = await supabase.auth.resend({ type: "signup", email: signupEmail });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Verification email resent! Check your inbox.");
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(interval); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    setResending(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
@@ -191,9 +221,22 @@ const AuthModal = () => {
                 We sent a verification link to <strong className="text-foreground">{signupEmail}</strong>.
                 Click the link to activate your account, then come back here.
               </p>
-              <Button variant="outline" onClick={() => { setEmailSent(false); setTab("login"); setLoginEmail(signupEmail); }}>
-                I've verified — Log in
-              </Button>
+              <p className="text-xs text-muted-foreground">
+                Don't see it? Check your <strong>spam or junk folder</strong>. It may take a minute to arrive.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleResendVerification}
+                  disabled={resending || resendCooldown > 0}
+                >
+                  {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+                </Button>
+                <Button variant="outline" onClick={() => { setEmailSent(false); setTab("login"); setLoginEmail(signupEmail); }}>
+                  I've verified — Log in
+                </Button>
+              </div>
             </div>
           ) : forgotMode ? (
             /* Forgot password */
