@@ -22,6 +22,7 @@ import ManagerIntegrationsPage from "./pages/ManagerIntegrationsPage";
 import ManagerSubletRequestsPage from "./pages/ManagerSubletRequestsPage";
 import ManagerPropertiesPage from "./pages/ManagerPropertiesPage";
 import ManagerActiveSublets from "./pages/ManagerActiveSublets";
+import ManagerApplicationsPage from "./pages/ManagerApplicationsPage";
 import TenantOnboardingPage from "./pages/TenantOnboardingPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import ManagerProfilePage from "./pages/ManagerProfilePage";
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/dashboard/manager/requests" element={<ProtectedRoute><ManagerSubletRequestsPage /></ProtectedRoute>} />
               <Route path="/dashboard/manager/properties" element={<ProtectedRoute><ManagerPropertiesPage /></ProtectedRoute>} />
               <Route path="/dashboard/manager/sublets" element={<ProtectedRoute><ManagerActiveSublets /></ProtectedRoute>} />
+              <Route path="/dashboard/manager/applications" element={<ProtectedRoute><ManagerApplicationsPage /></ProtectedRoute>} />
               <Route path="/listings/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
               <Route path="/listings/edit/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />

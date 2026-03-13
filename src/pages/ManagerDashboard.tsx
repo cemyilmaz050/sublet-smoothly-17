@@ -26,11 +26,25 @@ const ManagerDashboard = () => {
       ]);
       const requests = requestsRes.data || [];
       const listings = listingsRes.data || [];
+
+      // Get pending applications count
+      const listingIds = listings.map(l => l.id);
+      let pendingApplications = 0;
+      if (listingIds.length > 0) {
+        const { count } = await supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("listing_id", listingIds)
+          .eq("status", "pending");
+        pendingApplications = count ?? 0;
+      }
+
       return {
         pendingRequests: requests.filter(r => r.status === "pending").length,
         approvedSublets: requests.filter(r => r.status === "approved").length,
         totalProperties: listings.filter(l => l.status === "active").length,
         syncedProperties: listings.filter(l => l.source === "appfolio").length,
+        pendingApplications,
         integration: integrationsRes.data,
       };
     },
@@ -203,6 +217,7 @@ const ManagerDashboard = () => {
         {/* Quick Navigation */}
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
+            { label: "Applications", desc: "Review applicants", icon: Users, link: "/dashboard/manager/applications", count: stats?.pendingApplications },
             { label: "Sublet Requests", desc: "Review and manage requests", icon: FileText, link: "/dashboard/manager/requests", count: stats?.pendingRequests },
             { label: "Properties", desc: "View your property portfolio", icon: Building2, link: "/dashboard/manager/properties" },
             { label: "Active Sublets", desc: "Monitor running sublets", icon: CheckCircle2, link: "/dashboard/manager/sublets" },
