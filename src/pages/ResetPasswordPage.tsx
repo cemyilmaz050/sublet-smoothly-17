@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -13,40 +13,37 @@ const ResetPasswordPage = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [ready, setReady] = useState(false);
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
 
   useEffect(() => {
-    // Listen for PASSWORD_RECOVERY event from Supabase (handles both hash and PKCE flows)
+    let mounted = true;
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
-        if (session) {
+        if (session && mounted) {
           setReady(true);
         }
       }
     });
 
-    // Also check if session already exists (user may have landed with valid recovery token)
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       if (session) {
         setReady(true);
       } else {
-        // Check URL hash for recovery params (legacy flow)
         const hash = window.location.hash;
         if (hash) {
           const params = new URLSearchParams(hash.substring(1));
           const accessToken = params.get("access_token");
           const type = params.get("type");
-          if (accessToken || type === "recovery") {
-            // Supabase will handle session from hash automatically
-            return;
-          }
+          if (accessToken || type === "recovery") return;
         }
-        // Give a brief moment for auth state to settle
         const timeout = setTimeout(() => {
-          if (!ready) {
+          if (mounted && !ready) {
             toast.error("Invalid or expired reset link.");
             navigate("/login");
           }
@@ -55,7 +52,7 @@ const ResetPasswordPage = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { mounted = false; subscription.unsubscribe(); };
   }, [navigate]);
 
   const handleReset = async () => {
@@ -75,7 +72,8 @@ const ResetPasswordPage = () => {
       }
       setSuccess(true);
       toast.success("Password updated successfully!");
-      setTimeout(() => navigate("/login"), 3000);
+      // User is already logged in after password recovery, redirect to listings
+      setTimeout(() => navigate("/listings", { replace: true }), 2000);
     } catch (err: any) {
       toast.error(err.message || "Failed to update password");
     } finally {
@@ -86,7 +84,10 @@ const ResetPasswordPage = () => {
   if (!ready && !success) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-3">
+          <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Verifying your reset link...</p>
+        </div>
       </div>
     );
   }
@@ -94,14 +95,14 @@ const ResetPasswordPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container flex items-center justify-center py-16">
+      <div className="container flex items-center justify-center px-4 py-12 sm:py-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <div className="rounded-xl border bg-card p-8 shadow-card">
+          <div className="rounded-xl border bg-card p-6 sm:p-8 shadow-card">
             {success ? (
-              <div className="text-center">
+              <div className="text-center space-y-3">
                 <CheckCircle className="mx-auto h-12 w-12 text-primary" />
-                <h2 className="mt-4 text-2xl font-bold text-foreground">Password updated!</h2>
-                <p className="mt-2 text-muted-foreground">Redirecting you to login...</p>
+                <h2 className="text-2xl font-bold text-foreground">Password updated!</h2>
+                <p className="text-muted-foreground">Taking you to SubIn...</p>
               </div>
             ) : (
               <>
@@ -110,29 +111,45 @@ const ResetPasswordPage = () => {
                 <form onSubmit={(e) => { e.preventDefault(); handleReset(); }} className="mt-6 space-y-4">
                   <div>
                     <Label htmlFor="new-password">New Password</Label>
-                    <Input
-                      id="new-password"
-                      type="password"
-                      placeholder="Enter new password"
-                      className="mt-1.5"
-                      value={password}
-                      onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
-                    />
-                    {errors.password && <p className="mt-1 text-sm text-destructive">{errors.password}</p>}
+                    <div className="relative mt-1.5">
+                      <Input
+                        id="new-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter new password"
+                        className="pr-10 h-12"
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {errors.password ? (
+                      <p className="mt-1 text-sm text-destructive">{errors.password}</p>
+                    ) : (
+                      <p className="mt-1 text-xs text-muted-foreground">Must be at least 6 characters</p>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="confirm-password">Confirm Password</Label>
                     <Input
                       id="confirm-password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Confirm new password"
-                      className="mt-1.5"
+                      className="mt-1.5 h-12"
+                      autoComplete="new-password"
                       value={confirmPassword}
                       onChange={(e) => { setConfirmPassword(e.target.value); setErrors((p) => ({ ...p, confirm: undefined })); }}
                     />
                     {errors.confirm && <p className="mt-1 text-sm text-destructive">{errors.confirm}</p>}
                   </div>
-                  <Button className="w-full" type="submit" disabled={loading}>
+                  <Button className="w-full h-12" type="submit" disabled={loading}>
                     {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Update Password
                   </Button>
