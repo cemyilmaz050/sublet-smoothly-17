@@ -520,7 +520,10 @@ const ListingsPage = () => {
           {selectedListing && (
             <>
               <SheetHeader>
-                <SheetTitle className="text-xl">{selectedListing.headline || "Untitled"}</SheetTitle>
+                <div className="flex items-start justify-between gap-2">
+                  <SheetTitle className="text-xl">{selectedListing.headline || "Untitled"}</SheetTitle>
+                  <ShareListing listingId={selectedListing.id} headline={selectedListing.headline} address={selectedListing.address} />
+                </div>
               </SheetHeader>
               <div className="mt-4 space-y-5">
                 {selectedListing.photos && selectedListing.photos[0] && (
