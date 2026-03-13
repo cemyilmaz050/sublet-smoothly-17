@@ -175,6 +175,7 @@ const TenantDashboard = () => {
             >
               Browse Properties
             </button>
+            <NotificationBell />
             <UserMenu />
           </div>
         </div>
