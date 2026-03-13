@@ -313,7 +313,7 @@ const ListingsPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Navbar />
+      
 
       {/* Search & Filter Bar */}
       <div className="border-b bg-card/80 backdrop-blur-sm">

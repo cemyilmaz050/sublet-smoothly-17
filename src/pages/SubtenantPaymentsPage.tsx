@@ -17,7 +17,7 @@ const payments: { date: string; description: string; amount: string; status: Pay
 const SubtenantPaymentsPage = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-3xl py-8">
         <h1 className="mb-1 text-3xl font-bold text-foreground">Payments</h1>
         <p className="mb-8 text-muted-foreground">Track your upcoming and past payments</p>

@@ -17,7 +17,7 @@ const payouts: { date: string; amount: string; status: PaymentStatus }[] = [
 const TenantEarningsPage = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-3xl py-8">
         <h1 className="mb-1 text-3xl font-bold text-foreground">Earnings</h1>
         <p className="mb-8 text-muted-foreground">Track your payouts and earnings</p>

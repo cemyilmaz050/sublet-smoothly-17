@@ -78,7 +78,7 @@ const SubtenantDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-4xl py-8 space-y-6">
         {/* Profile Completeness */}
         <ProfileCompleteness />

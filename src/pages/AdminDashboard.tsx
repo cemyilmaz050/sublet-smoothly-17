@@ -141,7 +141,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
         <div>

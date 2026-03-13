@@ -45,7 +45,7 @@ const mockSublets = [
 const ManagerActiveSublets = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container py-8">
         <div className="mb-6 flex items-center gap-4">
           <Link to="/dashboard/manager">

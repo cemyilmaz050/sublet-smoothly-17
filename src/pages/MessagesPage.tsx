@@ -99,7 +99,7 @@ const MessagesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="mx-auto max-w-3xl px-4 py-8">
         {loading ? (
           <div className="space-y-3">

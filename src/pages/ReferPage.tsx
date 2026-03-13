@@ -22,7 +22,7 @@ const ReferPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
 
       <div className="mx-auto max-w-2xl px-4 py-12 sm:py-20">
         {/* Top right view referrals */}
