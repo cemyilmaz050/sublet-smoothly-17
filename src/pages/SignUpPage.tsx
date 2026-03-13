@@ -275,7 +275,7 @@ const SignUpPage = () => {
           <div className="text-center">
             <h1 className="text-3xl font-bold text-foreground">Create your account</h1>
             <p className="mt-2 text-muted-foreground">
-              {step === 1 ? "Choose how you'll use SubletSafe" : "Enter your details to get started"}
+              {step === 1 ? "Choose how you'll use SubIn" : "Enter your details to get started"}
             </p>
           </div>
 

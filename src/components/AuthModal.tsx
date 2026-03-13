@@ -227,7 +227,7 @@ const AuthModal = () => {
           </div>
           <div>
             <h2 className="text-lg font-bold text-foreground">
-              {forgotMode ? "Reset Password" : emailSent ? "Check Your Email" : "Welcome to SubletSafe"}
+              {forgotMode ? "Reset Password" : emailSent ? "Check Your Email" : "Welcome to SubIn"}
             </h2>
             <p className="text-sm text-muted-foreground">
               {forgotMode

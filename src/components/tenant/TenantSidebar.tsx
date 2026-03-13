@@ -35,7 +35,7 @@ const TenantSidebar = () => {
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary">
             <Building2 className="h-5 w-5 text-primary-foreground" />
           </div>
-          {!collapsed && <span className="text-lg font-bold text-foreground">SubletSafe</span>}
+          {!collapsed && <span className="text-lg font-bold text-foreground">SubIn</span>}
         </div>
 
         <SidebarGroup>
