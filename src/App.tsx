@@ -62,6 +62,7 @@ const App = () => (
               <Route path="/dashboard/manager/requests" element={<ProtectedRoute><ManagerSubletRequestsPage /></ProtectedRoute>} />
               <Route path="/dashboard/manager/properties" element={<ProtectedRoute><ManagerPropertiesPage /></ProtectedRoute>} />
               <Route path="/dashboard/manager/sublets" element={<ProtectedRoute><ManagerActiveSublets /></ProtectedRoute>} />
+              <Route path="/dashboard/manager/applications" element={<ProtectedRoute><ManagerApplicationsPage /></ProtectedRoute>} />
               <Route path="/listings/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
               <Route path="/listings/edit/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
