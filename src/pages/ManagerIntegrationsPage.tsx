@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link2, RefreshCw, CheckCircle2, AlertTriangle, Clock, Loader2, ArrowLeft, Building2 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -138,7 +138,6 @@ const ManagerIntegrationsPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -148,7 +147,7 @@ const ManagerIntegrationsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-2xl py-8">
         <Button variant="ghost" className="mb-4" asChild>
           <a href="/dashboard/manager">

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, FileText, LayoutDashboard, Loader2 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import Footer from "@/components/Footer";
 import { Link, useSearchParams } from "react-router-dom";
 import { Separator } from "@/components/ui/separator";
@@ -61,7 +61,7 @@ const PaymentConfirmationPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      
       <div className="flex-1 container flex max-w-lg flex-col items-center px-4 sm:px-6 py-10 sm:py-16">
         {confirming ? (
           <div className="flex flex-col items-center gap-4 py-20">

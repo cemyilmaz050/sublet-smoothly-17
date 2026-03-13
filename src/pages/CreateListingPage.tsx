@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, Loader2, Home } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import StepProgress from "@/components/StepProgress";
 import ListingStep1 from "@/components/listing/ListingStep1";
 import ListingStep2 from "@/components/listing/ListingStep2";
@@ -224,7 +224,7 @@ const CreateListingPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-2xl py-8">
         <h1 className="mb-2 text-2xl font-bold text-foreground">{editId ? "Edit Listing" : "Create New Listing"}</h1>
         <p className="mb-6 text-muted-foreground">Fill in the details about your property</p>

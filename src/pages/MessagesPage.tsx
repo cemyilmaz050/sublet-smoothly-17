@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { MessageSquare } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import DashboardMessages from "@/components/tenant/DashboardMessages";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,7 +99,7 @@ const MessagesPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="mx-auto max-w-3xl px-4 py-8">
         {loading ? (
           <div className="space-y-3">

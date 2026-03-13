@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { DollarSign, Building2, CreditCard, ArrowRight } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import PlatformFeeTooltip, { PLATFORM_FEE_PERCENT } from "@/components/PlatformFeeTooltip";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -32,7 +32,7 @@ const PricingSetupPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-2xl py-8">
         <h1 className="mb-1 text-3xl font-bold text-foreground">Pricing & Payments</h1>
         <p className="mb-8 text-muted-foreground">Set your rent, deposit, and payout preferences</p>

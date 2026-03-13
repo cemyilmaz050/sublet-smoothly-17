@@ -13,7 +13,7 @@ import {
   ArrowLeft, Search, User, Calendar, CheckCircle2, XCircle,
   MessageSquare, ShieldCheck, AlertTriangle, Clock, Eye,
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -180,7 +180,7 @@ const ManagerApplicationsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container py-8">
         {/* Header */}
         <div className="mb-6 flex items-center gap-4">

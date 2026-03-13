@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CreditCard, Calendar, DollarSign, RefreshCw } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import PaymentStatusBadge from "@/components/PaymentStatusBadge";
 import type { PaymentStatus } from "@/components/PaymentStatusBadge";
 import { Link } from "react-router-dom";
@@ -17,7 +17,7 @@ const payments: { date: string; description: string; amount: string; status: Pay
 const SubtenantPaymentsPage = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-3xl py-8">
         <h1 className="mb-1 text-3xl font-bold text-foreground">Payments</h1>
         <p className="mb-8 text-muted-foreground">Track your upcoming and past payments</p>

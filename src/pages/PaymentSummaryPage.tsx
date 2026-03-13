@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ShieldCheck, Loader2, Lock, CreditCard } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import Footer from "@/components/Footer";
 import CancellationPolicy from "@/components/CancellationPolicy";
 import PlatformFeeTooltip, { PLATFORM_FEE_PERCENT } from "@/components/PlatformFeeTooltip";
@@ -40,7 +40,7 @@ const PaymentSummaryPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      
       {/* Scrollable content area with bottom padding for sticky button */}
       <div className="flex-1 overflow-y-auto pb-32 sm:pb-8">
         <div className="container max-w-lg px-4 sm:px-6 py-6 sm:py-8">

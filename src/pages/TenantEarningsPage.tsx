@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DollarSign, TrendingUp, Clock, Pencil, Calendar } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import PaymentStatusBadge from "@/components/PaymentStatusBadge";
 import type { PaymentStatus } from "@/components/PaymentStatusBadge";
 import PlatformFeeTooltip from "@/components/PlatformFeeTooltip";
@@ -17,7 +17,7 @@ const payouts: { date: string; amount: string; status: PaymentStatus }[] = [
 const TenantEarningsPage = () => {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container max-w-3xl py-8">
         <h1 className="mb-1 text-3xl font-bold text-foreground">Earnings</h1>
         <p className="mb-8 text-muted-foreground">Track your payouts and earnings</p>

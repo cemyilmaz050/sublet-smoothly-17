@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
+
 import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, CheckCircle, Mail, Phone, Globe, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,7 +37,6 @@ const ManagerProfilePage = () => {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="container py-8 space-y-6">
           <Skeleton className="h-48 w-full rounded-xl" />
           <Skeleton className="h-8 w-64" />
@@ -50,7 +49,6 @@ const ManagerProfilePage = () => {
   if (!manager) {
     return (
       <>
-        <Navbar />
         <div className="container py-16 text-center">
           <h1 className="text-2xl font-bold text-foreground">Management group not found</h1>
           <p className="mt-2 text-muted-foreground">The management group you're looking for doesn't exist.</p>
@@ -69,7 +67,7 @@ const ManagerProfilePage = () => {
 
   return (
     <>
-      <Navbar />
+      
       <div className="min-h-screen bg-background">
         {/* Cover photo */}
         <div className="relative h-48 sm:h-64 bg-gradient-to-br from-primary/20 via-accent to-primary/10 overflow-hidden">

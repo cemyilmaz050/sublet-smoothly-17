@@ -6,7 +6,7 @@ import {
   Settings, DollarSign, FileText, Users, ArrowRight, RefreshCw,
   ClipboardList
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,7 +80,7 @@ const ManagerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container py-8">
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

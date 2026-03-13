@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import Navbar from "@/components/Navbar";
+
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
@@ -15,7 +15,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-24 text-center">
         <img src={logo} alt="SubIn" className="h-10 mb-8" />
         <h1 className="text-7xl font-extrabold text-primary">404</h1>

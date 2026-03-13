@@ -15,7 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import Navbar from "@/components/Navbar";
+
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import ReviewSection from "@/components/ReviewSection";
 import VerifiedBadge from "@/components/VerifiedBadge";
@@ -313,7 +313,7 @@ const ListingsPage = () => {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <Navbar />
+      
 
       {/* Search & Filter Bar */}
       <div className="border-b bg-card/80 backdrop-blur-sm">

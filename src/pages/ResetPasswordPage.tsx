@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -94,7 +94,7 @@ const ResetPasswordPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
       <div className="container flex items-center justify-center px-4 py-12 sm:py-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
           <div className="rounded-xl border bg-card p-6 sm:p-8 shadow-card">

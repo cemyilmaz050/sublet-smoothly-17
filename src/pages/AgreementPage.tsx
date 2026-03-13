@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import Navbar from "@/components/Navbar";
+
 import Footer from "@/components/Footer";
 import {
   FileText,
@@ -152,7 +152,6 @@ const AgreementPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="flex items-center justify-center py-32">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
@@ -163,7 +162,6 @@ const AgreementPage = () => {
   if (!agreement) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="flex flex-col items-center justify-center py-32 text-center px-4">
           <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
           <h1 className="text-xl font-bold text-foreground">Agreement Not Found</h1>
@@ -188,7 +186,7 @@ const AgreementPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+      
       <div className="flex-1 container max-w-2xl px-4 py-8 sm:py-12">
         <div className="flex items-center gap-3 mb-6">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">

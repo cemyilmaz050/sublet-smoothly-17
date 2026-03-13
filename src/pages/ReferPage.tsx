@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Home, KeyRound, Copy, Check, Users, Share2, DollarSign, HelpCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import Navbar from "@/components/Navbar";
+
 import { motion } from "framer-motion";
 
 type ReferralType = "tenant" | "renter" | null;
@@ -22,7 +22,7 @@ const ReferPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      
 
       <div className="mx-auto max-w-2xl px-4 py-12 sm:py-20">
         {/* Top right view referrals */}
