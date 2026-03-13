@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.sync-appfolio-public]
 verify_jwt = false
+
+[functions.confirm-booking]
+verify_jwt = false
+
+[functions.process-refund]
+verify_jwt = false
