@@ -26,6 +26,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import AgreementPage from "./pages/AgreementPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 // Manager layout + pages
@@ -77,6 +78,7 @@ const App = () => (
               <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
               <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
               <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
               {/* Manager Dashboard — unified layout */}
               <Route path="/manager" element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>

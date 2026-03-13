@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import DashboardMessages from "@/components/tenant/DashboardMessages";
 import UserMenu from "@/components/UserMenu";
+import NotificationBell from "@/components/NotificationBell";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
@@ -174,6 +175,7 @@ const TenantDashboard = () => {
             >
               Browse Properties
             </button>
+            <NotificationBell />
             <UserMenu />
           </div>
         </div>
