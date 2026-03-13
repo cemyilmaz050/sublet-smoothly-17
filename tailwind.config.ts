@@ -54,6 +54,10 @@ export default {
           DEFAULT: "hsl(var(--amber))",
           foreground: "hsl(var(--amber-foreground))",
         },
+        coral: {
+          DEFAULT: "hsl(var(--coral))",
+          foreground: "hsl(var(--coral-foreground))",
+        },
         emerald: {
           DEFAULT: "hsl(var(--emerald))",
           foreground: "hsl(var(--emerald-foreground))",
