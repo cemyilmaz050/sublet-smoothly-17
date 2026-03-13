@@ -49,7 +49,6 @@ const ManagerProfilePage = () => {
   if (!manager) {
     return (
       <>
-        <Navbar />
         <div className="container py-16 text-center">
           <h1 className="text-2xl font-bold text-foreground">Management group not found</h1>
           <p className="mt-2 text-muted-foreground">The management group you're looking for doesn't exist.</p>
