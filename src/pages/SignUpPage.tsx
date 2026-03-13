@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Home, Search, Mail, Phone, ArrowRight, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Home, Search, Mail, ArrowRight, Loader2, CheckCircle, AlertCircle, Eye, EyeOff } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
-import { useSearchParams, useNavigate, Navigate } from "react-router-dom";
+import { useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,7 +19,7 @@ interface FormErrors {
 }
 
 const SignUpPage = () => {
-  const { user, isReady, role } = useAuth();
+  const { user, isReady } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialRole = searchParams.get("role") as "tenant" | "subtenant" | null;
@@ -29,8 +29,8 @@ const SignUpPage = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -39,7 +39,6 @@ const SignUpPage = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
 
-  // Auto-redirect if already logged in
   if (isReady && user) {
     return <Navigate to="/listings" replace />;
   }
@@ -48,7 +47,7 @@ const SignUpPage = () => {
     {
       id: "tenant" as const,
       icon: Home,
-      title: "I'm a Current Tenant",
+      title: "I'm listing a sublet",
       description: "I want to sublet my apartment and find a verified subtenant",
     },
     {
@@ -78,32 +77,19 @@ const SignUpPage = () => {
   };
 
   const handleSignUp = async () => {
-    console.log("Sign up button clicked");
-    console.log("Form values:", {
-      firstName,
-      lastName,
-      email,
-      phone,
-      selectedRole,
-      hasPassword: Boolean(password),
-      passwordLength: password.length,
-    });
-    console.log("Supabase client:", supabase);
-
     if (!isReady) {
       setSubmitError("Authentication is still initializing. Please try again in a moment.");
-      toast.info("Auth is still initializing. Please try again in a second.");
       return;
     }
 
     if (!selectedRole) {
-      setSubmitError("Please choose whether you're a tenant or looking for a place.");
+      setSubmitError("Please choose whether you're listing or looking for a place.");
       setStep(1);
       return;
     }
 
     if (!validate()) {
-      setSubmitError("Please fix the highlighted fields and try again.");
+      setSubmitError(null);
       return;
     }
 
@@ -111,7 +97,6 @@ const SignUpPage = () => {
     setSubmitError(null);
 
     try {
-      console.log("Before supabase.auth.signUp()");
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -119,23 +104,19 @@ const SignUpPage = () => {
           data: {
             first_name: firstName,
             last_name: lastName,
-            phone,
             role: selectedRole,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
-      console.log("After supabase.auth.signUp():", { data, error });
 
       if (error) {
-        console.error("Signup error:", error);
         if (error.message.includes("already registered") || error.message.includes("already exists")) {
           setSubmitError(null);
           setDuplicateEmail(email);
           return;
         }
         setSubmitError(error.message);
-        toast.error(error.message);
         return;
       }
 
@@ -150,7 +131,6 @@ const SignUpPage = () => {
       if (data.user && !data.session) {
         setSubmitError(null);
         setEmailSent(true);
-        toast.success("Confirmation email sent. Please check your inbox.");
         return;
       }
 
@@ -161,11 +141,8 @@ const SignUpPage = () => {
       }
 
       setSubmitError("Could not complete signup. Please try again.");
-      toast.error("Could not complete signup. Please try again.");
     } catch (err: any) {
-      console.error("Sign up error:", err);
       setSubmitError("Something went wrong. Please try again.");
-      toast.error(err?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -195,23 +172,22 @@ const SignUpPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container flex items-center justify-center py-16">
+        <div className="container flex items-center justify-center px-4 py-12 sm:py-16">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center space-y-6">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <h1 className="text-2xl font-bold text-foreground">Account already exists</h1>
             <p className="text-muted-foreground">
-              An account with <strong className="text-foreground">{duplicateEmail}</strong> already exists.
-              If you haven't verified your email yet, check your inbox or resend the verification email.
+              An account with <strong className="text-foreground">{duplicateEmail}</strong> already exists. Would you like to log in instead?
             </p>
             <div className="flex flex-col gap-3">
-              <Button onClick={() => handleResendVerification(duplicateEmail)} disabled={resending || resendCooldown > 0}>
-                {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
-                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
-              </Button>
-              <Button variant="outline" onClick={() => navigate("/login")}>
+              <Button onClick={() => navigate("/login")} size="lg">
                 Log In Instead
+              </Button>
+              <Button variant="outline" onClick={() => handleResendVerification(duplicateEmail)} disabled={resending || resendCooldown > 0}>
+                {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                {resendCooldown > 0 ? `Resend verification in ${resendCooldown}s` : "Resend Verification Email"}
               </Button>
               <button onClick={() => setDuplicateEmail(null)} className="text-sm text-muted-foreground hover:text-primary">
                 ← Try a different email
@@ -228,7 +204,7 @@ const SignUpPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container flex items-center justify-center py-16">
+        <div className="container flex items-center justify-center px-4 py-12 sm:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -237,13 +213,16 @@ const SignUpPage = () => {
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <CheckCircle className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-3xl font-bold text-foreground">Check your email!</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Check your inbox!</h1>
             <p className="text-muted-foreground">
               We sent a verification link to <strong className="text-foreground">{email}</strong>.
               Click the link in the email to activate your account.
             </p>
+            <p className="text-xs text-muted-foreground">
+              Don't see it? Check your <strong>spam or junk folder</strong>. It may take a minute to arrive.
+            </p>
             <div className="flex flex-col gap-3">
-              <Button onClick={() => handleResendVerification(email)} disabled={resending || resendCooldown > 0} variant="outline">
+              <Button onClick={() => handleResendVerification(email)} disabled={resending || resendCooldown > 0} variant="outline" size="lg">
                 {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Email"}
               </Button>
@@ -266,16 +245,16 @@ const SignUpPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container flex items-center justify-center py-16">
+      <div className="container flex items-center justify-center px-4 py-10 sm:py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-lg"
         >
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground">Create your account</h1>
-            <p className="mt-2 text-muted-foreground">
-              {step === 1 ? "Choose how you'll use SubIn" : "Enter your details to get started"}
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Create your account</h1>
+            <p className="mt-2 text-sm sm:text-base text-muted-foreground">
+              {step === 1 ? "How will you use SubIn?" : "Enter your details to get started"}
             </p>
           </div>
 
@@ -289,35 +268,40 @@ const SignUpPage = () => {
                     setStep(2);
                   }}
                   className={cn(
-                    "group w-full rounded-xl border-2 p-6 text-left transition-all hover:border-primary hover:bg-accent/50",
+                    "group w-full rounded-xl border-2 p-5 sm:p-6 text-left transition-all hover:border-primary hover:bg-accent/50",
                     selectedRole === role.id ? "border-primary bg-accent/50" : "border-border"
                   )}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                      <role.icon className="h-6 w-6 text-primary" />
+                    <div className="flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+                      <role.icon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-foreground">{role.title}</h3>
                       <p className="mt-1 text-sm text-muted-foreground">{role.description}</p>
                     </div>
-                    <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                    <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary shrink-0" />
                   </div>
                 </button>
               ))}
+              <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link to="/login" className="font-medium text-primary hover:underline">Log in</Link>
+              </p>
             </div>
           )}
 
           {step === 2 && (
-            <div className="mt-8 rounded-xl border bg-card p-8 shadow-card">
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+            <div className="mt-8 rounded-xl border bg-card p-6 sm:p-8 shadow-card">
+              <form onSubmit={(e) => { e.preventDefault(); handleSignUp(); }} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
                     <Input
                       id="firstName"
                       placeholder="John"
-                      className="mt-1.5"
+                      className="mt-1.5 h-12"
+                      autoComplete="given-name"
                       value={firstName}
                       onChange={(e) => { setFirstName(e.target.value); setErrors((p) => ({ ...p, firstName: undefined })); }}
                     />
@@ -328,7 +312,8 @@ const SignUpPage = () => {
                     <Input
                       id="lastName"
                       placeholder="Doe"
-                      className="mt-1.5"
+                      className="mt-1.5 h-12"
+                      autoComplete="family-name"
                       value={lastName}
                       onChange={(e) => { setLastName(e.target.value); setErrors((p) => ({ ...p, lastName: undefined })); }}
                     />
@@ -343,7 +328,8 @@ const SignUpPage = () => {
                       id="email"
                       type="email"
                       placeholder="john@example.com"
-                      className="pl-10"
+                      className="pl-10 h-12"
+                      autoComplete="email"
                       value={email}
                       onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
                     />
@@ -351,30 +337,31 @@ const SignUpPage = () => {
                   {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
                 </div>
                 <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <div className="relative mt-1.5">
-                    <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="+1 (555) 000-0000"
-                      className="pl-10"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div>
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Create a password"
-                    className="mt-1.5"
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
-                  />
-                  {errors.password && <p className="mt-1 text-sm text-destructive">{errors.password}</p>}
+                  <div className="relative mt-1.5">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a password"
+                      className="pr-10 h-12"
+                      autoComplete="new-password"
+                      value={password}
+                      onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  {errors.password ? (
+                    <p className="mt-1 text-sm text-destructive">{errors.password}</p>
+                  ) : (
+                    <p className="mt-1 text-xs text-muted-foreground">Must be at least 6 characters</p>
+                  )}
                 </div>
                 {submitError && (
                   <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
@@ -382,10 +369,9 @@ const SignUpPage = () => {
                   </div>
                 )}
                 <Button
-                  className="mt-2 w-full"
+                  className="w-full h-12"
                   size="lg"
-                  type="button"
-                  onClick={handleSignUp}
+                  type="submit"
                   disabled={loading}
                 >
                   {loading ? (
@@ -400,13 +386,20 @@ const SignUpPage = () => {
                     </>
                   )}
                 </Button>
-                <button
-                  onClick={() => setStep(1)}
-                  className="mt-2 w-full text-center text-sm text-muted-foreground hover:text-primary"
-                >
-                  ← Back to role selection
-                </button>
-              </div>
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="text-sm text-muted-foreground hover:text-primary"
+                  >
+                    ← Change role
+                  </button>
+                  <p className="text-sm text-muted-foreground">
+                    Have an account?{" "}
+                    <Link to="/login" className="font-medium text-primary hover:underline">Log in</Link>
+                  </p>
+                </div>
+              </form>
             </div>
           )}
         </motion.div>
