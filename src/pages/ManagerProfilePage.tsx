@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
+
 import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin, CheckCircle, Mail, Phone, Globe, Calendar } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";

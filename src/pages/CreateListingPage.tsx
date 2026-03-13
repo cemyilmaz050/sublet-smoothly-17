@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, ArrowRight, Loader2, Home } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import StepProgress from "@/components/StepProgress";
 import ListingStep1 from "@/components/listing/ListingStep1";
 import ListingStep2 from "@/components/listing/ListingStep2";

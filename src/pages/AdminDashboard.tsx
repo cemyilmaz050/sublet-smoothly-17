@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
-import Navbar from "@/components/Navbar";
+
 
 // Hardcoded founder user IDs — only these can access
 const FOUNDER_IDS = [

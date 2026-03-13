@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Building2, Mail, ArrowRight, Loader2, ShieldCheck, Eye, EyeOff } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

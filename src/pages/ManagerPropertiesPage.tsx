@@ -21,7 +21,7 @@ import {
 import {
   Building2, Search, ArrowLeft, MapPin, Home, LayoutGrid, List, Plus
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";

@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ArrowLeft, CheckCircle2, Clock, User } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { Link } from "react-router-dom";
 import EmptyState from "@/components/EmptyState";
 

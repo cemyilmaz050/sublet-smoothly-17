@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+
 import DashboardMessages from "@/components/tenant/DashboardMessages";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import ProfileCompleteness from "@/components/ProfileCompleteness";

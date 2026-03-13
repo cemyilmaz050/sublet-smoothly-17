@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link2, RefreshCw, CheckCircle2, AlertTriangle, Clock, Loader2, ArrowLeft, Building2 } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";

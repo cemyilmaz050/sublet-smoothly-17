@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DollarSign, TrendingUp, Clock, Pencil, Calendar } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import PaymentStatusBadge from "@/components/PaymentStatusBadge";
 import type { PaymentStatus } from "@/components/PaymentStatusBadge";
 import PlatformFeeTooltip from "@/components/PlatformFeeTooltip";

@@ -1,6 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
-import Navbar from "@/components/Navbar";
+
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";

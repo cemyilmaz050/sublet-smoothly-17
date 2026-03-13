@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { MessageSquare } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import DashboardMessages from "@/components/tenant/DashboardMessages";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";

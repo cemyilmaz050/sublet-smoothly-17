@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Home, KeyRound, Copy, Check, Users, Share2, DollarSign, HelpCircle, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import Navbar from "@/components/Navbar";
+
 import { motion } from "framer-motion";
 
 type ReferralType = "tenant" | "renter" | null;
