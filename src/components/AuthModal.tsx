@@ -30,6 +30,8 @@ const AuthModal = () => {
   const [signupLoading, setSignupLoading] = useState(false);
   const [signupErrors, setSignupErrors] = useState<Record<string, string>>({});
   const [emailSent, setEmailSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
 
   // Forgot password
   const [forgotMode, setForgotMode] = useState(false);
