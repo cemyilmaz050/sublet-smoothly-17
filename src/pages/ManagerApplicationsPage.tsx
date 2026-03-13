@@ -323,9 +323,9 @@ const ManagerApplicationsPage = () => {
                 )}
 
                 {/* Background Check Banner */}
-                <div className="rounded-lg border-2 border-dashed border-amber-300 bg-amber-50 dark:bg-amber-950/20 p-4">
+                <div className="rounded-lg border-2 border-dashed border-amber/50 bg-accent/30 p-4">
                   <div className="flex items-start gap-3">
-                    <ShieldCheck className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                    <ShieldCheck className="h-5 w-5 text-amber shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <p className="text-sm font-semibold text-foreground">Background Check</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
