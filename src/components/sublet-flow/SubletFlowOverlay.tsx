@@ -144,12 +144,16 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       const { error } = await supabase.from("listings").insert(payload);
       if (error) throw error;
 
-      // Send notification to manager
+      // Send notification to BBG staff user if BBG is the management group
+      const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
+      const BBG_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
+      const notifUserId = data.managementGroupId === BBG_PM_ID ? BBG_USER_ID : data.managementGroupId;
       await supabase.from("notifications").insert({
-        user_id: data.managementGroupId, // placeholder
+        user_id: notifUserId,
         title: "New Sublet Request",
         message: `${user.user_metadata?.first_name || "A tenant"} submitted a sublet request for Unit ${data.catalogUnitNumber} at ${data.catalogPropertyAddress}`,
         type: "sublet_request",
+        link: "/manager/listings",
       }).then(() => {});
 
       setSuccessMessage(`Your sublet request has been sent to ${data.managementGroupName}!`);
