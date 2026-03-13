@@ -13,6 +13,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
+import ReviewSection from "@/components/ReviewSection";
+import VerifiedBadge from "@/components/VerifiedBadge";
+import StarRating from "@/components/StarRating";
 import CalendarView from "@/components/discover/CalendarView";
 import ListingsMap from "@/components/discover/ListingsMap";
 import { useNavigate } from "react-router-dom";
