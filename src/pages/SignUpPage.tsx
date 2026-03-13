@@ -370,6 +370,24 @@ const SignUpPage = () => {
                     <p className="mt-1 text-xs text-muted-foreground">Must be at least 6 characters</p>
                   )}
                 </div>
+                {/* Terms checkbox */}
+                <div className="space-y-1">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="signup-terms"
+                      checked={agreedToTerms}
+                      onCheckedChange={(v) => { setAgreedToTerms(v === true); setErrors((p) => ({ ...p, terms: undefined })); }}
+                      className="mt-0.5 h-4 w-4 shrink-0"
+                    />
+                    <label htmlFor="signup-terms" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">
+                      I agree to the{" "}
+                      <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</Link>
+                      {" "}and{" "}
+                      <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</Link>
+                    </label>
+                  </div>
+                  {errors.terms && <p className="ml-7 text-sm text-destructive">{errors.terms}</p>}
+                </div>
                 {submitError && (
                   <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                     {submitError}
