@@ -49,6 +49,7 @@ const TenantDashboard = () => {
   const [showSublet, setShowSublet] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [idVerified, setIdVerified] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
