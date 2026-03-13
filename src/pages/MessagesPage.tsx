@@ -28,7 +28,7 @@ const MessagesPage = () => {
           const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
 
           const { data: profile } = await supabase
-            .from("profiles")
+            .from("profiles_public" as any)
             .select("first_name, last_name")
             .eq("id", otherId)
             .maybeSingle();

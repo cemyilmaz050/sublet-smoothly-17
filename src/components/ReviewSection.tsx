@@ -49,7 +49,7 @@ const ReviewSection = ({ listingId, tenantId }: ReviewSectionProps) => {
       // Fetch reviewer names
       const reviewerIds = [...new Set(data.map((r: any) => r.reviewer_id))];
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("id, first_name, last_name")
         .in("id", reviewerIds);
 

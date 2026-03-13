@@ -83,7 +83,7 @@ const TenantDashboard = () => {
 
           // Fetch other user's profile
           const { data: profile } = await supabase
-            .from("profiles")
+            .from("profiles_public" as any)
             .select("first_name, last_name")
             .eq("id", otherId)
             .maybeSingle();
