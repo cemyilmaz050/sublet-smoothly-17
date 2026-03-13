@@ -26,6 +26,7 @@ import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import AgreementPage from "./pages/AgreementPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 // Manager layout + pages
