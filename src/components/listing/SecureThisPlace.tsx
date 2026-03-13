@@ -132,10 +132,15 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
     setPaymentLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { listingId: listing.id },
+        body: {
+          listingId: listing.id,
+          depositAmount: depositAmount,
+          platformFee: platformFee,
+          totalAmount: totalDue,
+        },
       });
       if (error) throw error;
-      if (data?.url) window.open(data.url, "_blank");
+      if (data?.url) window.location.href = data.url;
     } catch {
       toast.error("Payment setup failed. Please try again.");
     } finally {
