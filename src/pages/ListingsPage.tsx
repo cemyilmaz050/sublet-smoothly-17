@@ -383,7 +383,7 @@ const ListingsPage = () => {
           {viewMode === "calendar" ? (
             <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden">
               <CalendarView
-                listings={allListings}
+                listings={dbListings}
                 onDayClick={setCalendarSelectedDate}
                 selectedDate={calendarSelectedDate}
               />
