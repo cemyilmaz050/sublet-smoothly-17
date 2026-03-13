@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import {
   MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2,
   Search, SlidersHorizontal, Zap, Pencil, Eye, X, CalendarDays, Map,
-  MessageSquare, Send, CheckCircle2, Loader2,
+  MessageSquare, Send, CheckCircle2, Loader2, Home, Plus,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
