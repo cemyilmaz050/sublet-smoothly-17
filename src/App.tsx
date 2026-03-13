@@ -25,6 +25,7 @@ import ReferPage from "./pages/ReferPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import AgreementPage from "./pages/AgreementPage";
+import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import NotFound from "./pages/NotFound";
 
 // Manager layout + pages
