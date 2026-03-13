@@ -615,7 +615,9 @@ export type Database = {
           onboarding_complete: boolean
           phone: string | null
           role: string
+          stripe_verification_session_id: string | null
           updated_at: string
+          verification_attempts: number
         }
         Insert: {
           active_mode?: string
@@ -631,7 +633,9 @@ export type Database = {
           onboarding_complete?: boolean
           phone?: string | null
           role?: string
+          stripe_verification_session_id?: string | null
           updated_at?: string
+          verification_attempts?: number
         }
         Update: {
           active_mode?: string
@@ -647,7 +651,9 @@ export type Database = {
           onboarding_complete?: boolean
           phone?: string | null
           role?: string
+          stripe_verification_session_id?: string | null
           updated_at?: string
+          verification_attempts?: number
         }
         Relationships: []
       }
