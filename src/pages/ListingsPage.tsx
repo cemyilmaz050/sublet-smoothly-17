@@ -76,9 +76,7 @@ const ListingsPage = () => {
     }).then();
   }, [selectedListing?.id]);
 
-  const allListings = [...dbListings, ...mockListings];
-
-  const filtered = allListings.filter((l) => {
+  const filtered = dbListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (priceFilter && priceFilter !== "all") {
       const rent = l.monthly_rent ?? 0;
