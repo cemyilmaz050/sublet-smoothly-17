@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, HelpCircle, Share2, LogIn, MessageSquare, LogOut, User } from "lucide-react";
+import { Menu, HelpCircle, Gift, LogIn, MessageSquare, LogOut, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -44,7 +44,7 @@ const UserMenu = () => {
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => { setOpen(false); }} className={menuItemClass}>
-        <Share2 className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
+        <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => { setOpen(false); requireAuth(); }} className={menuItemClass}>
@@ -60,7 +60,7 @@ const UserMenu = () => {
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => { setOpen(false); }} className={menuItemClass}>
-        <Share2 className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
+        <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => handleNav("/messages")} className={menuItemClass}>
