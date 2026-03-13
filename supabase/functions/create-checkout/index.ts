@@ -8,6 +8,11 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
+  console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -24,6 +29,10 @@ serve(async (req) => {
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
+    logStep("User authenticated", { userId: user.id, email: user.email });
+
+    const body = await req.json().catch(() => ({}));
+    const { listingId, depositAmount, platformFee, totalAmount } = body;
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -35,6 +44,52 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
+    const origin = req.headers.get("origin") || "https://subinapp.com";
+
+    // If listingId is provided, create a one-time deposit payment
+    if (listingId && depositAmount) {
+      logStep("Creating deposit checkout", { listingId, depositAmount, platformFee, totalAmount });
+
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : user.email,
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "Security Deposit + Platform Fee",
+                description: `SubIn deposit for listing`,
+              },
+              unit_amount: Math.round((totalAmount || depositAmount) * 100),
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        metadata: {
+          listing_id: listingId,
+          subtenant_id: user.id,
+          deposit_amount: String(depositAmount),
+          platform_fee: String(platformFee || 0),
+          total_amount: String(totalAmount || depositAmount),
+          type: "sublet_deposit",
+        },
+        success_url: `${origin}/payments/confirmation?session_id={CHECKOUT_SESSION_ID}&listing_id=${listingId}`,
+        cancel_url: `${origin}/listings`,
+      });
+
+      logStep("Deposit checkout session created", { sessionId: session.id });
+
+      return new Response(JSON.stringify({ url: session.url, sessionId: session.id }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
+    // Default: subscription checkout (legacy flow)
+    logStep("Creating subscription checkout");
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -46,8 +101,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/payments/confirmation`,
-      cancel_url: `${req.headers.get("origin")}/payments/summary`,
+      success_url: `${origin}/payments/confirmation`,
+      cancel_url: `${origin}/payments/summary`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
@@ -55,6 +110,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
+    logStep("ERROR", { message: error.message });
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
