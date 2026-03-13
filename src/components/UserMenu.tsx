@@ -50,6 +50,10 @@ const UserMenu = () => {
       <button onClick={() => { setOpen(false); requireAuth(); }} className={menuItemClass}>
         <LogIn className="h-4 w-4 text-muted-foreground" /> Log In or Sign Up
       </button>
+      <div className="mx-4 border-t" />
+      <button onClick={() => handleNav("/manager")} className={menuItemClass}>
+        <User className="h-4 w-4 text-muted-foreground" /> Are you a Property Manager?
+      </button>
     </div>
   );
 
@@ -65,6 +69,10 @@ const UserMenu = () => {
       <div className="mx-4 border-t" />
       <button onClick={() => handleNav("/messages")} className={menuItemClass}>
         <MessageSquare className="h-4 w-4 text-muted-foreground" /> Messages
+      </button>
+      <div className="mx-4 border-t" />
+      <button onClick={() => handleNav("/manager")} className={menuItemClass}>
+        <User className="h-4 w-4 text-muted-foreground" /> Are you a Property Manager?
       </button>
       <div className="mx-4 border-t" />
       <button onClick={handleSignOut} className="flex items-center gap-2.5 px-4 py-3 text-sm text-destructive transition-colors hover:bg-destructive/10 w-full text-left">
