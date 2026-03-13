@@ -62,7 +62,7 @@ const Navbar = () => {
           <div className="flex items-center gap-1">
             <button
               onClick={navAction.onClick}
-              className="hidden rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] hover:text-foreground sm:block"
+              className="hidden text-sm font-semibold text-foreground transition-colors duration-150 ease-in-out hover:text-foreground/70 sm:block"
             >
               {navAction.label}
             </button>
