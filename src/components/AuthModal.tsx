@@ -74,6 +74,7 @@ const AuthModal = () => {
     setSelectedRole(null); setFirstName(""); setLastName("");
     setSignupEmail(""); setSignupPassword("");
     setSignupErrors({}); setEmailSent(false); setResendCooldown(0); setShowSignupPassword(false);
+    setAgreedToTerms(false);
     setForgotMode(false); setForgotEmail(""); setForgotSent(false); setForgotError(null);
     setTab("login");
   };
