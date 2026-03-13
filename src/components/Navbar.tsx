@@ -39,8 +39,9 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center">
-              <span className="text-xl font-bold text-foreground">RoomDibz</span>
+            <Link to="/" className="flex items-center gap-2">
+              <img src={logo} alt="SubletRooms" className="h-8 w-8" />
+              <span className="text-xl font-bold text-foreground">SubletRooms</span>
             </Link>
           </div>
 
