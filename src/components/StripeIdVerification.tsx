@@ -64,7 +64,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
       // Load Stripe and open Identity modal
       const stripe = await loadStripe(
-        import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ""
+        "pk_live_51TABODCpbA85hge15GgiO276acyyu7ttgB7zKw8Ygsb8KwU2QUagdYnjI5s3bkeLsoMFshURYYq5DLzAqbMU865d00W47B1eMN"
       );
       if (!stripe) throw new Error("Failed to load Stripe");
 
