@@ -18,6 +18,7 @@ interface FormErrors {
   lastName?: string;
   email?: string;
   password?: string;
+  terms?: string;
 }
 
 const SignUpPage = () => {
