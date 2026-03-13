@@ -507,6 +507,7 @@ const ListingsPage = () => {
               <ListingsMap
                 listings={filtered}
                 hoveredId={hoveredId}
+                selectedId={selectedListing?.id || null}
                 onSelect={(l) => setSelectedListing(l as any)}
               />
             </div>

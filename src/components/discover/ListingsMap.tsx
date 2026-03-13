@@ -1,7 +1,11 @@
-import { useEffect, useRef } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { MapPin, ArrowRight } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Fix default marker icon issue with bundlers
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -21,7 +25,6 @@ interface ListingMapItem {
   lng?: number;
 }
 
-// Approximate coordinates for known locations
 const LOCATION_COORDS: Record<string, [number, number]> = {
   "manhattan, ny": [40.7831, -73.9712],
   "brooklyn, ny": [40.6782, -73.9442],
@@ -42,29 +45,169 @@ function getCoords(address: string | null): [number, number] | null {
   for (const [key, coords] of Object.entries(LOCATION_COORDS)) {
     if (lower.includes(key)) return coords;
   }
-  // Default: random NYC area with small offset
   return [40.73 + Math.random() * 0.08, -73.99 + Math.random() * 0.06];
 }
 
-function createPriceIcon(price: number | null, isActive: boolean) {
-  const label = price ? `$${price.toLocaleString()}` : "???";
+// --- Price Tag Styles ---
+const BASE_STYLE = `
+  background: #ffffff;
+  color: #1A1A2E;
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', system-ui, sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  transform: translate(-50%, -100%);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border-left: 3px solid #4845D2;
+  animation: priceTagFadeIn 0.4s ease-out both;
+  line-height: 1;
+`;
+
+const ACTIVE_STYLE = `
+  background: #4845D2;
+  color: #ffffff;
+  border: 1px solid #4845D2;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', system-ui, sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(72,69,210,0.35), 0 2px 4px rgba(0,0,0,0.08);
+  transform: translate(-50%, -100%) scale(1.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border-left: 3px solid #3633B0;
+  line-height: 1;
+`;
+
+const MOBILE_EXTRA = `
+  padding: 8px 14px;
+  font-size: 14px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+`;
+
+const CLUSTER_STYLE = `
+  background: #ffffff;
+  color: #4845D2;
+  border: 2px solid #4845D2;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Inter', system-ui, sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(72,69,210,0.15), 0 1px 2px rgba(0,0,0,0.04);
+  transform: translate(-50%, -100%);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  animation: priceTagFadeIn 0.4s ease-out both;
+  line-height: 1;
+`;
+
+function createPriceIcon(price: number | null, isActive: boolean, isMobile: boolean, animDelay: number = 0) {
+  const label = price ? `$${price.toLocaleString()}/mo` : "$ —";
+  const style = isActive
+    ? ACTIVE_STYLE
+    : BASE_STYLE + (isMobile ? MOBILE_EXTRA : "");
+  const delayStyle = animDelay > 0 ? `animation-delay: ${animDelay}ms;` : "";
+
   return L.divIcon({
-    className: "custom-price-marker",
-    html: `<div style="
-      background: ${isActive ? "hsl(var(--primary))" : "hsl(var(--card))"};
-      color: ${isActive ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))"};
-      border: 1.5px solid ${isActive ? "hsl(var(--primary))" : "hsl(var(--border))"};
-      padding: 3px 8px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      transform: translate(-50%, -100%);
-    ">${label}</div>`,
+    className: "subin-price-marker",
+    html: `<div style="${style} ${delayStyle}"
+      onmouseenter="this.style.background='#4845D2';this.style.color='#ffffff';this.style.borderColor='#4845D2';this.style.borderLeftColor='#3633B0';this.style.transform='translate(-50%,-100%) scale(1.08)';this.style.boxShadow='0 4px 16px rgba(72,69,210,0.35), 0 2px 4px rgba(0,0,0,0.08)';"
+      onmouseleave="${isActive ? '' : "this.style.background='#ffffff';this.style.color='#1A1A2E';this.style.borderColor='rgba(0,0,0,0.06)';this.style.borderLeftColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)';"}"
+    >${label}</div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
   });
+}
+
+function createClusterIcon(count: number, animDelay: number = 0) {
+  const delayStyle = animDelay > 0 ? `animation-delay: ${animDelay}ms;` : "";
+  return L.divIcon({
+    className: "subin-cluster-marker",
+    html: `<div style="${CLUSTER_STYLE} ${delayStyle}"
+      onmouseenter="this.style.background='#4845D2';this.style.color='#ffffff';this.style.transform='translate(-50%,-100%) scale(1.08)';"
+      onmouseleave="this.style.background='#ffffff';this.style.color='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';"
+    >${count} listings</div>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0],
+  });
+}
+
+// --- Clustering Logic ---
+interface ClusteredMarker {
+  type: "single";
+  listing: ListingMapItem & { lat: number; lng: number };
+}
+
+interface ClusterGroup {
+  type: "cluster";
+  listings: (ListingMapItem & { lat: number; lng: number })[];
+  center: [number, number];
+}
+
+type MapMarker = ClusteredMarker | ClusterGroup;
+
+function clusterMarkers(
+  markers: (ListingMapItem & { lat: number; lng: number })[],
+  zoomLevel: number
+): MapMarker[] {
+  // At high zoom, don't cluster
+  if (zoomLevel >= 14 || markers.length <= 1) {
+    return markers.map((m) => ({ type: "single", listing: m }));
+  }
+
+  // Distance threshold based on zoom (in degrees, approximate)
+  const threshold = 0.15 / Math.pow(2, zoomLevel - 10);
+  const used = new Set<number>();
+  const result: MapMarker[] = [];
+
+  for (let i = 0; i < markers.length; i++) {
+    if (used.has(i)) continue;
+    const group = [markers[i]];
+    used.add(i);
+
+    for (let j = i + 1; j < markers.length; j++) {
+      if (used.has(j)) continue;
+      const dx = markers[i].lat - markers[j].lat;
+      const dy = markers[i].lng - markers[j].lng;
+      if (Math.sqrt(dx * dx + dy * dy) < threshold) {
+        group.push(markers[j]);
+        used.add(j);
+      }
+    }
+
+    if (group.length === 1) {
+      result.push({ type: "single", listing: group[0] });
+    } else {
+      const cLat = group.reduce((s, g) => s + g.lat, 0) / group.length;
+      const cLng = group.reduce((s, g) => s + g.lng, 0) / group.length;
+      result.push({ type: "cluster", listings: group, center: [cLat, cLng] });
+    }
+  }
+
+  return result;
+}
+
+// --- Map Zoom Tracker ---
+function ZoomTracker({ onZoomChange }: { onZoomChange: (z: number) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    const handler = () => onZoomChange(map.getZoom());
+    map.on("zoomend", handler);
+    onZoomChange(map.getZoom());
+    return () => { map.off("zoomend", handler); };
+  }, [map, onZoomChange]);
+  return null;
 }
 
 function FitBounds({ coords }: { coords: [number, number][] }) {
@@ -80,13 +223,52 @@ function FitBounds({ coords }: { coords: [number, number][] }) {
   return null;
 }
 
+function ZoomToCluster({ center }: { center: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.flyTo(center, Math.min(map.getZoom() + 2, 16), { duration: 0.5 });
+    }
+  }, [center, map]);
+  return null;
+}
+
+// --- CSS injection ---
+const PRICE_TAG_CSS = `
+  @keyframes priceTagFadeIn {
+    0% { opacity: 0; transform: translate(-50%, -100%) scale(0.85); }
+    100% { opacity: 1; transform: translate(-50%, -100%) scale(1); }
+  }
+  .subin-price-marker, .subin-cluster-marker {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+`;
+
 interface ListingsMapProps {
   listings: ListingMapItem[];
   hoveredId: string | null;
   onSelect: (listing: ListingMapItem) => void;
+  selectedId?: string | null;
 }
 
-export default function ListingsMap({ listings, hoveredId, onSelect }: ListingsMapProps) {
+export default function ListingsMap({ listings, hoveredId, onSelect, selectedId }: ListingsMapProps) {
+  const isMobile = useIsMobile();
+  const [zoom, setZoom] = useState(12);
+  const [clusterZoomTarget, setClusterZoomTarget] = useState<[number, number] | null>(null);
+  const [bottomSheetListing, setBottomSheetListing] = useState<ListingMapItem | null>(null);
+  const styleInjected = useRef(false);
+
+  // Inject CSS once
+  useEffect(() => {
+    if (styleInjected.current) return;
+    const style = document.createElement("style");
+    style.textContent = PRICE_TAG_CSS;
+    document.head.appendChild(style);
+    styleInjected.current = true;
+  }, []);
+
   const markers = listings
     .map((l) => {
       const coords = getCoords(l.address);
@@ -94,6 +276,8 @@ export default function ListingsMap({ listings, hoveredId, onSelect }: ListingsM
       return { ...l, lat: coords[0], lng: coords[1] };
     })
     .filter(Boolean) as (ListingMapItem & { lat: number; lng: number })[];
+
+  const clustered = clusterMarkers(markers, zoom);
 
   const allCoords: [number, number][] = markers.map((m) => [m.lat, m.lng]);
   const center: [number, number] = allCoords.length > 0
@@ -103,46 +287,112 @@ export default function ListingsMap({ listings, hoveredId, onSelect }: ListingsM
       ]
     : [40.7128, -74.006];
 
+  const handleZoomChange = useCallback((z: number) => setZoom(z), []);
+
+  const handleMarkerClick = useCallback((listing: ListingMapItem) => {
+    if (isMobile) {
+      setBottomSheetListing(listing);
+    } else {
+      onSelect(listing);
+    }
+  }, [isMobile, onSelect]);
+
+  const handleClusterClick = useCallback((center: [number, number]) => {
+    setClusterZoomTarget(center);
+    // Reset after animation
+    setTimeout(() => setClusterZoomTarget(null), 600);
+  }, []);
+
   return (
-    <MapContainer
-      center={center}
-      zoom={12}
-      className="h-full w-full"
-      zoomControl={true}
-      style={{ height: "100%", width: "100%" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <FitBounds coords={allCoords} />
-      {markers.map((m) => (
-        <Marker
-          key={m.id}
-          position={[m.lat, m.lng]}
-          icon={createPriceIcon(m.monthly_rent, hoveredId === m.id)}
-          eventHandlers={{ click: () => onSelect(m) }}
-        >
-          <Popup>
-            <div style={{ minWidth: 160 }}>
-              {m.photos?.[0] && (
-                <img
-                  src={m.photos[0]}
-                  alt=""
-                  style={{ width: "100%", height: 80, objectFit: "cover", borderRadius: 6, marginBottom: 6 }}
-                />
-              )}
-              <strong style={{ fontSize: 13 }}>{m.headline || "Untitled"}</strong>
-              <p style={{ fontSize: 12, margin: "2px 0", color: "#666" }}>{m.address}</p>
-              {m.monthly_rent && (
-                <p style={{ fontSize: 14, fontWeight: 700, margin: 0 }}>
-                  ${m.monthly_rent.toLocaleString()}/mo
+    <>
+      <MapContainer
+        center={center}
+        zoom={12}
+        className="h-full w-full"
+        zoomControl={true}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <FitBounds coords={allCoords} />
+        <ZoomTracker onZoomChange={handleZoomChange} />
+        <ZoomToCluster center={clusterZoomTarget} />
+
+        {clustered.map((item, idx) => {
+          if (item.type === "cluster") {
+            return (
+              <Marker
+                key={`cluster-${idx}`}
+                position={item.center}
+                icon={createClusterIcon(item.listings.length, idx * 60)}
+                eventHandlers={{ click: () => handleClusterClick(item.center) }}
+              />
+            );
+          }
+
+          const m = item.listing;
+          const isActive = hoveredId === m.id || selectedId === m.id;
+          return (
+            <Marker
+              key={m.id}
+              position={[m.lat, m.lng]}
+              icon={createPriceIcon(m.monthly_rent, isActive, isMobile, idx * 60)}
+              eventHandlers={{ click: () => handleMarkerClick(m) }}
+            />
+          );
+        })}
+      </MapContainer>
+
+      {/* Mobile Bottom Sheet */}
+      {isMobile && (
+        <Sheet open={!!bottomSheetListing} onOpenChange={(open) => !open && setBottomSheetListing(null)}>
+          <SheetContent side="bottom" className="rounded-t-2xl px-4 pb-6 pt-3">
+            {bottomSheetListing && (
+              <div className="space-y-3">
+                {/* Drag handle */}
+                <div className="mx-auto h-1 w-10 rounded-full bg-border" />
+
+                {bottomSheetListing.photos?.[0] && (
+                  <div className="overflow-hidden rounded-xl">
+                    <img
+                      src={bottomSheetListing.photos[0]}
+                      alt={bottomSheetListing.headline || ""}
+                      className="h-44 w-full object-cover"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="text-lg font-bold text-foreground">
+                    {bottomSheetListing.headline || "Untitled Listing"}
+                  </h3>
+                  <p className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {bottomSheetListing.address || "Unknown location"}
+                  </p>
+                </div>
+
+                <p className="text-2xl font-bold" style={{ color: "#4845D2" }}>
+                  ${bottomSheetListing.monthly_rent?.toLocaleString() ?? "—"}
+                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
                 </p>
-              )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+
+                <Button
+                  className="w-full"
+                  onClick={() => {
+                    onSelect(bottomSheetListing);
+                    setBottomSheetListing(null);
+                  }}
+                >
+                  View Listing <ArrowRight className="ml-1.5 h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </SheetContent>
+        </Sheet>
+      )}
+    </>
   );
 }
