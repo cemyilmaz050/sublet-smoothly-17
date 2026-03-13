@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Mail, ArrowRight, Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Building2, Mail, ArrowRight, Loader2, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,11 +53,34 @@ const LoginPage = () => {
       }
       if (data.session) {
         toast.success("Logged in successfully!");
-        // Explicit redirect — don't rely solely on state re-render
         navigate("/listings", { replace: true });
       }
     } catch (err: any) {
       toast.error(err.message || "An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setEmail("demo@bostonbrokerage.com");
+    setPassword("demo123456");
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: "demo@bostonbrokerage.com",
+        password: "demo123456",
+      });
+      if (error) {
+        toast.error("Demo account not available. Please contact support.");
+        return;
+      }
+      if (data.session) {
+        toast.success("Logged in as Boston Brokerage Group staff!");
+        navigate("/manager", { replace: true });
+      }
+    } catch (err: any) {
+      toast.error("Demo login failed.");
     } finally {
       setLoading(false);
     }
@@ -205,6 +229,29 @@ const LoginPage = () => {
               <Link to="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
             </p>
           </div>
+
+          {/* Demo Staff Login */}
+          <Card className="mt-6 border-dashed border-2 border-primary/30 bg-primary/[0.03]">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">Boston Brokerage Group — Staff Login</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Demo account for property management staff</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 text-xs"
+                    onClick={handleDemoLogin}
+                    disabled={loading}
+                  >
+                    <Building2 className="mr-1.5 h-3.5 w-3.5" />
+                    Log in as BBG Staff
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </div>

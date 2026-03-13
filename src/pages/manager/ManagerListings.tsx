@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Building2, Search, MapPin, Home, LayoutGrid, List, Pause, Pencil, Trash2 } from "lucide-react";
+import { Building2, Search, MapPin, Home, LayoutGrid, List, Pencil, Calendar, User, DollarSign } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -14,10 +14,11 @@ import EmptyState from "@/components/EmptyState";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { format } from "date-fns";
 
 const ManagerListings = () => {
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -30,15 +31,28 @@ const ManagerListings = () => {
         .select("*")
         .eq("manager_id", user!.id)
         .order("created_at", { ascending: false });
-      return data || [];
+      if (!data?.length) return [];
+
+      // Fetch tenant names
+      const tenantIds = [...new Set(data.map(l => l.tenant_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name")
+        .in("id", tenantIds);
+      const pm = Object.fromEntries((profiles || []).map(p => [p.id, p]));
+
+      return data.map(l => ({
+        ...l,
+        tenant_name: [pm[l.tenant_id]?.first_name, pm[l.tenant_id]?.last_name].filter(Boolean).join(" ") || "Unknown Tenant",
+      }));
     },
   });
 
-  const filtered = listings.filter((l) => {
+  const filtered = listings.filter((l: any) => {
     if (filterStatus !== "all" && l.status !== filterStatus) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      return (l.address?.toLowerCase().includes(q) || l.headline?.toLowerCase().includes(q));
+      return (l.address?.toLowerCase().includes(q) || l.headline?.toLowerCase().includes(q) || l.tenant_name?.toLowerCase().includes(q));
     }
     return true;
   });
@@ -52,12 +66,22 @@ const ManagerListings = () => {
     }
   };
 
+  const statusLabel = (s: string) => {
+    switch (s) {
+      case "active": return "Active";
+      case "pending": return "Pending";
+      case "expired": return "Filled";
+      case "draft": return "Draft";
+      default: return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">My Listings</h1>
-          <p className="text-sm text-muted-foreground mt-1">{listings.length} total listings</p>
+          <h1 className="text-2xl font-bold text-foreground">Active Sublet Listings</h1>
+          <p className="text-sm text-muted-foreground mt-1">Properties listed for sublet under Boston Brokerage Group management</p>
         </div>
         <div className="flex gap-2">
           <Button variant={viewMode === "grid" ? "default" : "outline"} size="icon" onClick={() => setViewMode("grid")}>
@@ -73,7 +97,7 @@ const ManagerListings = () => {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search listings..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
+          <Input placeholder="Search by address, headline, or tenant..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-44">
@@ -84,7 +108,7 @@ const ManagerListings = () => {
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="expired">Expired</SelectItem>
+            <SelectItem value="expired">Filled</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -92,10 +116,10 @@ const ManagerListings = () => {
       {isLoading ? (
         <p className="py-12 text-center text-muted-foreground">Loading listings...</p>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Building2} title="No listings found" description="Listings synced or added will appear here." />
+        <EmptyState icon={Building2} title="No sublet listings yet" description="When tenants list properties under your management, they'll appear here." />
       ) : viewMode === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {filtered.map((listing) => (
+          {filtered.map((listing: any) => (
             <Card key={listing.id} className="overflow-hidden shadow-card transition-all hover:shadow-elevated group">
               <div className="relative h-40 bg-accent">
                 {listing.photos?.[0] ? (
@@ -104,7 +128,7 @@ const ManagerListings = () => {
                   <div className="flex h-full items-center justify-center"><Home className="h-12 w-12 text-muted-foreground/20" /></div>
                 )}
                 <Badge variant={statusVariant(listing.status) as any} className="absolute right-3 top-3 text-xs">
-                  {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
+                  {statusLabel(listing.status)}
                 </Badge>
               </div>
               <CardContent className="p-4 space-y-2">
@@ -113,16 +137,18 @@ const ManagerListings = () => {
                   <MapPin className="h-3.5 w-3.5 shrink-0" />
                   {listing.address || "No address"}
                 </p>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <User className="h-3 w-3" />
+                  Listed by {listing.tenant_name}
+                </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">{listing.bedrooms || 0} bed · {listing.bathrooms || 0} bath</span>
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    {listing.created_at ? format(new Date(listing.created_at), "MMM d, yyyy") : "—"}
+                  </span>
                   {listing.monthly_rent && (
                     <span className="font-semibold text-foreground">${Number(listing.monthly_rent).toLocaleString()}/mo</span>
                   )}
-                </div>
-                <div className="flex gap-1.5 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="outline" size="sm" className="flex-1 text-xs"><Pencil className="mr-1 h-3 w-3" />Edit</Button>
-                  <Button variant="outline" size="sm" className="text-xs"><Pause className="h-3 w-3" /></Button>
-                  <Button variant="outline" size="sm" className="text-xs text-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></Button>
                 </div>
               </CardContent>
             </Card>
@@ -135,29 +161,30 @@ const ManagerListings = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Property</TableHead>
-                  <TableHead>Rent</TableHead>
+                  <TableHead>Listed By</TableHead>
+                  <TableHead>Date Listed</TableHead>
+                  <TableHead>Asking Price</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((listing) => (
+                {filtered.map((listing: any) => (
                   <TableRow key={listing.id}>
                     <TableCell>
                       <p className="font-medium text-foreground">{listing.headline || "Untitled"}</p>
                       <p className="text-xs text-muted-foreground">{listing.address}</p>
                     </TableCell>
-                    <TableCell>{listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}` : "—"}</TableCell>
+                    <TableCell className="text-sm">{listing.tenant_name}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {listing.created_at ? format(new Date(listing.created_at), "MMM d, yyyy") : "—"}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}/mo` : "—"}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={statusVariant(listing.status) as any} className="text-xs">
-                        {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
+                        {statusLabel(listing.status)}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="outline" size="sm"><Pencil className="h-3 w-3" /></Button>
-                        <Button variant="outline" size="sm"><Pause className="h-3 w-3" /></Button>
-                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

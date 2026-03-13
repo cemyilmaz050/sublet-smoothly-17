@@ -52,6 +52,56 @@ export type Database = {
           },
         ]
       }
+      background_checks: {
+        Row: {
+          applicant_id: string
+          application_id: string
+          created_at: string
+          employment_verified: boolean | null
+          id: string
+          identity_verified: boolean | null
+          notes: string | null
+          rental_history_verified: boolean | null
+          reviewer_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id: string
+          created_at?: string
+          employment_verified?: boolean | null
+          id?: string
+          identity_verified?: boolean | null
+          notes?: string | null
+          rental_history_verified?: boolean | null
+          reviewer_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string
+          created_at?: string
+          employment_verified?: boolean | null
+          id?: string
+          identity_verified?: boolean | null
+          notes?: string | null
+          rental_history_verified?: boolean | null
+          reviewer_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "background_checks_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_properties: {
         Row: {
           address: string
