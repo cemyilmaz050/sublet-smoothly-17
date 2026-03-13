@@ -7,79 +7,82 @@ interface StepProgressProps {
   currentStep: number;
 }
 
+const SHORT_LABELS = ["Property Basics", "Photos", "Pricing", "House Rules", "Submit"];
+
 const StepProgress = ({ steps, currentStep }: StepProgressProps) => {
   const isMobile = useIsMobile();
+  const labels = steps.length === SHORT_LABELS.length ? SHORT_LABELS : steps;
 
   if (isMobile) {
+    const pct = ((currentStep) / (steps.length - 1)) * 100;
     return (
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-            {currentStep + 1}
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-foreground">{steps[currentStep]}</p>
-            <p className="text-xs text-muted-foreground">Step {currentStep + 1} of {steps.length}</p>
-          </div>
-        </div>
-        <div className="flex gap-1">
-          {steps.map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                "h-1.5 w-6 rounded-full transition-colors",
-                i < currentStep ? "bg-primary" : i === currentStep ? "bg-primary" : "bg-muted"
-              )}
-            />
-          ))}
+      <div className="w-full px-4 py-3">
+        <p className="text-center text-sm font-semibold text-foreground">
+          Step {currentStep + 1} of {steps.length} — {labels[currentStep]}
+        </p>
+        <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className="h-full rounded-full bg-primary transition-all duration-300"
+            style={{ width: `${pct}%` }}
+          />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6">
-      <div className="flex items-center">
-        {steps.map((step, index) => (
-          <div key={step} className="flex flex-1 items-center">
-            {/* Step circle + label */}
-            <div className="flex flex-col items-center gap-2">
+    <div className="mx-auto w-full max-w-2xl px-8">
+      <div className="flex items-start justify-between">
+        {labels.map((label, index) => {
+          const isCompleted = index < currentStep;
+          const isActive = index === currentStep;
+
+          return (
+            <div key={index} className="relative flex flex-1 flex-col items-center">
+              {/* Connecting line — drawn from this circle to the next */}
+              {index < labels.length - 1 && (
+                <div
+                  className={cn(
+                    "absolute top-[18px] h-[2px] md:top-[22px]",
+                    isCompleted ? "bg-primary" : "bg-muted"
+                  )}
+                  style={{
+                    left: "calc(50% + 18px)",
+                    right: "calc(-50% + 18px)",
+                  }}
+                />
+              )}
+
+              {/* Circle */}
               <div
                 className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-all",
-                  index < currentStep
+                  "relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-bold md:h-11 md:w-11 md:text-sm",
+                  isCompleted
                     ? "bg-primary text-primary-foreground"
-                    : index === currentStep
+                    : isActive
                     ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-muted text-muted-foreground"
                 )}
               >
-                {index < currentStep ? <Check className="h-5 w-5" /> : index + 1}
+                {isCompleted ? <Check className="h-4 w-4 md:h-5 md:w-5" /> : index + 1}
               </div>
+
+              {/* Label */}
               <span
                 className={cn(
-                  "max-w-[100px] text-center text-[11px] leading-tight md:text-xs",
-                  index === currentStep
+                  "mt-2 whitespace-nowrap text-center text-[11px] md:text-[13px]",
+                  isActive
                     ? "font-bold text-foreground"
-                    : index < currentStep
+                    : isCompleted
                     ? "font-medium text-foreground"
                     : "font-medium text-muted-foreground"
                 )}
               >
-                {step}
+                {label}
               </span>
             </div>
-            {/* Connecting line */}
-            {index < steps.length - 1 && (
-              <div
-                className={cn(
-                  "mt-[-1.5rem] h-0.5 flex-1",
-                  index < currentStep ? "bg-primary" : "bg-muted"
-                )}
-              />
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
