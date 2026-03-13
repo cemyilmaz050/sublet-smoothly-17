@@ -79,8 +79,11 @@ const SubtenantDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <div className="container max-w-4xl py-8">
-        <div className="mb-8 flex items-center justify-between">
+      <div className="container max-w-4xl py-8 space-y-6">
+        {/* Profile Completeness */}
+        <ProfileCompleteness />
+
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Subtenant Dashboard</h1>
             <p className="mt-1 text-muted-foreground">Track your applications and find your next home</p>
