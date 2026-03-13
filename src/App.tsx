@@ -15,18 +15,23 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import TenantDashboard from "./pages/TenantDashboard";
 import SubtenantDashboard from "./pages/SubtenantDashboard";
-import ManagerDashboard from "./pages/ManagerDashboard";
-import MessagesPage from "./pages/MessagesPage";
-import CreateListingPage from "./pages/CreateListingPage";
-import ManagerIntegrationsPage from "./pages/ManagerIntegrationsPage";
-import ManagerSubletRequestsPage from "./pages/ManagerSubletRequestsPage";
-import ManagerPropertiesPage from "./pages/ManagerPropertiesPage";
-import ManagerActiveSublets from "./pages/ManagerActiveSublets";
-import ManagerApplicationsPage from "./pages/ManagerApplicationsPage";
 import TenantOnboardingPage from "./pages/TenantOnboardingPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import ManagerProfilePage from "./pages/ManagerProfilePage";
+import MessagesPage from "./pages/MessagesPage";
+import CreateListingPage from "./pages/CreateListingPage";
 import NotFound from "./pages/NotFound";
+
+// Manager layout + pages
+import ManagerLayout from "./components/manager/ManagerLayout";
+import ManagerHome from "./pages/manager/ManagerHome";
+import ManagerListings from "./pages/manager/ManagerListings";
+import ManagerApplications from "./pages/manager/ManagerApplications";
+import ManagerMessages from "./pages/manager/ManagerMessages";
+import ManagerNotifications from "./pages/manager/ManagerNotifications";
+import ManagerBackgroundChecks from "./pages/manager/ManagerBackgroundChecks";
+import ManagerPayments from "./pages/manager/ManagerPayments";
+import ManagerSettings from "./pages/manager/ManagerSettings";
 
 const queryClient = new QueryClient();
 
@@ -57,15 +62,25 @@ const App = () => (
               <Route path="/dashboard/tenant" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
               <Route path="/tenant/dashboard" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
               <Route path="/dashboard/subtenant" element={<ProtectedRoute><SubtenantDashboard /></ProtectedRoute>} />
-              <Route path="/dashboard/manager" element={<ProtectedRoute><ManagerDashboard /></ProtectedRoute>} />
-              <Route path="/dashboard/manager/integrations" element={<ProtectedRoute><ManagerIntegrationsPage /></ProtectedRoute>} />
-              <Route path="/dashboard/manager/requests" element={<ProtectedRoute><ManagerSubletRequestsPage /></ProtectedRoute>} />
-              <Route path="/dashboard/manager/properties" element={<ProtectedRoute><ManagerPropertiesPage /></ProtectedRoute>} />
-              <Route path="/dashboard/manager/sublets" element={<ProtectedRoute><ManagerActiveSublets /></ProtectedRoute>} />
-              <Route path="/dashboard/manager/applications" element={<ProtectedRoute><ManagerApplicationsPage /></ProtectedRoute>} />
               <Route path="/listings/create" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
               <Route path="/listings/edit/:id" element={<ProtectedRoute><CreateListingPage /></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+
+              {/* Manager Dashboard — unified layout */}
+              <Route path="/manager" element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>
+                <Route index element={<ManagerHome />} />
+                <Route path="listings" element={<ManagerListings />} />
+                <Route path="applications" element={<ManagerApplications />} />
+                <Route path="messages" element={<ManagerMessages />} />
+                <Route path="notifications" element={<ManagerNotifications />} />
+                <Route path="checks" element={<ManagerBackgroundChecks />} />
+                <Route path="payments" element={<ManagerPayments />} />
+                <Route path="settings" element={<ManagerSettings />} />
+              </Route>
+
+              {/* Redirects from old manager routes */}
+              <Route path="/dashboard/manager" element={<Navigate to="/manager" replace />} />
+              <Route path="/dashboard/manager/*" element={<Navigate to="/manager" replace />} />
 
               <Route path="*" element={<NotFound />} />
             </Routes>
