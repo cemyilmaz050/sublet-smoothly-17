@@ -1,14 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
-import { Building2, Home, ExternalLink, Pencil } from "lucide-react";
+import { Home, ExternalLink, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
 import DashboardMessages from "@/components/tenant/DashboardMessages";
-import UserMenu from "@/components/UserMenu";
-import NotificationBell from "@/components/NotificationBell";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
