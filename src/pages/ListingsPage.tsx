@@ -5,17 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2,
   Search, SlidersHorizontal, Zap, Pencil, Eye, X, CalendarDays, Map,
-  MessageSquare, Send, CheckCircle2, Loader2,
+  MessageSquare, Send, CheckCircle2, Loader2, CalendarIcon,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import Navbar from "@/components/Navbar";
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import ReviewSection from "@/components/ReviewSection";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import StarRating from "@/components/StarRating";
+import ShareListing from "@/components/ShareListing";
 import CalendarView from "@/components/discover/CalendarView";
 import ListingsMap from "@/components/discover/ListingsMap";
 import { useNavigate } from "react-router-dom";
@@ -84,6 +89,8 @@ const ListingsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [moveInDate, setMoveInDate] = useState<Date | undefined>();
+  const [moveOutDate, setMoveOutDate] = useState<Date | undefined>();
   const [dbListings, setDbListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -158,6 +165,15 @@ const ListingsPage = () => {
       if (priceFilter === "0-1500" && rent > 1500) return false;
       if (priceFilter === "1500-2500" && (rent < 1500 || rent > 2500)) return false;
       if (priceFilter === "2500+" && rent < 2500) return false;
+    }
+    // Date range filter
+    if (moveInDate || moveOutDate) {
+      const from = l.available_from ? new Date(l.available_from) : null;
+      const until = l.available_until ? new Date(l.available_until) : null;
+      if (moveInDate && from && from > moveInDate) return false;
+      if (moveInDate && until && until < moveInDate) return false;
+      if (moveOutDate && until && until < moveOutDate) return false;
+      if (moveOutDate && from && from > moveOutDate) return false;
     }
     // Calendar date filter
     if (calendarSelectedDate && viewMode === "calendar") {
@@ -326,18 +342,33 @@ const ListingsPage = () => {
               <SelectItem value="2500+">$2,500+</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger className="w-[160px]">
-              <Calendar className="mr-1 h-4 w-4" />
-              <SelectValue placeholder="Dates" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="any">Any dates</SelectItem>
-              <SelectItem value="summer">Summer 2026</SelectItem>
-              <SelectItem value="fall">Fall 2026</SelectItem>
-              <SelectItem value="winter">Winter 2026–27</SelectItem>
-            </SelectContent>
-          </Select>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveInDate && "text-muted-foreground")}>
+                <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                {moveInDate ? format(moveInDate, "MMM d") : "Move in"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarPicker mode="single" selected={moveInDate} onSelect={setMoveInDate} disabled={(d) => d < new Date()} initialFocus className={cn("p-3 pointer-events-auto")} />
+            </PopoverContent>
+          </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveOutDate && "text-muted-foreground")}>
+                <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                {moveOutDate ? format(moveOutDate, "MMM d") : "Move out"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarPicker mode="single" selected={moveOutDate} onSelect={setMoveOutDate} disabled={(d) => d < (moveInDate || new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
+            </PopoverContent>
+          </Popover>
+          {(moveInDate || moveOutDate) && (
+            <button onClick={() => { setMoveInDate(undefined); setMoveOutDate(undefined); }} className="text-xs text-primary hover:underline">
+              Clear dates
+            </button>
+          )}
           <Button variant="outline" size="sm" className="gap-1.5">
             <SlidersHorizontal className="h-4 w-4" />
             Filters
@@ -489,7 +520,10 @@ const ListingsPage = () => {
           {selectedListing && (
             <>
               <SheetHeader>
-                <SheetTitle className="text-xl">{selectedListing.headline || "Untitled"}</SheetTitle>
+                <div className="flex items-start justify-between gap-2">
+                  <SheetTitle className="text-xl">{selectedListing.headline || "Untitled"}</SheetTitle>
+                  <ShareListing listingId={selectedListing.id} headline={selectedListing.headline} address={selectedListing.address} />
+                </div>
               </SheetHeader>
               <div className="mt-4 space-y-5">
                 {selectedListing.photos && selectedListing.photos[0] && (
