@@ -294,6 +294,29 @@ const ListingsPage = () => {
         {/* Left: Listings Cards */}
         <div className="w-full overflow-y-auto lg:w-[45%]">
           <div className="p-4 lg:p-6">
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => <div key={i} className="h-36 animate-pulse rounded-xl bg-muted" />)}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                  <Home className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">No sublets available right now</h3>
+                <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                  Be the first to list yours — it only takes a few minutes to get started.
+                </p>
+                <Button className="mt-6" onClick={() => {
+                  if (!user) { requireAuth(() => navigate("/create-listing")); return; }
+                  navigate("/create-listing");
+                }}>
+                  <Plus className="mr-1.5 h-4 w-4" />
+                  List Your Apartment
+                </Button>
+              </div>
+            ) : (
+              <>
             <p className="mb-4 text-sm text-muted-foreground">
               {filtered.length} listing{filtered.length !== 1 ? "s" : ""} found
               {calendarSelectedDate && viewMode === "calendar" && (
@@ -308,8 +331,6 @@ const ListingsPage = () => {
                 </span>
               )}
             </p>
-
-            <div className="space-y-4">
               {filtered.map((listing, index) => (
                 <motion.div
                   key={listing.id}
