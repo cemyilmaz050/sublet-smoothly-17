@@ -212,9 +212,22 @@ const AuthModal = () => {
                 We sent a verification link to <strong className="text-foreground">{signupEmail}</strong>.
                 Click the link to activate your account, then come back here.
               </p>
-              <Button variant="outline" onClick={() => { setEmailSent(false); setTab("login"); setLoginEmail(signupEmail); }}>
-                I've verified — Log in
-              </Button>
+              <p className="text-xs text-muted-foreground">
+                Don't see it? Check your <strong>spam or junk folder</strong>. It may take a minute to arrive.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleResendVerification}
+                  disabled={resending || resendCooldown > 0}
+                >
+                  {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+                </Button>
+                <Button variant="outline" onClick={() => { setEmailSent(false); setTab("login"); setLoginEmail(signupEmail); }}>
+                  I've verified — Log in
+                </Button>
+              </div>
             </div>
           ) : forgotMode ? (
             /* Forgot password */
