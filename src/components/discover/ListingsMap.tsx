@@ -42,7 +42,8 @@ function getCoords(address: string | null): [number, number] | null {
   for (const [key, coords] of Object.entries(LOCATION_COORDS)) {
     if (lower.includes(key)) return coords;
   }
-  return null;
+  // Default: random NYC area with small offset
+  return [40.73 + Math.random() * 0.08, -73.99 + Math.random() * 0.06];
 }
 
 function createPriceIcon(price: number | null, isActive: boolean) {

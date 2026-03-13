@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import {
   MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2,
   Search, SlidersHorizontal, Zap, Pencil, Eye, X, CalendarDays, Map,
-  MessageSquare, Send, CheckCircle2, Loader2, Home, Plus,
+  MessageSquare, Send, CheckCircle2, Loader2,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
@@ -38,6 +38,38 @@ interface ListingItem {
   manager_id: string | null;
   property_type?: string | null;
 }
+
+const mockListings: ListingItem[] = [
+  {
+    id: "mock-1", headline: "Sunny 2BR in Downtown", address: "Manhattan, NY", monthly_rent: 2400,
+    photos: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop"],
+    available_from: "2026-07-01", available_until: "2026-12-31", bedrooms: 2, bathrooms: 1, sqft: 850,
+    description: "Bright corner apartment with skyline views, in-unit laundry, and modern finishes throughout.",
+    source: "manual", tenant_id: "", manager_id: null, property_type: "apartment",
+  },
+  {
+    id: "mock-2", headline: "Cozy Studio near Park", address: "Brooklyn, NY", monthly_rent: 1800,
+    photos: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop"],
+    available_from: "2026-08-01", available_until: "2026-11-30", bedrooms: 1, bathrooms: 1, sqft: 480,
+    description: "Charming studio steps from Prospect Park. Hardwood floors, lots of natural light.",
+    source: "manual", tenant_id: "", manager_id: null, property_type: "studio",
+  },
+  {
+    id: "mock-3", headline: "Modern 1BR with Views", address: "Jersey City, NJ", monthly_rent: 2100,
+    photos: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop"],
+    available_from: "2026-07-15", available_until: "2027-01-15", bedrooms: 1, bathrooms: 1, sqft: 650,
+    description: "Floor-to-ceiling windows with stunning river views. Doorman building with gym.",
+    source: "manual", tenant_id: "", manager_id: null, property_type: "apartment",
+  },
+  {
+    id: "mock-4", headline: "Spacious 3BR Brownstone", address: "Harlem, NY", monthly_rent: 3200,
+    photos: ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&h=400&fit=crop"],
+    available_from: "2026-06-15", available_until: "2026-12-15", bedrooms: 3, bathrooms: 2, sqft: 1200,
+    description: "Classic brownstone with exposed brick, chef's kitchen, and private backyard.",
+    source: "manual", tenant_id: "", manager_id: null, property_type: "house",
+  },
+];
+
 
 const ListingsPage = () => {
   const { user, role } = useAuth();
@@ -76,7 +108,9 @@ const ListingsPage = () => {
     }).then();
   }, [selectedListing?.id]);
 
-  const filtered = dbListings.filter((l) => {
+  const allListings = [...dbListings, ...mockListings];
+
+  const filtered = allListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (priceFilter && priceFilter !== "all") {
       const rent = l.monthly_rent ?? 0;
@@ -294,29 +328,6 @@ const ListingsPage = () => {
         {/* Left: Listings Cards */}
         <div className="w-full overflow-y-auto lg:w-[45%]">
           <div className="p-4 lg:p-6">
-            {loading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map((i) => <div key={i} className="h-36 animate-pulse rounded-xl bg-muted" />)}
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                  <Home className="h-8 w-8 text-primary" />
-                </div>
-                <h3 className="text-lg font-semibold text-foreground">No sublets available right now</h3>
-                <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                  Be the first to list yours — it only takes a few minutes to get started.
-                </p>
-                <Button className="mt-6" onClick={() => {
-                  if (!user) { requireAuth(() => navigate("/create-listing")); return; }
-                  navigate("/create-listing");
-                }}>
-                  <Plus className="mr-1.5 h-4 w-4" />
-                  List Your Apartment
-                </Button>
-              </div>
-            ) : (
-              <>
             <p className="mb-4 text-sm text-muted-foreground">
               {filtered.length} listing{filtered.length !== 1 ? "s" : ""} found
               {calendarSelectedDate && viewMode === "calendar" && (
@@ -331,6 +342,7 @@ const ListingsPage = () => {
                 </span>
               )}
             </p>
+
             <div className="space-y-4">
               {filtered.map((listing, index) => (
                 <motion.div
@@ -393,9 +405,10 @@ const ListingsPage = () => {
                   </div>
                 </motion.div>
               ))}
+              {filtered.length === 0 && !loading && (
+                <div className="py-16 text-center text-muted-foreground">No listings found matching your search.</div>
+              )}
             </div>
-              </>
-            )}
           </div>
         </div>
 
@@ -404,7 +417,7 @@ const ListingsPage = () => {
           {viewMode === "calendar" ? (
             <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden">
               <CalendarView
-                listings={dbListings}
+                listings={allListings}
                 onDayClick={setCalendarSelectedDate}
                 selectedDate={calendarSelectedDate}
               />

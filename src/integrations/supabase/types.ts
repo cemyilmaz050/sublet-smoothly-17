@@ -320,13 +320,10 @@ export type Database = {
           headline: string | null
           house_rules: string | null
           id: string
-          latitude: number | null
-          longitude: number | null
           management_group_id: string | null
           manager_id: string | null
           min_duration: number | null
           monthly_rent: number | null
-          move_in_flexibility: string | null
           path: string | null
           photos: string[] | null
           property_type: Database["public"]["Enums"]["property_type"] | null
@@ -356,13 +353,10 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
-          latitude?: number | null
-          longitude?: number | null
           management_group_id?: string | null
           manager_id?: string | null
           min_duration?: number | null
           monthly_rent?: number | null
-          move_in_flexibility?: string | null
           path?: string | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
@@ -392,13 +386,10 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
-          latitude?: number | null
-          longitude?: number | null
           management_group_id?: string | null
           manager_id?: string | null
           min_duration?: number | null
           monthly_rent?: number | null
-          move_in_flexibility?: string | null
           path?: string | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
