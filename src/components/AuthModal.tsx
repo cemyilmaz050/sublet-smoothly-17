@@ -347,8 +347,8 @@ const AuthModal = () => {
 
               {/* SIGNUP TAB */}
               <TabsContent value="signup" className="mt-0 space-y-4">
-                <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignIn} disabled={googleLoading}>
-                  {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
+                <Button variant="outline" className="w-full" size="lg" onClick={handleGoogleSignIn}>
+                  <GoogleIcon />
                   Continue with Google
                 </Button>
                 <div className="relative">
