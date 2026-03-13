@@ -72,7 +72,16 @@ const AuthModal = () => {
         if (error.message.includes("Invalid login credentials")) {
           toast.error("Invalid email or password. Please try again.");
         } else if (error.message.includes("Email not confirmed")) {
-          toast.error("Please confirm your email before logging in.");
+          toast.error("Please confirm your email before logging in. Check your inbox and spam folder.", {
+            action: {
+              label: "Resend",
+              onClick: async () => {
+                const { error: resendErr } = await supabase.auth.resend({ type: "signup", email: loginEmail });
+                if (resendErr) toast.error(resendErr.message);
+                else toast.success("Verification email resent!");
+              },
+            },
+          });
         } else {
           toast.error(error.message);
         }
