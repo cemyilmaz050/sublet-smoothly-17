@@ -114,13 +114,24 @@ export default function ManagerLayout() {
 
 function ManagerHeaderUser() {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   if (!user) return null;
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
   return (
     <div className="flex items-center gap-3">
       <span className="text-xs text-muted-foreground hidden sm:block">Boston Brokerage Group — Staff</span>
-      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-        {user.email?.charAt(0).toUpperCase()}
-      </div>
+      <button
+        onClick={handleSignOut}
+        title="Sign out"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary hover:bg-destructive/10 hover:text-destructive transition-colors"
+      >
+        <LogOut className="h-4 w-4" />
+      </button>
     </div>
   );
 }
