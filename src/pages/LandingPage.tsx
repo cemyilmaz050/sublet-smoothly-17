@@ -27,7 +27,7 @@ const LandingPage = () => {
             transition={{ duration: 0.6 }}
           >
             <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm">
-              ✨ Trusted by 2,000+ tenants
+              ✨ The smart way to sublet
             </Badge>
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Sublet your apartment{" "}

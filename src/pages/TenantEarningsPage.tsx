@@ -1,18 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, TrendingUp, Clock, Pencil, Calendar } from "lucide-react";
+import { DollarSign, TrendingUp, Clock, Calendar, Pencil } from "lucide-react";
 import Navbar from "@/components/Navbar";
-import PaymentStatusBadge from "@/components/PaymentStatusBadge";
-import type { PaymentStatus } from "@/components/PaymentStatusBadge";
 import PlatformFeeTooltip from "@/components/PlatformFeeTooltip";
+import EmptyState from "@/components/EmptyState";
 import { Link } from "react-router-dom";
-
-const payouts: { date: string; amount: string; status: PaymentStatus }[] = [
-  { date: "Mar 1, 2026", amount: "$2,350.00", status: "transferred" },
-  { date: "Feb 1, 2026", amount: "$2,350.00", status: "transferred" },
-  { date: "Jan 15, 2026", amount: "$2,350.00", status: "transferred" },
-];
 
 const TenantEarningsPage = () => {
   return (
@@ -31,7 +23,7 @@ const TenantEarningsPage = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Earned</p>
-                <p className="text-xl font-bold text-foreground">$7,050.00</p>
+                <p className="text-xl font-bold text-foreground">$0.00</p>
               </div>
             </CardContent>
           </Card>
@@ -42,7 +34,7 @@ const TenantEarningsPage = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Pending Payout</p>
-                <p className="text-xl font-bold text-foreground">$2,350.00</p>
+                <p className="text-xl font-bold text-foreground">$0.00</p>
               </div>
             </CardContent>
           </Card>
@@ -53,7 +45,7 @@ const TenantEarningsPage = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Next Payout</p>
-                <p className="text-xl font-bold text-foreground">Apr 1</p>
+                <p className="text-xl font-bold text-foreground">—</p>
               </div>
             </CardContent>
           </Card>
@@ -65,40 +57,18 @@ const TenantEarningsPage = () => {
             <p className="font-medium text-foreground">Payout Schedule</p>
             <p className="text-sm text-muted-foreground">Payouts are processed on the 1st of every month</p>
           </div>
-          <PlatformFeeTooltip amount={2500} />
+          <PlatformFeeTooltip amount={0} />
         </div>
 
-        {/* Payout History */}
-        <Card className="mb-6 shadow-card">
-          <CardHeader>
-            <CardTitle className="text-lg">Payout History</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {payouts.map((p, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="text-muted-foreground">{p.date}</TableCell>
-                    <TableCell className="text-right font-medium text-foreground">{p.amount}</TableCell>
-                    <TableCell className="text-right">
-                      <PaymentStatusBadge status={p.status} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        {/* Empty state */}
+        <EmptyState
+          icon={DollarSign}
+          title="No payouts yet"
+          description="Once a subtenant makes a payment for your listing, your earnings will appear here."
+        />
 
         {/* Edit Payout */}
-        <Link to="/pricing-setup">
+        <Link to="/pricing-setup" className="mt-6 block">
           <Button variant="outline" size="lg" className="w-full">
             <Pencil className="mr-1 h-4 w-4" />
             Edit Payout Method
