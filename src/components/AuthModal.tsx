@@ -472,6 +472,25 @@ const AuthModal = () => {
                     )}
                   </div>
 
+                  {/* Terms checkbox */}
+                  <div className="space-y-1">
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id="modal-signup-terms"
+                        checked={agreedToTerms}
+                        onCheckedChange={(v) => { setAgreedToTerms(v === true); setSignupErrors((p) => ({ ...p, terms: "" })); }}
+                        className="mt-0.5 h-4 w-4 shrink-0"
+                      />
+                      <label htmlFor="modal-signup-terms" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">
+                        I agree to the{" "}
+                        <Link to="/terms" target="_blank" className="text-primary hover:underline font-medium">Terms of Service</Link>
+                        {" "}and{" "}
+                        <Link to="/privacy" target="_blank" className="text-primary hover:underline font-medium">Privacy Policy</Link>
+                      </label>
+                    </div>
+                    {signupErrors.terms && <p className="ml-7 text-sm text-destructive">{signupErrors.terms}</p>}
+                  </div>
+
                   <Button className="w-full h-12" size="lg" onClick={handleSignUp} disabled={signupLoading}>
                     {signupLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : <>Create Account <ArrowRight className="ml-1 h-4 w-4" /></>}
                   </Button>
