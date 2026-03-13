@@ -47,6 +47,7 @@ const AuthModal = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Forgot password
   const [forgotMode, setForgotMode] = useState(false);
