@@ -26,11 +26,25 @@ const ManagerDashboard = () => {
       ]);
       const requests = requestsRes.data || [];
       const listings = listingsRes.data || [];
+
+      // Get pending applications count
+      const listingIds = listings.map(l => l.id);
+      let pendingApplications = 0;
+      if (listingIds.length > 0) {
+        const { count } = await supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .in("listing_id", listingIds)
+          .eq("status", "pending");
+        pendingApplications = count ?? 0;
+      }
+
       return {
         pendingRequests: requests.filter(r => r.status === "pending").length,
         approvedSublets: requests.filter(r => r.status === "approved").length,
         totalProperties: listings.filter(l => l.status === "active").length,
         syncedProperties: listings.filter(l => l.source === "appfolio").length,
+        pendingApplications,
         integration: integrationsRes.data,
       };
     },
