@@ -99,7 +99,40 @@ const ListingsPage = () => {
         .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, property_type")
         .eq("status", "active")
         .order("created_at", { ascending: false });
-      setDbListings((data as ListingItem[]) || []);
+
+      if (data && data.length > 0) {
+        // Fetch tenant verification status
+        const tenantIds = [...new Set(data.map((l: any) => l.tenant_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, id_verified")
+          .in("id", tenantIds);
+        const verifiedMap = new Map((profiles || []).map((p: any) => [p.id, p.id_verified]));
+
+        // Fetch avg ratings per listing
+        const listingIds = data.map((l: any) => l.id);
+        const { data: reviews } = await supabase
+          .from("reviews")
+          .select("listing_id, rating")
+          .in("listing_id", listingIds);
+
+        const ratingMap = new Map<string, { sum: number; count: number }>();
+        (reviews || []).forEach((r: any) => {
+          const existing = ratingMap.get(r.listing_id) || { sum: 0, count: 0 };
+          ratingMap.set(r.listing_id, { sum: existing.sum + r.rating, count: existing.count + 1 });
+        });
+
+        const enriched = data.map((l: any) => ({
+          ...l,
+          tenant_verified: verifiedMap.get(l.tenant_id) || false,
+          avg_rating: ratingMap.has(l.id) ? ratingMap.get(l.id)!.sum / ratingMap.get(l.id)!.count : 0,
+          review_count: ratingMap.get(l.id)?.count || 0,
+        }));
+
+        setDbListings(enriched as ListingItem[]);
+      } else {
+        setDbListings([]);
+      }
       setLoading(false);
     };
     fetchListings();
