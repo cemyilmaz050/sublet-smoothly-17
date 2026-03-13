@@ -429,6 +429,7 @@ const SignUpPage = () => {
           )}
         </motion.div>
       </div>
+      <Footer />
     </div>
   );
 };
