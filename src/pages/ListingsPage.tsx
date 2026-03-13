@@ -89,6 +89,8 @@ const ListingsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [moveInDate, setMoveInDate] = useState<Date | undefined>();
+  const [moveOutDate, setMoveOutDate] = useState<Date | undefined>();
   const [dbListings, setDbListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
