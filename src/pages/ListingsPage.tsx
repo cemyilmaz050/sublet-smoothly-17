@@ -107,7 +107,8 @@ const ListingsPage = () => {
           .from("profiles")
           .select("id, id_verified")
           .in("id", tenantIds) as any;
-        const verifiedMap = new Map((profiles || []).map((p: any) => [p.id, p.id_verified]));
+        const verifiedMap: Record<string, boolean> = {};
+        (profiles || []).forEach((p: any) => { verifiedMap[p.id] = p.id_verified; });
 
         // Fetch avg ratings per listing
         const listingIds = data.map((l: any) => l.id);
