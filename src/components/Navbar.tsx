@@ -5,7 +5,7 @@ import { useAuthModal } from "@/hooks/useAuthModal";
 import useHasPublishedListing from "@/hooks/useHasPublishedListing";
 import UserMenu from "@/components/UserMenu";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
-import logo from "@/assets/subletrooms-logo.png";
+import logo from "@/assets/subin-logo.png";
 
 const Navbar = () => {
   const location = useLocation();
@@ -39,9 +39,8 @@ const Navbar = () => {
       <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg">
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={logo} alt="SubletRooms" className="h-8 w-8" />
-              <span className="text-xl font-bold"><span className="text-primary">Sub</span><span className="text-foreground">In</span></span>
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="SubIn" className="h-8" />
             </Link>
           </div>
 
