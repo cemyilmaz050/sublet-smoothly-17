@@ -45,6 +45,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ErrorBoundary>
         <AuthProvider>
           <AuthModalProvider>
             <AuthModal />
@@ -57,6 +58,8 @@ const App = () => (
               <Route path="/sign-up" element={<SignUpPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/auth/callback" element={<AuthCallbackPage />} />
               <Route path="/managers/:slug" element={<ManagerProfilePage />} />
               <Route path="/refer" element={<ReferPage />} />
