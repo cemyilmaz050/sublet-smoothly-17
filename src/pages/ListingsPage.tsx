@@ -5,17 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2,
   Search, SlidersHorizontal, Zap, Pencil, Eye, X, CalendarDays, Map,
-  MessageSquare, Send, CheckCircle2, Loader2,
+  MessageSquare, Send, CheckCircle2, Loader2, CalendarIcon,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import Navbar from "@/components/Navbar";
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import ReviewSection from "@/components/ReviewSection";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import StarRating from "@/components/StarRating";
+import ShareListing from "@/components/ShareListing";
 import CalendarView from "@/components/discover/CalendarView";
 import ListingsMap from "@/components/discover/ListingsMap";
 import { useNavigate } from "react-router-dom";
