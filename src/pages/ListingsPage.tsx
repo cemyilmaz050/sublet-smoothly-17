@@ -521,8 +521,8 @@ const ListingsPage = () => {
           {selectedListing && (
             <>
               <SheetHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <SheetTitle className="text-xl">{selectedListing.headline || "Untitled"}</SheetTitle>
+                <SheetTitle className="pr-8 text-xl">{selectedListing.headline || "Untitled"}</SheetTitle>
+                <div className="flex items-center gap-2 pt-1">
                   <ShareListing listingId={selectedListing.id} headline={selectedListing.headline} address={selectedListing.address} />
                 </div>
               </SheetHeader>
