@@ -342,19 +342,33 @@ const ListingsPage = () => {
               <SelectItem value="2500+">$2,500+</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={dateFilter} onValueChange={setDateFilter}>
-            <SelectTrigger className="w-[160px]">
-              <Calendar className="mr-1 h-4 w-4" />
-              <SelectValue placeholder="Dates" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="any">Any dates</SelectItem>
-              <SelectItem value="summer">Summer 2026</SelectItem>
-              <SelectItem value="fall">Fall 2026</SelectItem>
-              <SelectItem value="winter">Winter 2026–27</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm" className="gap-1.5">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveInDate && "text-muted-foreground")}>
+                <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                {moveInDate ? format(moveInDate, "MMM d") : "Move in"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarPicker mode="single" selected={moveInDate} onSelect={setMoveInDate} disabled={(d) => d < new Date()} initialFocus className={cn("p-3 pointer-events-auto")} />
+            </PopoverContent>
+          </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveOutDate && "text-muted-foreground")}>
+                <CalendarIcon className="mr-1 h-3.5 w-3.5" />
+                {moveOutDate ? format(moveOutDate, "MMM d") : "Move out"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <CalendarPicker mode="single" selected={moveOutDate} onSelect={setMoveOutDate} disabled={(d) => d < (moveInDate || new Date())} initialFocus className={cn("p-3 pointer-events-auto")} />
+            </PopoverContent>
+          </Popover>
+          {(moveInDate || moveOutDate) && (
+            <button onClick={() => { setMoveInDate(undefined); setMoveOutDate(undefined); }} className="text-xs text-primary hover:underline">
+              Clear dates
+            </button>
+          )}
             <SlidersHorizontal className="h-4 w-4" />
             Filters
           </Button>
