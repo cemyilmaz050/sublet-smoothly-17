@@ -20,15 +20,15 @@ import {
   ShieldCheck, DollarSign, Settings, LogOut,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
+import bbgLogo from "@/assets/bbg-logo.png";
 
 const navItems = [
   { title: "Dashboard", url: "/manager", icon: LayoutDashboard },
-  { title: "My Listings", url: "/manager/listings", icon: Building2 },
+  { title: "Active Sublet Listings", url: "/manager/listings", icon: Building2 },
   { title: "Applications", url: "/manager/applications", icon: Users },
+  { title: "Background Checks", url: "/manager/checks", icon: ShieldCheck },
   { title: "Messages", url: "/manager/messages", icon: MessageSquare },
   { title: "Notifications", url: "/manager/notifications", icon: Bell },
-  { title: "Background Checks", url: "/manager/checks", icon: ShieldCheck },
   { title: "Payments & Earnings", url: "/manager/payments", icon: DollarSign },
   { title: "Settings", url: "/manager/settings", icon: Settings },
 ];
@@ -43,20 +43,16 @@ function SidebarNav() {
       <SidebarHeader className="p-4">
         {!collapsed && (
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={bbgLogo} alt="Boston Brokerage Group" className="h-9 w-9 rounded-lg object-contain" />
             <div>
-              <p className="text-sm font-bold text-sidebar-foreground">SubletSafe</p>
-              <p className="text-[11px] text-muted-foreground">Manager Portal</p>
+              <p className="text-sm font-bold text-sidebar-foreground">Boston Brokerage Group</p>
+              <p className="text-[11px] text-muted-foreground">Staff Portal</p>
             </div>
           </div>
         )}
         {collapsed && (
           <div className="flex justify-center">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={bbgLogo} alt="BBG" className="h-9 w-9 rounded-lg object-contain" />
           </div>
         )}
       </SidebarHeader>
@@ -120,7 +116,8 @@ function ManagerHeaderUser() {
   const { user, signOut } = useAuth();
   if (!user) return null;
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-muted-foreground hidden sm:block">Boston Brokerage Group — Staff</span>
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
         {user.email?.charAt(0).toUpperCase()}
       </div>

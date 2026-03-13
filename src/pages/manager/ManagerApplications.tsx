@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -11,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search, User, Calendar, CheckCircle2, XCircle,
-  MessageSquare, ShieldCheck, Eye, Clock,
+  MessageSquare, ShieldCheck, Eye, Clock, Fingerprint, Home, Briefcase, StickyNote,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +29,7 @@ interface AppWithDetails {
   status: string | null;
   created_at: string | null;
   applicant_name: string;
+  applicant_email?: string;
   listing_headline: string | null;
   listing_address: string | null;
   listing_monthly_rent: number | null;
@@ -40,7 +43,15 @@ const ManagerApplications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedApp, setSelectedApp] = useState<AppWithDetails | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [bgCheckVerified, setBgCheckVerified] = useState(false);
+
+  // Background check panel state
+  const [bgCheckOpen, setBgCheckOpen] = useState(false);
+  const [bgCheckApp, setBgCheckApp] = useState<AppWithDetails | null>(null);
+  const [bgIdentity, setBgIdentity] = useState(false);
+  const [bgRental, setBgRental] = useState(false);
+  const [bgEmployment, setBgEmployment] = useState(false);
+  const [bgNotes, setBgNotes] = useState("");
+  const [bgSaving, setBgSaving] = useState(false);
 
   const { data: applications = [], isLoading } = useQuery({
     queryKey: ["mgr-apps", user?.id],
@@ -78,6 +89,20 @@ const ManagerApplications = () => {
     },
   });
 
+  // Fetch existing background checks
+  const { data: bgChecks = {} } = useQuery({
+    queryKey: ["mgr-bg-checks-map", user?.id],
+    enabled: !!user && applications.length > 0,
+    queryFn: async () => {
+      const appIds = applications.map(a => a.id);
+      const { data } = await supabase
+        .from("background_checks")
+        .select("*")
+        .in("application_id", appIds);
+      return Object.fromEntries((data || []).map((bc: any) => [bc.application_id, bc]));
+    },
+  });
+
   // Realtime
   useQuery({
     queryKey: ["mgr-apps-rt", user?.id],
@@ -106,7 +131,7 @@ const ManagerApplications = () => {
       user_id: app.applicant_id,
       title: decision === "approved" ? "Application Approved! 🎉" : "Application Update",
       message: decision === "approved"
-        ? `Your application for ${app.listing_headline || app.listing_address || "a listing"} has been approved!`
+        ? `Your application for ${app.listing_headline || app.listing_address || "a listing"} has been approved by Boston Brokerage Group!`
         : `Your application for ${app.listing_headline || app.listing_address || "a listing"} was not approved at this time.`,
       type: decision === "approved" ? "approval" : "rejection",
       link: "/dashboard/subtenant",
@@ -114,6 +139,62 @@ const ManagerApplications = () => {
     toast.success(decision === "approved" ? "Applicant approved!" : "Applicant declined");
     setDetailOpen(false);
     setSelectedApp(null);
+  };
+
+  const openBgCheck = (app: AppWithDetails) => {
+    const existing = (bgChecks as any)[app.id];
+    setBgCheckApp(app);
+    setBgIdentity(existing?.identity_verified ?? false);
+    setBgRental(existing?.rental_history_verified ?? false);
+    setBgEmployment(existing?.employment_verified ?? false);
+    setBgNotes(existing?.notes ?? "");
+    setBgCheckOpen(true);
+  };
+
+  const handleBgCheckSave = async (finalStatus: string) => {
+    if (!bgCheckApp || !user) return;
+    setBgSaving(true);
+    try {
+      const existing = (bgChecks as any)[bgCheckApp.id];
+      const payload = {
+        identity_verified: bgIdentity,
+        rental_history_verified: bgRental,
+        employment_verified: bgEmployment,
+        notes: bgNotes,
+        status: finalStatus,
+        updated_at: new Date().toISOString(),
+      };
+
+      if (existing) {
+        await supabase.from("background_checks").update(payload).eq("id", existing.id);
+      } else {
+        await supabase.from("background_checks").insert({
+          ...payload,
+          application_id: bgCheckApp.id,
+          applicant_id: bgCheckApp.applicant_id,
+          reviewer_id: user.id,
+        });
+      }
+
+      // If verified, approve the application
+      if (finalStatus === "verified") {
+        await handleDecision(bgCheckApp, "approved");
+      } else if (finalStatus === "declined") {
+        await handleDecision(bgCheckApp, "declined");
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["mgr-bg-checks-map"] });
+      toast.success(
+        finalStatus === "verified" ? "Applicant verified and approved!" :
+        finalStatus === "declined" ? "Applicant declined." :
+        "Background check saved — needs more info."
+      );
+      setBgCheckOpen(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save");
+    } finally {
+      setBgSaving(false);
+    }
   };
 
   const uniqueListings = [...new Map(applications.map(a => [a.listing_id, { id: a.listing_id, label: a.listing_headline || a.listing_address || "Listing" }])).values()];
@@ -132,6 +213,12 @@ const ManagerApplications = () => {
   const statusLabel = (s: string | null) => s === "approved" ? "Approved" : s === "declined" ? "Declined" : "Pending";
   const pendingCount = applications.filter(a => a.status === "pending").length;
 
+  const getBgStatus = (appId: string) => {
+    const bc = (bgChecks as any)[appId];
+    if (!bc) return null;
+    return bc.status;
+  };
+
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl">
       <div>
@@ -139,7 +226,7 @@ const ManagerApplications = () => {
           <h1 className="text-2xl font-bold text-foreground">Applications</h1>
           {pendingCount > 0 && <Badge variant="destructive" className="text-xs">{pendingCount} pending</Badge>}
         </div>
-        <p className="text-sm text-muted-foreground mt-1">Review applicants across all your listings</p>
+        <p className="text-sm text-muted-foreground mt-1">Review applicants for Boston Brokerage Group properties</p>
       </div>
 
       {/* Filters */}
@@ -179,40 +266,51 @@ const ManagerApplications = () => {
         </CardContent></Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map(app => (
-            <Card key={app.id} className="shadow-card transition-all hover:shadow-elevated">
-              <CardContent className="p-5">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent">
-                    <User className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-foreground truncate">{app.applicant_name}</p>
-                      <Badge variant={statusVariant(app.status) as any} className="shrink-0 text-xs">{statusLabel(app.status)}</Badge>
+          {filtered.map(app => {
+            const bgStatus = getBgStatus(app.id);
+            return (
+              <Card key={app.id} className="shadow-card transition-all hover:shadow-elevated">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent">
+                      <User className="h-5 w-5 text-accent-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground truncate mt-0.5">{app.listing_headline || app.listing_address || "Listing"}</p>
-                    <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "—"}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-semibold text-foreground truncate">{app.applicant_name}</p>
+                        <Badge variant={statusVariant(app.status) as any} className="shrink-0 text-xs">{statusLabel(app.status)}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground truncate mt-0.5">{app.listing_headline || app.listing_address || "Listing"}</p>
+                      <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3" />
+                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "—"}
+                      </div>
+                      {app.message && <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>}
+                      {bgStatus && (
+                        <Badge variant={bgStatus === "verified" ? "emerald" : bgStatus === "declined" ? "destructive" : "secondary"} className="mt-2 text-xs gap-1">
+                          <ShieldCheck className="h-3 w-3" />
+                          {bgStatus === "verified" ? "BG Verified" : bgStatus === "declined" ? "BG Declined" : "Needs Info"}
+                        </Badge>
+                      )}
                     </div>
-                    {app.message && <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>}
                   </div>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedApp(app); setDetailOpen(true); setBgCheckVerified(false); }}>
-                    <Eye className="mr-1 h-3.5 w-3.5" /> Review
-                  </Button>
-                  {app.status === "pending" && (
-                    <>
-                      <Button variant="emerald" size="sm" onClick={() => handleDecision(app, "approved")}><CheckCircle2 className="h-3.5 w-3.5" /></Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDecision(app, "declined")}><XCircle className="h-3.5 w-3.5" /></Button>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="mt-4 flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedApp(app); setDetailOpen(true); }}>
+                      <Eye className="mr-1 h-3.5 w-3.5" /> Review
+                    </Button>
+                    {app.status === "pending" && (
+                      <>
+                        <Button variant="outline" size="sm" className="text-xs" onClick={() => openBgCheck(app)}>
+                          <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Run Background Check
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => handleDecision(app, "declined")}><XCircle className="h-3.5 w-3.5" /></Button>
+                      </>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -241,31 +339,109 @@ const ManagerApplications = () => {
                     <p className="text-sm text-foreground">{selectedApp.message}</p>
                   </div>
                 )}
-                <div className="rounded-lg border-2 border-dashed border-amber/50 bg-accent/30 p-4">
-                  <div className="flex items-start gap-3">
-                    <ShieldCheck className="h-5 w-5 text-amber shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-foreground">Background Check</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Run a background check before approving.</p>
-                      <div className="mt-3 flex gap-2">
-                        <Button variant="outline" size="sm" disabled className="text-xs"><ShieldCheck className="mr-1 h-3.5 w-3.5" />Run Check (Coming Soon)</Button>
-                        <Button variant={bgCheckVerified ? "emerald" : "outline"} size="sm" className="text-xs" onClick={() => setBgCheckVerified(!bgCheckVerified)}>
-                          {bgCheckVerified ? <><CheckCircle2 className="mr-1 h-3.5 w-3.5" />Verified</> : "Mark Verified"}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Status</span>
                   <Badge variant={statusVariant(selectedApp.status) as any}>{statusLabel(selectedApp.status)}</Badge>
                 </div>
                 {selectedApp.status === "pending" && (
                   <div className="flex gap-3 pt-2">
-                    <Button className="flex-1" variant="emerald" onClick={() => handleDecision(selectedApp, "approved")}><CheckCircle2 className="mr-1 h-4 w-4" />Approve</Button>
+                    <Button className="flex-1" onClick={() => { setDetailOpen(false); openBgCheck(selectedApp); }}>
+                      <ShieldCheck className="mr-1 h-4 w-4" /> Run Background Check
+                    </Button>
                     <Button className="flex-1" variant="destructive" onClick={() => handleDecision(selectedApp, "declined")}><XCircle className="mr-1 h-4 w-4" />Decline</Button>
                   </div>
                 )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Background Check Panel */}
+      <Dialog open={bgCheckOpen} onOpenChange={(o) => { if (!o) setBgCheckOpen(false); }}>
+        <DialogContent className="sm:max-w-lg">
+          {bgCheckApp && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  Background Check — {bgCheckApp.applicant_name}
+                </DialogTitle>
+                <DialogDescription>
+                  Reviewing for {bgCheckApp.listing_headline || bgCheckApp.listing_address || "a listing"}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-5 py-3">
+                {/* Checklist */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
+                    <Checkbox checked={bgIdentity} onCheckedChange={(v) => setBgIdentity(!!v)} />
+                    <Fingerprint className="h-4 w-4 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Identity Verification</p>
+                      <p className="text-xs text-muted-foreground">Government-issued ID verified</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
+                    <Checkbox checked={bgRental} onCheckedChange={(v) => setBgRental(!!v)} />
+                    <Home className="h-4 w-4 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Rental History</p>
+                      <p className="text-xs text-muted-foreground">Previous landlord references checked</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
+                    <Checkbox checked={bgEmployment} onCheckedChange={(v) => setBgEmployment(!!v)} />
+                    <Briefcase className="h-4 w-4 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Employment Status</p>
+                      <p className="text-xs text-muted-foreground">Current employment or income verified</p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Notes */}
+                <div>
+                  <label className="flex items-center gap-1.5 text-sm font-medium text-foreground mb-1.5">
+                    <StickyNote className="h-3.5 w-3.5" /> Notes
+                  </label>
+                  <Textarea
+                    placeholder="Add any notes about this applicant..."
+                    value={bgNotes}
+                    onChange={(e) => setBgNotes(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-col gap-2 pt-1">
+                  <Button
+                    variant="emerald"
+                    className="w-full"
+                    disabled={bgSaving}
+                    onClick={() => handleBgCheckSave("verified")}
+                  >
+                    <CheckCircle2 className="mr-1.5 h-4 w-4" /> Verified & Approved
+                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      disabled={bgSaving}
+                      onClick={() => handleBgCheckSave("needs_info")}
+                    >
+                      <Clock className="mr-1.5 h-4 w-4" /> Needs More Info
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="flex-1"
+                      disabled={bgSaving}
+                      onClick={() => handleBgCheckSave("declined")}
+                    >
+                      <XCircle className="mr-1.5 h-4 w-4" /> Declined
+                    </Button>
+                  </div>
+                </div>
               </div>
             </>
           )}

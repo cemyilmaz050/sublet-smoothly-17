@@ -1,11 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Users, Clock, CheckCircle2, ArrowRight, AlertTriangle, DollarSign, FileText, ClipboardList } from "lucide-react";
+import { Building2, Users, Clock, CheckCircle2, ArrowRight, AlertTriangle, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import bbgLogo from "@/assets/bbg-logo.png";
 
 const ManagerHome = () => {
   const { user } = useAuth();
@@ -22,24 +23,15 @@ const ManagerHome = () => {
       const requests = requestsRes.data || [];
 
       let pendingApps = 0;
+      let totalApps = 0;
       const listingIds = listings.map(l => l.id);
       if (listingIds.length > 0) {
-        const { count } = await supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .in("listing_id", listingIds)
-          .eq("status", "pending");
-        pendingApps = count ?? 0;
-      }
-
-      // Total applications
-      let totalApps = 0;
-      if (listingIds.length > 0) {
-        const { count } = await supabase
-          .from("applications")
-          .select("id", { count: "exact", head: true })
-          .in("listing_id", listingIds);
-        totalApps = count ?? 0;
+        const [pendingRes, totalRes] = await Promise.all([
+          supabase.from("applications").select("id", { count: "exact", head: true }).in("listing_id", listingIds).eq("status", "pending"),
+          supabase.from("applications").select("id", { count: "exact", head: true }).in("listing_id", listingIds),
+        ]);
+        pendingApps = pendingRes.count ?? 0;
+        totalApps = totalRes.count ?? 0;
       }
 
       return {
@@ -81,9 +73,13 @@ const ManagerHome = () => {
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-6xl">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">Welcome back. Here's your property overview.</p>
+      {/* BBG Welcome Banner */}
+      <div className="flex items-center gap-4">
+        <img src={bbgLogo} alt="Boston Brokerage Group" className="h-14 w-14 rounded-xl object-contain border bg-card p-1" />
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Boston Brokerage Group</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Staff Dashboard — Property Management Portal</p>
+        </div>
       </div>
 
       {/* Stat tiles */}
