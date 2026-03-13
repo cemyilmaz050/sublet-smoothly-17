@@ -22,6 +22,7 @@ import ManagerIntegrationsPage from "./pages/ManagerIntegrationsPage";
 import ManagerSubletRequestsPage from "./pages/ManagerSubletRequestsPage";
 import ManagerPropertiesPage from "./pages/ManagerPropertiesPage";
 import ManagerActiveSublets from "./pages/ManagerActiveSublets";
+import ManagerApplicationsPage from "./pages/ManagerApplicationsPage";
 import TenantOnboardingPage from "./pages/TenantOnboardingPage";
 import AuthCallbackPage from "./pages/AuthCallbackPage";
 import ManagerProfilePage from "./pages/ManagerProfilePage";
