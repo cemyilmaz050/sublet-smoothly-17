@@ -114,7 +114,7 @@ const ListingsPage = () => {
         const { data: reviews } = await supabase
           .from("reviews")
           .select("listing_id, rating")
-          .in("listing_id", listingIds);
+          .in("listing_id", listingIds) as any;
 
         const ratingMap = new Map<string, { sum: number; count: number }>();
         (reviews || []).forEach((r: any) => {
