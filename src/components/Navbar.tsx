@@ -5,7 +5,7 @@ import { useAuthModal } from "@/hooks/useAuthModal";
 import useHasPublishedListing from "@/hooks/useHasPublishedListing";
 import UserMenu from "@/components/UserMenu";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
-import logo from "@/assets/subletrooms-logo.png";
+import logo from "@/assets/subin-logo.png";
 
 const Navbar = () => {
   const location = useLocation();
