@@ -44,7 +44,7 @@ const UserMenu = () => {
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => { setOpen(false); }} className={menuItemClass}>
-        <Share2 className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
+        <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => { setOpen(false); requireAuth(); }} className={menuItemClass}>
