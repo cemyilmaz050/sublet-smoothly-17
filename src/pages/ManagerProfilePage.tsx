@@ -37,7 +37,6 @@ const ManagerProfilePage = () => {
   if (loading) {
     return (
       <>
-        <Navbar />
         <div className="container py-8 space-y-6">
           <Skeleton className="h-48 w-full rounded-xl" />
           <Skeleton className="h-8 w-64" />
