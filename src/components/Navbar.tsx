@@ -1,4 +1,3 @@
-import { Building2 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,6 +5,7 @@ import { useAuthModal } from "@/hooks/useAuthModal";
 import useHasPublishedListing from "@/hooks/useHasPublishedListing";
 import UserMenu from "@/components/UserMenu";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
+import logo from "@/assets/subletrooms-logo.png";
 
 const Navbar = () => {
   const location = useLocation();
