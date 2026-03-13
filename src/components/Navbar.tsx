@@ -16,10 +16,11 @@ const Navbar = () => {
   const { hasListing } = useHasPublishedListing();
   const [subletOpen, setSubletOpen] = useState(false);
 
+  const isOnTenantDashboard = location.pathname.startsWith("/tenant/dashboard") || location.pathname.startsWith("/dashboard/tenant");
+
   const handleSubletClick = () => {
     if (!user) {
       requireAuth(() => {
-        // After auth, re-trigger the sublet flow
         if (hasListing) {
           navigate("/tenant/dashboard");
         } else {
@@ -35,22 +36,18 @@ const Navbar = () => {
     }
   };
 
-  return (
-    <>
-      <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg w-full">
-        <div className="flex h-16 items-center justify-between px-6 w-full">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center">
-              <img src={logo} alt="SubIn" className="h-8" />
-            </Link>
-          </div>
+  // Determine button label and action
+  const getNavAction = () => {
+    if (user && hasListing && isOnTenantDashboard) {
+      return { label: "Browse as Sub-lessee", onClick: () => navigate("/") };
+    }
+    if (user && hasListing) {
+      return { label: "Go to Your Listings", onClick: handleSubletClick };
+    }
+    return { label: "Sublet Your Apartment", onClick: handleSubletClick };
+  };
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSubletClick}
-              className="hidden text-sm font-semibold text-primary transition-colors hover:text-primary/80 sm:block"
-            >
-              {user && hasListing ? "Go to Your Listings" : "Sublet Your Apartment"}
+  const navAction = getNavAction();
             </button>
             <NotificationBell />
             <UserMenu />
