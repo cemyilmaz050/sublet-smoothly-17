@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   CreditCard,
   CalendarDays,
+  Lock,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -54,6 +55,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
   const [scheduleMessage, setScheduleMessage] = useState("");
   const [submittingSchedule, setSubmittingSchedule] = useState(false);
   const [scheduleSent, setScheduleSent] = useState(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
 
   useEffect(() => {
     if (!listing.tenant_id) return;
@@ -126,6 +128,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
 
   const handleSecureNow = async () => {
     if (!user) return;
+    setPaymentLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
         body: { listingId: listing.id },
@@ -134,6 +137,8 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       if (data?.url) window.open(data.url, "_blank");
     } catch {
       toast.error("Payment setup failed. Please try again.");
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -147,18 +152,18 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
   ];
 
   return (
-    <div className="space-y-4 rounded-xl border-2 border-primary/20 bg-gradient-to-b from-primary/5 to-transparent p-5">
+    <div className="space-y-4 rounded-xl border-2 border-primary/20 bg-gradient-to-b from-primary/5 to-transparent p-4 sm:p-5">
       <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-lg">
+        <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-base sm:text-lg shrink-0">
           {tenantInitial}
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-foreground">Listed by {tenantName}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-foreground truncate">Listed by {tenantName}</p>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" /> Usually responds within a few hours
+            <Clock className="h-3 w-3 shrink-0" /> Usually responds within a few hours
           </p>
         </div>
-        <Badge variant="outline" className="gap-1 text-xs border-emerald/30 text-emerald">
+        <Badge variant="outline" className="gap-1 text-xs border-emerald/30 text-emerald shrink-0">
           <ShieldCheck className="h-3 w-3" /> Verified
         </Badge>
       </div>
@@ -167,18 +172,18 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       <h4 className="text-base font-bold text-foreground">Secure This Place</h4>
 
       <Button variant="outline" className="w-full justify-start gap-2 h-12 text-sm" onClick={handleScheduleClick}>
-        <CalendarDays className="h-4 w-4 text-primary" />
-        <div className="text-left">
+        <CalendarDays className="h-4 w-4 text-primary shrink-0" />
+        <div className="text-left min-w-0">
           <span className="font-semibold">Schedule a Meeting</span>
-          <span className="block text-xs text-muted-foreground">Visit the apartment or meet the tenant</span>
+          <span className="block text-xs text-muted-foreground truncate">Visit the apartment or meet the tenant</span>
         </div>
       </Button>
 
       <Button className="w-full justify-start gap-2 h-12 text-sm" onClick={handlePaymentClick}>
-        <CreditCard className="h-4 w-4" />
-        <div className="text-left">
+        <CreditCard className="h-4 w-4 shrink-0" />
+        <div className="text-left min-w-0">
           <span className="font-semibold">Secure the Place Now</span>
-          <span className="block text-xs text-primary-foreground/80">Pay deposit to reserve this apartment</span>
+          <span className="block text-xs text-primary-foreground/80 truncate">Pay deposit to reserve this apartment</span>
         </div>
       </Button>
 
@@ -189,7 +194,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
 
       {/* Schedule Modal */}
       <Dialog open={showScheduleModal} onOpenChange={(open) => { setShowScheduleModal(open); if (!open) { setScheduleSent(false); setSchedulingDate(undefined); setScheduleMessage(""); } }}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Schedule a Meeting</DialogTitle>
             <DialogDescription>Pick a date and time to visit {listing.headline || "this apartment"}.</DialogDescription>
@@ -199,7 +204,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
               <CheckCircle2 className="h-12 w-12 text-emerald" />
               <p className="text-sm font-semibold text-foreground">Request Sent!</p>
               <p className="text-xs text-muted-foreground text-center">{tenantName} will get back to you soon.</p>
-              <Button variant="outline" onClick={() => setShowScheduleModal(false)}>Done</Button>
+              <Button variant="outline" className="h-12 min-w-[120px]" onClick={() => setShowScheduleModal(false)}>Done</Button>
             </div>
           ) : (
             <div className="space-y-4">
@@ -207,7 +212,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
                 <label className="text-sm font-medium text-foreground mb-1.5 block">Date</label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !schedulingDate && "text-muted-foreground")}>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal h-12", !schedulingDate && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {schedulingDate ? format(schedulingDate, "PPP") : "Pick a date"}
                     </Button>
@@ -221,7 +226,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
                 <label className="text-sm font-medium text-foreground mb-1.5 block">Time</label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {timeSlots.map((t) => (
-                    <Button key={t} variant={schedulingTime === t ? "default" : "outline"} size="sm" className="text-xs h-8" onClick={() => setSchedulingTime(t)}>{t}</Button>
+                    <Button key={t} variant={schedulingTime === t ? "default" : "outline"} size="sm" className="text-xs h-10 sm:h-8" onClick={() => setSchedulingTime(t)}>{t}</Button>
                   ))}
                 </div>
               </div>
@@ -229,9 +234,9 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
                 <label className="text-sm font-medium text-foreground mb-1.5 block">
                   Introduce yourself <span className="text-muted-foreground font-normal">(optional)</span>
                 </label>
-                <Textarea placeholder="Hi! I'm looking for a summer sublet..." value={scheduleMessage} onChange={(e) => setScheduleMessage(e.target.value)} rows={3} className="resize-none" />
+                <Textarea placeholder="Hi! I'm looking for a summer sublet..." value={scheduleMessage} onChange={(e) => setScheduleMessage(e.target.value)} rows={3} className="resize-none text-base" />
               </div>
-              <Button className="w-full" onClick={handleScheduleSubmit} disabled={submittingSchedule || !schedulingDate}>
+              <Button className="w-full h-12" onClick={handleScheduleSubmit} disabled={submittingSchedule || !schedulingDate}>
                 {submittingSchedule ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Sending...</> : <><CalendarDays className="mr-1 h-4 w-4" /> Send Meeting Request</>}
               </Button>
             </div>
@@ -239,21 +244,22 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
         </DialogContent>
       </Dialog>
 
-      {/* Payment Modal */}
+      {/* Payment Modal — mobile-optimized */}
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-sm max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Secure This Place</DialogTitle>
             <DialogDescription>Reserve {listing.headline || "this apartment"} with an initial deposit.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+            {/* Cost breakdown */}
+            <div className="rounded-lg border bg-muted/30 p-3 sm:p-4 space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Security Deposit ({DEPOSIT_MONTHS} month)</span>
+                <span className="text-muted-foreground">Security Deposit ({DEPOSIT_MONTHS} mo)</span>
                 <span className="font-semibold text-foreground">${depositAmount.toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Platform Service Fee ({PLATFORM_FEE_PERCENT}%)</span>
+                <span className="text-muted-foreground">Platform Fee ({PLATFORM_FEE_PERCENT}%)</span>
                 <span className="font-semibold text-foreground">${platformFee.toLocaleString()}</span>
               </div>
               <div className="h-px bg-border" />
@@ -262,14 +268,37 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
                 <span className="text-lg font-bold text-primary">${totalDue.toLocaleString()}</span>
               </div>
             </div>
+
+            {/* Trust & security */}
             <div className="flex items-start gap-2 rounded-lg bg-emerald/10 p-3">
               <ShieldCheck className="h-4 w-4 text-emerald shrink-0 mt-0.5" />
               <p className="text-xs text-emerald leading-relaxed">Your deposit is fully protected. If move-in isn't confirmed, you'll receive a full refund.</p>
             </div>
-            <Button className="w-full" size="lg" onClick={handleSecureNow}>
-              <CreditCard className="mr-2 h-4 w-4" /> Pay ${totalDue.toLocaleString()} & Reserve
+
+            {/* Accepted payment methods */}
+            <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+              <CreditCard className="h-3.5 w-3.5" />
+              <span>Visa</span>
+              <span>•</span>
+              <span>Mastercard</span>
+              <span>•</span>
+              <span>Apple Pay</span>
+              <span>•</span>
+              <span>Google Pay</span>
+            </div>
+
+            {/* CTA */}
+            <Button className="w-full h-[52px] text-base font-semibold" onClick={handleSecureNow} disabled={paymentLoading}>
+              {paymentLoading ? (
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              ) : (
+                <Lock className="mr-1.5 h-4 w-4" />
+              )}
+              {paymentLoading ? "Processing..." : `Pay $${totalDue.toLocaleString()} & Reserve`}
             </Button>
-            <p className="text-center text-xs text-muted-foreground">Secure checkout powered by Stripe</p>
+            <p className="flex items-center justify-center gap-1 text-center text-[11px] text-muted-foreground">
+              <Lock className="h-3 w-3" /> Secure checkout powered by Stripe
+            </p>
           </div>
         </DialogContent>
       </Dialog>
