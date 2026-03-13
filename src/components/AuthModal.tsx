@@ -48,7 +48,7 @@ const AuthModal = () => {
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  
 
   const handleGoogleSignIn = async () => {
     // Don't set loading state BEFORE the OAuth call — setting state triggers
