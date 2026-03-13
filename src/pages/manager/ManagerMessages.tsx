@@ -21,7 +21,7 @@ const ManagerMessages = () => {
       const enriched = await Promise.all(
         convos.map(async (c: any) => {
           const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
-          const { data: profile } = await supabase.from("profiles_public" as any).select("first_name, last_name").eq("id", otherId).maybeSingle();
+          const { data: profile } = await supabase.from("profiles_public" as any).select("first_name, last_name").eq("id", otherId).maybeSingle() as { data: { first_name: string | null; last_name: string | null } | null };
           const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "User";
           const { data: lastMsg } = await supabase.from("messages").select("content, read, sender_id, created_at").eq("conversation_id", c.id).order("created_at", { ascending: false }).limit(1);
           const { count } = await supabase.from("messages").select("id", { count: "exact", head: true }).eq("conversation_id", c.id).eq("read", false).neq("sender_id", user.id);

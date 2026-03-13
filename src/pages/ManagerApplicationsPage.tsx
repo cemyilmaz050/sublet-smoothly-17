@@ -75,7 +75,7 @@ const ManagerApplicationsPage = () => {
       const { data: profiles } = await supabase
         .from("profiles_public" as any)
         .select("id, first_name, last_name")
-        .in("id", applicantIds);
+        .in("id", applicantIds) as { data: { id: string; first_name: string | null; last_name: string | null }[] | null };
 
       const profileMap = Object.fromEntries(
         (profiles || []).map((p) => [p.id, p])

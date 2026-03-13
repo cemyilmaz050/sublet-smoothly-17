@@ -31,7 +31,7 @@ const MessagesPage = () => {
             .from("profiles_public" as any)
             .select("first_name, last_name")
             .eq("id", otherId)
-            .maybeSingle();
+            .maybeSingle() as { data: { first_name: string | null; last_name: string | null } | null };
 
           const otherFirstName = profile?.first_name || "User";
           const otherLastName = profile?.last_name || "";

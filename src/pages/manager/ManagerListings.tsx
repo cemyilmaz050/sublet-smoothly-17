@@ -38,7 +38,7 @@ const ManagerListings = () => {
       const { data: profiles } = await supabase
         .from("profiles_public" as any)
         .select("id, first_name, last_name")
-        .in("id", tenantIds);
+        .in("id", tenantIds) as { data: { id: string; first_name: string | null; last_name: string | null }[] | null };
       const pm = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
       return data.map(l => ({
