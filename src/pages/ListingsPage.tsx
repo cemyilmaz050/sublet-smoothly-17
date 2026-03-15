@@ -465,8 +465,15 @@ const ListingsPage = () => {
                         )}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
-                        {role === "subtenant" && (
-                          <Badge variant="outline" className="gap-1 text-xs"><Zap className="h-3 w-3 text-amber" />Fast Lane</Badge>
+                        {!isOwnListing(listing) && (
+                          <KnockButton
+                            listingId={listing.id}
+                            tenantId={listing.tenant_id}
+                            listingHeadline={listing.headline}
+                            listingAddress={listing.address}
+                            knockCount={(listing as any).knock_count || 0}
+                            compact
+                          />
                         )}
                         <div className="ml-auto flex items-center gap-1.5">
                           {role !== "manager" && role !== "tenant" && (
