@@ -113,14 +113,42 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
     }
 
     const dateStr = format(schedulingDate, "EEEE, MMMM d, yyyy");
-    const content = `📅 Meeting Request\n\nI'd like to schedule a visit on ${dateStr} at ${schedulingTime}.${scheduleMessage ? `\n\n${scheduleMessage}` : ""}`;
+    const content = `📅 Meeting Request\n\nHi, I would like to schedule a viewing for ${dateStr} at ${schedulingTime}.${scheduleMessage ? `\n\n${scheduleMessage}` : ""}`;
+
+    // Record meeting in meetings table
+    await supabase.from("meetings" as any).insert({
+      listing_id: listing.id,
+      requester_id: user.id,
+      host_id: listing.tenant_id,
+      conversation_id: convoId,
+      meeting_date: format(schedulingDate, "yyyy-MM-dd"),
+      meeting_time: schedulingTime,
+      message: scheduleMessage || null,
+      status: "pending",
+    });
 
     await supabase.from("messages").insert({ conversation_id: convoId, sender_id: user.id, content });
     await supabase.from("notifications").insert({
-      user_id: listing.tenant_id, title: "Meeting Request",
-      message: `Someone wants to visit "${listing.headline || "your apartment"}" on ${dateStr}`,
+      user_id: listing.tenant_id, title: "Meeting Request 📅",
+      message: `Someone wants to visit "${listing.headline || "your apartment"}" on ${dateStr} at ${schedulingTime}`,
       type: "meeting", link: "/messages",
     });
+
+    // Trigger email notification
+    supabase.functions.invoke("send-notification-email", {
+      body: {
+        to: listing.tenant_id,
+        subject: `New Meeting Request for ${listing.headline || "your listing"}`,
+        type: "meeting_request",
+        data: {
+          listing_title: listing.headline || "Your apartment",
+          meeting_date: dateStr,
+          meeting_time: schedulingTime,
+          message: scheduleMessage,
+          action_url: `${window.location.origin}/messages`,
+        },
+      },
+    }).catch(() => {}); // fire and forget
 
     setSubmittingSchedule(false);
     setScheduleSent(true);
