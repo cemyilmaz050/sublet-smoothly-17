@@ -276,6 +276,10 @@ export default function ListingsMap({ listings, hoveredId, onSelect, selectedId 
 
   const markers = listings
     .map((l) => {
+      // Prefer DB lat/lng, fall back to address geocoding
+      if ((l as any).latitude && (l as any).longitude) {
+        return { ...l, lat: (l as any).latitude, lng: (l as any).longitude };
+      }
       const coords = getCoords(l.address);
       if (!coords) return null;
       return { ...l, lat: coords[0], lng: coords[1] };
