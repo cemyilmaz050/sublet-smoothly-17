@@ -56,7 +56,8 @@ function getCoords(address: string | null): [number, number] | null {
   for (const [key, coords] of Object.entries(LOCATION_COORDS)) {
     if (lower.includes(key)) return coords;
   }
-  return [40.73 + Math.random() * 0.08, -73.99 + Math.random() * 0.06];
+  // Default to Boston area with slight randomization
+  return [42.35 + Math.random() * 0.03, -71.08 + Math.random() * 0.04];
 }
 
 // --- Price Tag Styles ---
