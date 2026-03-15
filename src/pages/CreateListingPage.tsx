@@ -12,6 +12,7 @@ import ListingStep4 from "@/components/listing/ListingStep4";
 import ListingStep5 from "@/components/listing/ListingStep5";
 import PublishChecklist from "@/components/listing/PublishChecklist";
 import PublishSuccess from "@/components/listing/PublishSuccess";
+import TenantIdVerification from "@/components/TenantIdVerification";
 import { ListingFormData, defaultListingForm } from "@/types/listing";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
