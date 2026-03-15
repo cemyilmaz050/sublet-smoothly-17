@@ -189,46 +189,7 @@ const ListingsPage = () => {
     });
   }, [user]);
 
-  const [applyingId, setApplyingId] = useState<string | null>(null);
   const [contactingId, setContactingId] = useState<string | null>(null);
-  const [appliedListings, setAppliedListings] = useState<Set<string>>(new Set());
-  const [applicationMessage, setApplicationMessage] = useState("");
-  const [showApplyForm, setShowApplyForm] = useState(false);
-
-  // Load existing applications
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("applications").select("listing_id").eq("applicant_id", user.id).then(({ data }) => {
-      if (data) setAppliedListings(new Set(data.map((d) => d.listing_id)));
-    });
-  }, [user]);
-
-  const handleApply = async (listing: ListingItem) => {
-    if (!user) { requireAuth(() => handleApply(listing)); return; }
-    if (appliedListings.has(listing.id)) { toast.info("You've already applied to this listing."); return; }
-    setApplyingId(listing.id);
-    const { error } = await supabase.from("applications").insert({
-      applicant_id: user.id,
-      listing_id: listing.id,
-      message: applicationMessage || null,
-      status: "pending",
-    });
-    setApplyingId(null);
-    if (error) { toast.error("Failed to submit application. Please try again."); return; }
-    setAppliedListings((prev) => new Set(prev).add(listing.id));
-    setApplicationMessage("");
-    setShowApplyForm(false);
-    toast.success("Application submitted! The tenant will be notified.");
-
-    // Also create a notification for the listing owner
-    await supabase.from("notifications").insert({
-      user_id: listing.tenant_id,
-      title: "New Application",
-      message: `Someone applied to your listing "${listing.headline || "Untitled"}"`,
-      type: "application",
-      link: "/tenant/applicants",
-    });
-  };
 
   const handleContact = async (listing: ListingItem) => {
     if (!user) { requireAuth(() => handleContact(listing)); return; }
