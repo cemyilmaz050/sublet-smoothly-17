@@ -18,7 +18,7 @@ import { format } from "date-fns";
 
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import ReviewSection from "@/components/ReviewSection";
-import KnockButton from "@/components/KnockButton";
+import KnockButton, { KnockActivity } from "@/components/KnockButton";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import StarRating from "@/components/StarRating";
 import ShareListing from "@/components/ShareListing";
