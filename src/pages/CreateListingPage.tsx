@@ -213,6 +213,31 @@ const CreateListingPage = () => {
       }
 
       setPublished(true);
+
+      // Send listing-live email notification
+      const publishedId = draftId || id;
+      supabase.functions.invoke("send-notification-email", {
+        body: {
+          to: user.email,
+          subject: `Your listing "${form.headline}" is live on SubIn!`,
+          type: "listing_live",
+          data: {
+            listing_title: form.headline,
+            action_url: `${window.location.origin}/listings`,
+          },
+        },
+      }).catch(() => {});
+
+      // Notify BBG manager portal
+      const BBG_MANAGER_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
+      supabase.from("notifications").insert({
+        user_id: BBG_MANAGER_USER_ID,
+        title: "New Listing Published",
+        message: `A new listing "${form.headline}" at ${form.address} has been published and needs review.`,
+        type: "listing",
+        link: "/manager",
+      }).then(() => {});
+
     } catch (err: any) {
       console.error("Publish error:", err);
       toast.error(err.message || "Failed to publish listing");
