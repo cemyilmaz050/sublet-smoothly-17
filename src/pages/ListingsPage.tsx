@@ -514,7 +514,7 @@ const ListingsPage = () => {
 
       {/* Listing Detail Drawer */}
       <Sheet open={!!selectedListing} onOpenChange={(open) => !open && setSelectedListing(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+        <SheetContent className="w-full overflow-y-auto sm:max-w-lg safe-bottom">
           {selectedListing && (
             <>
               <SheetHeader>
