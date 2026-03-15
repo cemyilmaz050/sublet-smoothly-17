@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Home, ExternalLink, Pencil, MoreVertical, Pause, Play, Trash2, Loader2 } from "lucide-react";
+import { Home, ExternalLink, Pencil, MoreVertical, Pause, Play, Trash2, Loader2, MessageSquare, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
-import DashboardMessages from "@/components/tenant/DashboardMessages";
+
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
@@ -327,9 +327,32 @@ const TenantDashboard = () => {
           )}
         </section>
 
-        {/* SECTION 3: Messages */}
+        {/* SECTION 3: Messages — links to full messages page */}
         <section>
-          <DashboardMessages conversations={conversations} unreadCount={unreadCount} />
+          <button
+            onClick={() => navigate("/messages")}
+            className="flex w-full items-center justify-between rounded-xl border bg-card px-5 py-4 text-left transition-colors hover:bg-accent/50"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <MessageSquare className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">Messages</p>
+                <p className="text-xs text-muted-foreground">
+                  {unreadCount > 0 ? `${unreadCount} unread` : `${conversations.length} conversations`}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
+                  {unreadCount}
+                </span>
+              )}
+              <ArrowRight className="h-4 w-4 text-muted-foreground" />
+            </div>
+          </button>
         </section>
       </main>
 
