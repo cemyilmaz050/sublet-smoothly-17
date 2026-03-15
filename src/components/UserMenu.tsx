@@ -19,6 +19,22 @@ const UserMenu = () => {
   const [initials, setInitials] = useState<string>("");
 
   useEffect(() => {
+    if (!user) { setAvatarUrl(null); setInitials(""); return; }
+    // Get initials from user metadata
+    const meta = user.user_metadata || {};
+    const first = (meta.first_name || meta.full_name?.split(" ")[0] || "").charAt(0).toUpperCase();
+    const last = (meta.last_name || meta.full_name?.split(" ").slice(-1)[0] || "").charAt(0).toUpperCase();
+    setInitials(first + last || user.email?.charAt(0).toUpperCase() || "U");
+    // Fetch avatar from profile
+    supabase.from("profiles").select("avatar_url, first_name, last_name").eq("id", user.id).single().then(({ data }) => {
+      if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      if (data?.first_name || data?.last_name) {
+        setInitials(((data.first_name || "").charAt(0) + (data.last_name || "").charAt(0)).toUpperCase() || initials);
+      }
+    });
+  }, [user]);
+
+  useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
