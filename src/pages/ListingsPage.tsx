@@ -280,17 +280,18 @@ const ListingsPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       
 
-      {/* Search & Filter Bar */}
+      {/* Search & Filter Bar — scrollable on mobile */}
       <div className="border-b bg-card/80 backdrop-blur-sm">
-        <div className="flex items-center gap-3 px-4 py-3 lg:px-6">
-          <div className="flex flex-1 items-center gap-2 rounded-lg border bg-background px-3">
-            <Search className="h-4 w-4 text-muted-foreground" />
+        {/* Row 1: Search + key filters */}
+        <div className="flex items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3 lg:px-6">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border bg-background px-3">
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
             <Input
-              placeholder="Search by location or keyword..."
-              className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+              placeholder="Search location..."
+              className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-[16px]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -299,9 +300,9 @@ const ListingsPage = () => {
             )}
           </div>
           <Select value={priceFilter} onValueChange={setPriceFilter}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[120px] sm:w-[160px] shrink-0">
               <DollarSign className="mr-1 h-4 w-4" />
-              <SelectValue placeholder="Price range" />
+              <SelectValue placeholder="Price" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All prices</SelectItem>
@@ -310,9 +311,19 @@ const ListingsPage = () => {
               <SelectItem value="2500+">$2,500+</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" size="icon" className="shrink-0 h-9 w-9 sm:hidden" onClick={() => setShowMobileFilters(!showMobileFilters)}>
+            <SlidersHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Row 2: Date filters — hidden on mobile unless toggled */}
+        <div className={cn(
+          "items-center gap-2 px-3 pb-2 sm:flex sm:px-4 sm:pb-3 lg:px-6",
+          showMobileFilters ? "flex" : "hidden sm:flex"
+        )}>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveInDate && "text-muted-foreground")}>
+              <Button variant="outline" size="sm" className={cn("flex-1 sm:flex-none sm:w-[140px] justify-start text-left font-normal text-xs h-10 sm:h-9", !moveInDate && "text-muted-foreground")}>
                 <CalendarIcon className="mr-1 h-3.5 w-3.5" />
                 {moveInDate ? format(moveInDate, "MMM d") : "Move in"}
               </Button>
@@ -323,7 +334,7 @@ const ListingsPage = () => {
           </Popover>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveOutDate && "text-muted-foreground")}>
+              <Button variant="outline" size="sm" className={cn("flex-1 sm:flex-none sm:w-[140px] justify-start text-left font-normal text-xs h-10 sm:h-9", !moveOutDate && "text-muted-foreground")}>
                 <CalendarIcon className="mr-1 h-3.5 w-3.5" />
                 {moveOutDate ? format(moveOutDate, "MMM d") : "Move out"}
               </Button>
@@ -333,29 +344,39 @@ const ListingsPage = () => {
             </PopoverContent>
           </Popover>
           {(moveInDate || moveOutDate) && (
-            <button onClick={() => { setMoveInDate(undefined); setMoveOutDate(undefined); }} className="text-xs text-primary hover:underline">
+            <button onClick={() => { setMoveInDate(undefined); setMoveOutDate(undefined); }} className="text-xs text-primary hover:underline whitespace-nowrap">
               Clear dates
             </button>
           )}
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <SlidersHorizontal className="h-4 w-4" />
-            Filters
-          </Button>
-          {/* Calendar/Map toggle */}
-          <div className="hidden lg:flex items-center gap-1 rounded-lg border p-0.5">
+          <div className="hidden sm:flex items-center gap-1.5 ml-auto">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <SlidersHorizontal className="h-4 w-4" />
+              Filters
+            </Button>
+          </div>
+          {/* Map/List/Calendar toggle — visible on all sizes */}
+          <div className="flex items-center gap-1 rounded-lg border p-0.5 ml-auto sm:ml-0">
             <Button
-              variant={viewMode === "map" ? "default" : "ghost"}
+              variant={mobileView === "list" ? "default" : "ghost"}
               size="sm"
-              className="h-7 px-2.5 text-xs"
-              onClick={() => { setViewMode("map"); setCalendarSelectedDate(null); }}
+              className="h-7 px-2 text-xs"
+              onClick={() => { setMobileView("list"); setViewMode("map"); setCalendarSelectedDate(null); }}
+            >
+              List
+            </Button>
+            <Button
+              variant={mobileView === "map" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => { setMobileView("map"); setViewMode("map"); }}
             >
               <Map className="mr-1 h-3.5 w-3.5" /> Map
             </Button>
             <Button
-              variant={viewMode === "calendar" ? "default" : "ghost"}
+              variant={viewMode === "calendar" && mobileView === "list" ? "default" : "ghost"}
               size="sm"
-              className="h-7 px-2.5 text-xs"
-              onClick={() => setViewMode("calendar")}
+              className="hidden lg:flex h-7 px-2 text-xs"
+              onClick={() => { setViewMode("calendar"); setMobileView("list"); }}
             >
               <CalendarDays className="mr-1 h-3.5 w-3.5" /> Calendar
             </Button>
