@@ -294,7 +294,7 @@ export default function ListingsMap({ listings, hoveredId, onSelect, selectedId 
         allCoords.reduce((s, c) => s + c[0], 0) / allCoords.length,
         allCoords.reduce((s, c) => s + c[1], 0) / allCoords.length,
       ]
-    : [40.7128, -74.006];
+    : [42.3601, -71.0589]; // Default to Boston
 
   const handleZoomChange = useCallback((z: number) => setZoom(z), []);
 

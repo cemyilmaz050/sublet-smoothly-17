@@ -458,6 +458,7 @@ const ListingsPage = () => {
                 <div className="py-16 text-center text-muted-foreground">No listings found matching your search.</div>
               )}
             </div>
+            )}
           </div>
         </div>
 
