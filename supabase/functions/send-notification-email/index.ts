@@ -109,6 +109,13 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
         </div>
         ${footer}</div>`;
 
+    case "listing_deleted":
+      return `<div style="${baseStyle}">${logo}
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Listing Deleted</h1>
+        <p style="${mutedStyle}">Your listing "<strong>${data.listing_title}</strong>" has been successfully deleted from SubIn.</p>
+        <p style="${mutedStyle}">All related applications have been removed and any active deposits have been refunded.</p>
+        ${footer}</div>`;
+
     default:
       return `<div style="${baseStyle}">${logo}<p>${data.message || ""}</p>${footer}</div>`;
   }
