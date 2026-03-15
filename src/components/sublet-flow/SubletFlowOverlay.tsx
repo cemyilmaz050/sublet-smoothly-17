@@ -42,6 +42,15 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const [catalogUnits, setCatalogUnits] = useState<Record<string, any[]>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [idVerified, setIdVerified] = useState<boolean | null>(null);
+
+  // Check ID verification on mount
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("id_verified").eq("id", user.id).single()
+      .then(({ data: p }) => setIdVerified(p?.id_verified ?? false));
+  }, [user]);
+  const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const update = useCallback((partial: Partial<SubletFlowData>) => setData((p) => ({ ...p, ...partial })), []);
 
