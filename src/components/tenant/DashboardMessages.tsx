@@ -161,15 +161,15 @@ const DashboardMessages = ({ conversations, unreadCount, autoOpenConversationId 
       <Sheet open={!!openConvo} onOpenChange={(o) => !o && setOpenConvo(null)}>
         <SheetContent className="flex w-full flex-col p-0 sm:max-w-lg">
           {/* Header */}
-          <div className="flex items-center gap-3 border-b px-4 py-3">
-            <button onClick={() => setOpenConvo(null)}>
+          <div className="flex items-center gap-3 border-b px-4 py-3 safe-top">
+            <button onClick={() => setOpenConvo(null)} className="p-1 -ml-1">
               <ArrowLeft className="h-5 w-5 text-muted-foreground" />
             </button>
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary shrink-0">
               {openConvo?.other_initial}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-foreground">{openConvo?.other_name}</p>
+              <p className="text-sm font-semibold text-foreground truncate">{openConvo?.other_name}</p>
               {(openConvo?.listing_headline || openConvo?.listing_address) && (
                 <p className="text-[10px] text-muted-foreground truncate">
                   re: {openConvo?.listing_headline || openConvo?.listing_address}
@@ -179,13 +179,13 @@ const DashboardMessages = ({ conversations, unreadCount, autoOpenConversationId 
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-4 space-y-3">
             {messages.map((msg) => {
               const isMine = msg.sender_id === user?.id;
               return (
                 <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${isMine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
-                    {msg.content}
+                  <div className={`max-w-[80%] sm:max-w-[75%] rounded-2xl px-3.5 py-2.5 text-sm ${isMine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
+                    <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                     <p className={`mt-1 text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                       {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
                     </p>
@@ -196,20 +196,20 @@ const DashboardMessages = ({ conversations, unreadCount, autoOpenConversationId 
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
-          <div className="border-t p-3">
+          {/* Input — with safe area for iPhone */}
+          <div className="border-t p-3 safe-bottom">
             <div className="flex items-center gap-2">
-              <button className="text-muted-foreground hover:text-foreground">
+              <button className="text-muted-foreground hover:text-foreground p-1">
                 <Paperclip className="h-5 w-5" />
               </button>
               <Input
                 value={newMsg}
                 onChange={(e) => setNewMsg(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                 placeholder="Write a message..."
-                className="flex-1"
+                className="flex-1 text-[16px]"
               />
-              <Button size="icon" onClick={handleSend} disabled={!newMsg.trim() || sending}>
+              <Button size="icon" className="h-10 w-10 shrink-0" onClick={handleSend} disabled={!newMsg.trim() || sending}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>
