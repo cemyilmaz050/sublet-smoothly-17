@@ -32,6 +32,14 @@ const CreateListingPage = () => {
   const [loading, setLoading] = useState(false);
   const [published, setPublished] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(editId || null);
+  const [idVerified, setIdVerified] = useState<boolean | null>(null);
+
+  // Check ID verification status
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("id_verified").eq("id", user.id).single()
+      .then(({ data }) => setIdVerified(data?.id_verified ?? false));
+  }, [user]);
 
   useEffect(() => {
     if (!editId) return;
