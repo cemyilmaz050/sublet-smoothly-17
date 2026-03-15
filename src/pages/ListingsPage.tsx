@@ -9,10 +9,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2,
-  Search, SlidersHorizontal, Zap, Pencil, Eye, X, CalendarDays, Map,
-  MessageSquare, Send, CheckCircle2, Loader2, CalendarIcon,
+  Search, SlidersHorizontal, Pencil, Eye, X, CalendarDays, Map,
+  MessageSquare, Loader2, CalendarIcon,
 } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
