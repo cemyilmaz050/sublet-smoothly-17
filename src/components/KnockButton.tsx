@@ -1,19 +1,76 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
 
+/* ─── Custom SVG Icons ─── */
+const FistIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M10 4C10 2.9 10.9 2 12 2C13.1 2 14 2.9 14 4V8H10V4Z"
+      fill="currentColor"
+      opacity="0.85"
+    />
+    <path
+      d="M7 6C7 5.17 7.67 4.5 8.5 4.5C9.33 4.5 10 5.17 10 6V9H7V6Z"
+      fill="currentColor"
+      opacity="0.9"
+    />
+    <path
+      d="M14 6C14 5.17 14.67 4.5 15.5 4.5C16.33 4.5 17 5.17 17 6V9H14V6Z"
+      fill="currentColor"
+      opacity="0.9"
+    />
+    <path
+      d="M5 9C5 8.17 5.67 7.5 6.5 7.5C7.33 7.5 8 8.17 8 9V12H5V9Z"
+      fill="currentColor"
+      opacity="0.8"
+    />
+    <path
+      d="M5 12H19C19 12 20 12.5 20 14V16C20 19.31 17.31 22 14 22H12C8.13 22 5 18.87 5 15V12Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const FlameIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M8 1C8 1 3 6 3 10C3 12.76 5.24 15 8 15C10.76 15 13 12.76 13 10C13 6 8 1 8 1Z"
+      fill="url(#flame-grad)"
+    />
+    <path
+      d="M8 7C8 7 6 9.5 6 11C6 12.1 6.9 13 8 13C9.1 13 10 12.1 10 11C10 9.5 8 7 8 7Z"
+      fill="#FFF3"
+    />
+    <defs>
+      <linearGradient id="flame-grad" x1="8" y1="1" x2="8" y2="15" gradientUnits="userSpaceOnUse">
+        <stop stopColor="#FF6B6B" />
+        <stop offset="1" stopColor="#EE3E64" />
+      </linearGradient>
+    </defs>
+  </svg>
+);
+
+/* ─── Props ─── */
 interface KnockButtonProps {
   listingId: string;
   tenantId: string;
   listingHeadline?: string | null;
   listingAddress?: string | null;
   knockCount?: number;
-  /** Compact mode for listing cards */
   compact?: boolean;
   className?: string;
 }
@@ -29,12 +86,14 @@ const KnockButton = ({
 }: KnockButtonProps) => {
   const { user } = useAuth();
   const { requireAuth } = useAuthModal();
-  const navigate = useNavigate();
   const [knocked, setKnocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(knockCount);
+  const [showRipple, setShowRipple] = useState(false);
+  const [shaking, setShaking] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
-  // Check if user already knocked
   useEffect(() => {
     if (!user) return;
     supabase
@@ -48,7 +107,6 @@ const KnockButton = ({
       });
   }, [user, listingId]);
 
-  // Sync external knockCount
   useEffect(() => {
     setCount(knockCount);
   }, [knockCount]);
@@ -62,12 +120,12 @@ const KnockButton = ({
     }
 
     if (knocked || loading) return;
-    if (user.id === tenantId) return; // Can't knock your own listing
+    if (user.id === tenantId) return;
 
     setLoading(true);
 
     try {
-      // 1. Create or find conversation (empty — no message sent)
+      // 1. Create or find conversation
       let conversationId: string | null = null;
       const { data: existingConvo } = await supabase
         .from("conversations")
@@ -101,7 +159,6 @@ const KnockButton = ({
 
       if (error) {
         if (error.code === "23505") {
-          // Already knocked (unique constraint)
           setKnocked(true);
           toast.info("You've already knocked on this listing.");
         } else {
@@ -110,10 +167,21 @@ const KnockButton = ({
         return;
       }
 
-      setKnocked(true);
-      setCount((c) => c + 1);
+      // 3. Trigger animations
+      setShaking(true);
+      setTimeout(() => {
+        setShaking(false);
+        setShowRipple(true);
+      }, 500);
+      setTimeout(() => {
+        setShowRipple(false);
+        setConfirming(true);
+        setKnocked(true);
+        setCount((c) => c + 1);
+      }, 1300);
+      setTimeout(() => setConfirming(false), 1650);
 
-      // 3. Get knocker's name for notification
+      // 4. Notifications
       const { data: profile } = await supabase
         .from("profiles")
         .select("first_name, last_name")
@@ -123,16 +191,14 @@ const KnockButton = ({
         ? `${profile.first_name} ${profile.last_name || ""}`.trim()
         : "Someone";
 
-      // 4. In-app notification
       await supabase.from("notifications").insert({
         user_id: tenantId,
-        title: "Someone knocked! 🚪",
+        title: "New knock on your listing",
         message: `${knockerName} knocked on your listing at ${listingAddress || listingHeadline || "your apartment"}`,
         type: "knock",
         link: "/dashboard/tenant",
       });
 
-      // 5. Email notification (fire and forget)
       supabase.functions
         .invoke("send-notification-email", {
           body: {
@@ -150,7 +216,7 @@ const KnockButton = ({
         })
         .catch(() => {});
 
-      toast.success("Knock sent! 🚪 The sublessor will be notified.");
+      toast.success("Knock sent! The sublessor will be notified.");
     } catch (err) {
       console.error("Knock error:", err);
       toast.error("Failed to knock. Please try again.");
@@ -159,48 +225,135 @@ const KnockButton = ({
     }
   };
 
-  // Don't show knock button for own listings
+  // Don't render for own listings
   if (user && user.id === tenantId) return null;
 
+  /* ─── Compact (listing card) ─── */
   if (compact) {
     return (
-      <div className={cn("flex items-center gap-1.5", className)}>
+      <div className={cn("flex items-center gap-2", className)} onClick={(e) => e.stopPropagation()}>
         <button
+          ref={btnRef}
           onClick={handleKnock}
           disabled={knocked || loading}
           className={cn(
-            "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-all",
+            "group/knock relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-all duration-200 overflow-visible",
             knocked
               ? "bg-muted text-muted-foreground cursor-default"
-              : "bg-muted/60 text-muted-foreground hover:bg-primary/10 hover:text-primary active:scale-95"
+              : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm active:scale-95"
           )}
         >
-          {knocked ? "Knocked ✓" : "🚪 Knock"}
+          {/* Ripple rings */}
+          {showRipple && (
+            <>
+              <span className="absolute inset-0 rounded-full border-2 border-primary animate-knock-ripple-1 pointer-events-none" />
+              <span className="absolute inset-0 rounded-full border-2 border-primary animate-knock-ripple-2 pointer-events-none" />
+              <span className="absolute inset-0 rounded-full border border-primary animate-knock-ripple-3 pointer-events-none" />
+            </>
+          )}
+
+          <FistIcon
+            className={cn(
+              "h-3.5 w-3.5 shrink-0 transition-transform",
+              !knocked && "group-hover/knock:animate-knock-shake",
+              shaking && "animate-knock-shake",
+            )}
+          />
+          <span className={cn(confirming && "animate-knock-confirm")}>
+            {knocked ? "Knocked" : "Knock"}
+          </span>
+          {knocked && (
+            <svg className="h-3 w-3 shrink-0" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+          {!knocked && count > 0 && (
+            <span className="ml-0.5 rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold leading-none">
+              {count}
+            </span>
+          )}
         </button>
-        {count > 0 && (
-          <span className="text-[11px] text-muted-foreground">{count} knock{count !== 1 ? "s" : ""}</span>
-        )}
       </div>
     );
   }
 
+  /* ─── Full (detail drawer) ─── */
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      className={cn(
-        "gap-1.5 text-xs",
-        knocked && "bg-muted text-muted-foreground border-muted cursor-default",
-        className
+    <div className={cn("relative", className)} onClick={(e) => e.stopPropagation()}>
+      <button
+        ref={btnRef}
+        onClick={handleKnock}
+        disabled={knocked || loading}
+        className={cn(
+          "group/knock relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all duration-200 overflow-visible",
+          knocked
+            ? "bg-muted text-muted-foreground cursor-default animate-knock-confirm"
+            : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg active:scale-[0.98]"
+        )}
+      >
+        {/* Ripple rings */}
+        {showRipple && (
+          <>
+            <span className="absolute inset-0 rounded-xl border-2 border-primary animate-knock-ripple-1 pointer-events-none" />
+            <span className="absolute inset-0 rounded-xl border-2 border-primary animate-knock-ripple-2 pointer-events-none" />
+            <span className="absolute inset-0 rounded-xl border border-primary animate-knock-ripple-3 pointer-events-none" />
+          </>
+        )}
+
+        <FistIcon
+          className={cn(
+            "h-5 w-5 shrink-0 transition-transform",
+            !knocked && "group-hover/knock:animate-knock-shake",
+            shaking && "animate-knock-shake",
+          )}
+        />
+        <span>
+          {knocked ? "Knocked" : "Knock"}
+        </span>
+        {knocked && (
+          <svg className="h-4 w-4 shrink-0" viewBox="0 0 12 12" fill="none">
+            <path d="M2 6L5 9L10 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
+        {!knocked && count > 0 && (
+          <span className="ml-1 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs font-semibold leading-none">
+            {count}
+          </span>
+        )}
+      </button>
+    </div>
+  );
+};
+
+/* ─── Listing Card Activity Indicator ─── */
+export const KnockActivity = ({
+  knockCount,
+  className,
+}: {
+  knockCount: number;
+  className?: string;
+}) => {
+  if (knockCount < 1) return null;
+
+  return (
+    <div className={cn("flex items-center gap-2 mt-1.5", className)}>
+      {/* Knock counter with pulsing dot */}
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full rounded-full bg-coral opacity-75 animate-pulse-dot" />
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-coral" />
+        </span>
+        {knockCount} {knockCount === 1 ? "person" : "people"} knocked
+      </span>
+
+      {/* Hot listing badge — appears at 10+ knocks */}
+      {knockCount >= 10 && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-coral to-destructive px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-sm">
+          <FlameIcon className="h-3 w-3 animate-flame-flicker" />
+          Hot listing
+        </span>
       )}
-      onClick={handleKnock}
-      disabled={knocked || loading}
-    >
-      {knocked ? "Knocked ✓" : "🚪 Knock"}
-      {count > 0 && (
-        <span className="ml-1 text-[11px] text-muted-foreground">({count})</span>
-      )}
-    </Button>
+    </div>
   );
 };
 
