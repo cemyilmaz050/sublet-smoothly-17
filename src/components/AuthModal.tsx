@@ -231,7 +231,13 @@ const AuthModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto p-0 gap-0" aria-describedby="auth-modal-desc">
+        <DialogTitle className="sr-only">
+          {forgotMode ? "Reset Password" : emailSent ? "Check Your Email" : "Welcome to SubIn"}
+        </DialogTitle>
+        <DialogDescription id="auth-modal-desc" className="sr-only">
+          {forgotMode ? "Reset your password" : emailSent ? "Verify your email" : "Sign in or create an account"}
+        </DialogDescription>
         {/* Header */}
         <div className="flex items-center gap-3 border-b px-5 sm:px-6 py-4 sm:py-5">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary shrink-0">
