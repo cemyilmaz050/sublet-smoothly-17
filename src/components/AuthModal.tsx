@@ -65,11 +65,21 @@ const AuthModal = () => {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
+
+      // If the browser was redirected (mobile flow), we won't reach here
+      if (result?.redirected) return;
+
       if (result?.error) {
         toast.error(result.error.message || "Google sign-in failed");
         setGoogleLoading(false);
+        return;
       }
-      // Don't reset loading — page will reload after OAuth
+
+      // Success — session was set by lovable auth bridge.
+      // Close modal and execute pending action.
+      setGoogleLoading(false);
+      executePendingAction();
+      resetState();
     } catch (err: any) {
       toast.error(err.message || "Google sign-in failed");
       setGoogleLoading(false);
