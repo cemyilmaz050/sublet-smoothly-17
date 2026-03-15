@@ -122,7 +122,6 @@ const AuthModal = () => {
         return;
       }
       if (data.session) {
-        toast.success("Logged in successfully!");
         executePendingAction();
         resetState();
       }
