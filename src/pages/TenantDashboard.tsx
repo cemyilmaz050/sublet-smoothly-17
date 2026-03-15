@@ -11,6 +11,7 @@ import DashboardMessages from "@/components/tenant/DashboardMessages";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
+import KnocksSection from "@/components/tenant/KnocksSection";
 
 interface Listing {
   id: string;
@@ -168,7 +169,10 @@ const TenantDashboard = () => {
         {/* ID Verification */}
         <TenantIdVerification idVerified={idVerified} onVerified={() => setIdVerified(true)} />
 
-        {/* SECTION 1: My Listing */}
+        {/* SECTION 1: Knocks */}
+        <KnocksSection />
+
+        {/* SECTION 2: My Listing */}
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">My Listing</h2>
 

@@ -14,7 +14,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 interface EmailRequest {
   to: string;
   subject: string;
-  type: "meeting_request" | "meeting_confirmed" | "booking_confirmed" | "new_message" | "listing_live" | "application_received";
+  type: "meeting_request" | "meeting_confirmed" | "booking_confirmed" | "new_message" | "listing_live" | "application_received" | "knock";
   data: Record<string, any>;
 }
 
@@ -97,6 +97,16 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
         <p style="${mutedStyle}">${data.applicant_name} has applied for your listing "${data.listing_title}".</p>
         ${data.message ? `<div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;"><p style="margin: 0; ${mutedStyle}">"${data.message}"</p></div>` : ""}
         <a href="${data.action_url}" style="${btnStyle}">Review Application</a>
+        ${footer}</div>`;
+
+    case "knock":
+      return `<div style="${baseStyle}">${logo}
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Someone knocked on your listing 🚪</h1>
+        <p style="${mutedStyle}"><strong>${data.knocker_name}</strong> is interested in your place at <strong>${data.listing_address || data.listing_title}</strong>. Send them a message to start the conversation.</p>
+        <div style="margin: 24px 0; display: flex; gap: 12px;">
+          <a href="${data.message_url}" style="${btnStyle}">Message Them</a>
+          <a href="${data.profile_url}" style="${btnStyle} background: #f3f4f6; color: #1a1a1a;">View Their Profile</a>
+        </div>
         ${footer}</div>`;
 
     default:

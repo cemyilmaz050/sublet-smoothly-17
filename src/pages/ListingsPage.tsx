@@ -18,6 +18,7 @@ import { format } from "date-fns";
 
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import ReviewSection from "@/components/ReviewSection";
+import KnockButton from "@/components/KnockButton";
 import VerifiedBadge from "@/components/VerifiedBadge";
 import StarRating from "@/components/StarRating";
 import ShareListing from "@/components/ShareListing";
@@ -73,7 +74,7 @@ const ListingsPage = () => {
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, property_type")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, property_type, knock_count")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
@@ -464,8 +465,15 @@ const ListingsPage = () => {
                         )}
                       </div>
                       <div className="mt-3 flex items-center gap-2">
-                        {role === "subtenant" && (
-                          <Badge variant="outline" className="gap-1 text-xs"><Zap className="h-3 w-3 text-amber" />Fast Lane</Badge>
+                        {!isOwnListing(listing) && (
+                          <KnockButton
+                            listingId={listing.id}
+                            tenantId={listing.tenant_id}
+                            listingHeadline={listing.headline}
+                            listingAddress={listing.address}
+                            knockCount={(listing as any).knock_count || 0}
+                            compact
+                          />
                         )}
                         <div className="ml-auto flex items-center gap-1.5">
                           {role !== "manager" && role !== "tenant" && (
@@ -576,6 +584,13 @@ const ListingsPage = () => {
                   )}
                   {!isOwnListing(selectedListing) && (
                     <>
+                      <KnockButton
+                        listingId={selectedListing.id}
+                        tenantId={selectedListing.tenant_id}
+                        listingHeadline={selectedListing.headline}
+                        listingAddress={selectedListing.address}
+                        knockCount={(selectedListing as any).knock_count || 0}
+                      />
                       <Button variant="outline" className="w-full" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
                         {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a Message</>}
                       </Button>

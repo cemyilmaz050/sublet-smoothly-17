@@ -138,6 +138,9 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding }: Props) => 
                       <Heart className="h-3.5 w-3.5" /> {listing.save_count}
                     </span>
                     <span className="flex items-center gap-1">
+                      🚪 {(listing as any).knock_count || 0}
+                    </span>
+                    <span className="flex items-center gap-1">
                       <Users className="h-3.5 w-3.5" /> 0
                     </span>
                   </div>

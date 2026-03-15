@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Search, MapPin, Calendar, ShieldCheck, Clock, MessageSquare } from "lucide-react";
+import { Heart, Search, MapPin, Calendar, ShieldCheck, Clock, MessageSquare, DoorOpen } from "lucide-react";
 
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
@@ -34,6 +34,15 @@ interface SavedListing {
   } | null;
 }
 
+interface KnockedListing {
+  id: string;
+  listing_id: string;
+  responded: boolean;
+  created_at: string;
+  listing_headline: string | null;
+  listing_address: string | null;
+}
+
 const SubtenantDashboard = () => {
   const { user, documentsStatus, onboardingComplete } = useAuth();
   const navigate = useNavigate();
@@ -42,12 +51,13 @@ const SubtenantDashboard = () => {
 
   const [applications, setApplications] = useState<Application[]>([]);
   const [savedListings, setSavedListings] = useState<SavedListing[]>([]);
+  const [knockedListings, setKnockedListings] = useState<KnockedListing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [appsRes, savedRes] = await Promise.all([
+      const [appsRes, savedRes, knocksRes] = await Promise.all([
         supabase
           .from("applications")
           .select("id, status, created_at, listing:listings(headline, address)")
@@ -58,9 +68,35 @@ const SubtenantDashboard = () => {
           .select("id, listing_id, listing:listings(headline, address, monthly_rent, photos)")
           .eq("user_id", user.id)
           .order("saved_at", { ascending: false }),
+        supabase
+          .from("knocks" as any)
+          .select("id, listing_id, responded, created_at")
+          .eq("knocker_id", user.id)
+          .order("created_at", { ascending: false }),
       ]);
       setApplications((appsRes.data as any) || []);
       setSavedListings((savedRes.data as any) || []);
+
+      // Enrich knocks with listing info
+      const knocksData = (knocksRes.data as any[]) || [];
+      if (knocksData.length > 0) {
+        const listingIds = [...new Set(knocksData.map((k: any) => k.listing_id))];
+        const { data: listingsData } = await supabase
+          .from("listings")
+          .select("id, headline, address")
+          .in("id", listingIds);
+        const listingMap: Record<string, any> = {};
+        (listingsData || []).forEach((l: any) => { listingMap[l.id] = l; });
+
+        setKnockedListings(knocksData.map((k: any) => ({
+          ...k,
+          listing_headline: listingMap[k.listing_id]?.headline || "Untitled",
+          listing_address: listingMap[k.listing_id]?.address || "",
+        })));
+      } else {
+        setKnockedListings([]);
+      }
+
       setLoading(false);
     };
     fetchData();
@@ -115,6 +151,9 @@ const SubtenantDashboard = () => {
             <TabsTrigger value="applications">
               My Applications{applications.length > 0 && ` (${applications.length})`}
             </TabsTrigger>
+            <TabsTrigger value="knocks">
+              🚪 Knocks{knockedListings.length > 0 && ` (${knockedListings.length})`}
+            </TabsTrigger>
             <TabsTrigger value="saved">
               Saved{savedListings.length > 0 && ` (${savedListings.length})`}
             </TabsTrigger>
@@ -148,6 +187,43 @@ const SubtenantDashboard = () => {
                         </p>
                       </div>
                       <Badge variant="pending" className="capitalize">{app.status || "pending"}</Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="knocks">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2].map((i) => <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />)}
+              </div>
+            ) : knockedListings.length === 0 ? (
+              <EmptyState
+                icon={DoorOpen}
+                title="No knocks yet"
+                description="Knock on listings you're interested in — it's a quick way to signal interest."
+                actionLabel="Browse Listings"
+                onAction={() => navigate("/listings")}
+              />
+            ) : (
+              <div className="space-y-3">
+                {knockedListings.map((knock) => (
+                  <Card key={knock.id} className="shadow-sm">
+                    <CardContent className="flex items-center justify-between p-5">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{knock.listing_headline}</h3>
+                        <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5" /> {knock.listing_address || "Unknown"}
+                        </p>
+                        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" /> Knocked {formatDate(knock.created_at)}
+                        </p>
+                      </div>
+                      <Badge variant={knock.responded ? "default" : "secondary"} className="capitalize text-xs">
+                        {knock.responded ? "Responded ✓" : "Waiting"}
+                      </Badge>
                     </CardContent>
                   </Card>
                 ))}
