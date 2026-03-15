@@ -14,7 +14,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 interface EmailRequest {
   to: string;
   subject: string;
-  type: "meeting_request" | "meeting_confirmed" | "booking_confirmed" | "new_message" | "listing_live" | "application_received";
+  type: "meeting_request" | "meeting_confirmed" | "booking_confirmed" | "new_message" | "listing_live" | "application_received" | "knock";
   data: Record<string, any>;
 }
 
