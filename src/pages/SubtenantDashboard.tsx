@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Search, MapPin, Calendar, ShieldCheck, Clock, MessageSquare } from "lucide-react";
+import { Heart, Search, MapPin, Calendar, ShieldCheck, Clock, MessageSquare, DoorOpen } from "lucide-react";
 
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
@@ -34,6 +34,15 @@ interface SavedListing {
   } | null;
 }
 
+interface KnockedListing {
+  id: string;
+  listing_id: string;
+  responded: boolean;
+  created_at: string;
+  listing_headline: string | null;
+  listing_address: string | null;
+}
+
 const SubtenantDashboard = () => {
   const { user, documentsStatus, onboardingComplete } = useAuth();
   const navigate = useNavigate();
@@ -42,12 +51,13 @@ const SubtenantDashboard = () => {
 
   const [applications, setApplications] = useState<Application[]>([]);
   const [savedListings, setSavedListings] = useState<SavedListing[]>([]);
+  const [knockedListings, setKnockedListings] = useState<KnockedListing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [appsRes, savedRes] = await Promise.all([
+      const [appsRes, savedRes, knocksRes] = await Promise.all([
         supabase
           .from("applications")
           .select("id, status, created_at, listing:listings(headline, address)")
@@ -58,9 +68,35 @@ const SubtenantDashboard = () => {
           .select("id, listing_id, listing:listings(headline, address, monthly_rent, photos)")
           .eq("user_id", user.id)
           .order("saved_at", { ascending: false }),
+        supabase
+          .from("knocks" as any)
+          .select("id, listing_id, responded, created_at")
+          .eq("knocker_id", user.id)
+          .order("created_at", { ascending: false }),
       ]);
       setApplications((appsRes.data as any) || []);
       setSavedListings((savedRes.data as any) || []);
+
+      // Enrich knocks with listing info
+      const knocksData = (knocksRes.data as any[]) || [];
+      if (knocksData.length > 0) {
+        const listingIds = [...new Set(knocksData.map((k: any) => k.listing_id))];
+        const { data: listingsData } = await supabase
+          .from("listings")
+          .select("id, headline, address")
+          .in("id", listingIds);
+        const listingMap: Record<string, any> = {};
+        (listingsData || []).forEach((l: any) => { listingMap[l.id] = l; });
+
+        setKnockedListings(knocksData.map((k: any) => ({
+          ...k,
+          listing_headline: listingMap[k.listing_id]?.headline || "Untitled",
+          listing_address: listingMap[k.listing_id]?.address || "",
+        })));
+      } else {
+        setKnockedListings([]);
+      }
+
       setLoading(false);
     };
     fetchData();
