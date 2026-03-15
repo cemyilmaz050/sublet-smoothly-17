@@ -50,38 +50,6 @@ interface ListingItem {
   review_count?: number;
 }
 
-const mockListings: ListingItem[] = [
-  {
-    id: "mock-1", headline: "Sunny 2BR in Downtown", address: "Manhattan, NY", monthly_rent: 2400,
-    photos: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop"],
-    available_from: "2026-07-01", available_until: "2026-12-31", bedrooms: 2, bathrooms: 1, sqft: 850,
-    description: "Bright corner apartment with skyline views, in-unit laundry, and modern finishes throughout.",
-    source: "manual", tenant_id: "", manager_id: null, property_type: "apartment",
-  },
-  {
-    id: "mock-2", headline: "Cozy Studio near Park", address: "Brooklyn, NY", monthly_rent: 1800,
-    photos: ["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop"],
-    available_from: "2026-08-01", available_until: "2026-11-30", bedrooms: 1, bathrooms: 1, sqft: 480,
-    description: "Charming studio steps from Prospect Park. Hardwood floors, lots of natural light.",
-    source: "manual", tenant_id: "", manager_id: null, property_type: "studio",
-  },
-  {
-    id: "mock-3", headline: "Modern 1BR with Views", address: "Jersey City, NJ", monthly_rent: 2100,
-    photos: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop"],
-    available_from: "2026-07-15", available_until: "2027-01-15", bedrooms: 1, bathrooms: 1, sqft: 650,
-    description: "Floor-to-ceiling windows with stunning river views. Doorman building with gym.",
-    source: "manual", tenant_id: "", manager_id: null, property_type: "apartment",
-  },
-  {
-    id: "mock-4", headline: "Spacious 3BR Brownstone", address: "Harlem, NY", monthly_rent: 3200,
-    photos: ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=600&h=400&fit=crop"],
-    available_from: "2026-06-15", available_until: "2026-12-15", bedrooms: 3, bathrooms: 2, sqft: 1200,
-    description: "Classic brownstone with exposed brick, chef's kitchen, and private backyard.",
-    source: "manual", tenant_id: "", manager_id: null, property_type: "house",
-  },
-];
-
-
 const ListingsPage = () => {
   const { user, role } = useAuth();
   const { requireAuth } = useAuthModal();
@@ -156,7 +124,7 @@ const ListingsPage = () => {
     }).then();
   }, [selectedListing?.id]);
 
-  const allListings = [...dbListings, ...mockListings];
+  const allListings = dbListings;
 
   const filtered = allListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -579,6 +547,9 @@ const ListingsPage = () => {
                   )}
                   {!isOwnListing(selectedListing) && (
                     <>
+                      <Button variant="outline" className="w-full" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
+                        {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a Message</>}
+                      </Button>
                       {appliedListings.has(selectedListing.id) ? (
                         <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald/30 bg-emerald/10 py-3 text-sm font-medium text-emerald">
                           <CheckCircle2 className="h-4 w-4" /> Application Submitted

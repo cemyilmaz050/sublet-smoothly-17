@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin } from "lucide-react";
+import TenantIdVerification from "@/components/TenantIdVerification";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +42,14 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const [catalogUnits, setCatalogUnits] = useState<Record<string, any[]>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [idVerified, setIdVerified] = useState<boolean | null>(null);
+
+  // Check ID verification on mount
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("id_verified").eq("id", user.id).single()
+      .then(({ data: p }) => setIdVerified(p?.id_verified ?? false));
+  }, [user]);
 
   const update = useCallback((partial: Partial<SubletFlowData>) => setData((p) => ({ ...p, ...partial })), []);
 
@@ -761,12 +770,17 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           </div>
         )}
 
+        {/* ID Verification gate */}
+        {idVerified === false && (
+          <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
+        )}
+
         <label className="flex items-start gap-2">
           <Checkbox checked={data.confirmAccuracy} onCheckedChange={(v) => update({ confirmAccuracy: !!v })} className="mt-0.5" />
           <span className="text-sm text-foreground">I confirm all information is accurate and I agree to the platform sublet terms</span>
         </label>
 
-        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy} className="w-full">
+        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy || idVerified === false} className="w-full">
           {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</> : <><Home className="mr-2 h-4 w-4" /> Publish Property</>}
         </Button>
       </div>

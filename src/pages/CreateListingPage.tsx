@@ -12,6 +12,7 @@ import ListingStep4 from "@/components/listing/ListingStep4";
 import ListingStep5 from "@/components/listing/ListingStep5";
 import PublishChecklist from "@/components/listing/PublishChecklist";
 import PublishSuccess from "@/components/listing/PublishSuccess";
+import TenantIdVerification from "@/components/TenantIdVerification";
 import { ListingFormData, defaultListingForm } from "@/types/listing";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,6 +32,14 @@ const CreateListingPage = () => {
   const [loading, setLoading] = useState(false);
   const [published, setPublished] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(editId || null);
+  const [idVerified, setIdVerified] = useState<boolean | null>(null);
+
+  // Check ID verification status
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("id_verified").eq("id", user.id).single()
+      .then(({ data }) => setIdVerified(data?.id_verified ?? false));
+  }, [user]);
 
   useEffect(() => {
     if (!editId) return;
@@ -247,6 +256,12 @@ const CreateListingPage = () => {
                 <div className="mt-6">
                   {checklist.ChecklistUI}
                 </div>
+                {/* ID Verification gate — must verify before publishing */}
+                {idVerified === false && (
+                  <div className="mt-6">
+                    <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
+                  </div>
+                )}
               </>
             )}
 
@@ -263,7 +278,7 @@ const CreateListingPage = () => {
               ) : (
                 <Button
                   onClick={handlePublish}
-                  disabled={!confirmed || loading || !checklist.allDone}
+                  disabled={!confirmed || loading || !checklist.allDone || idVerified === false}
                   className="bg-primary text-primary-foreground"
                   size="lg"
                 >
