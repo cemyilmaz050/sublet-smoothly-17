@@ -9,10 +9,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   MapPin, Calendar, DollarSign, ShieldCheck, Heart, Building2,
-  Search, SlidersHorizontal, Zap, Pencil, Eye, X, CalendarDays, Map,
-  MessageSquare, Send, CheckCircle2, Loader2, CalendarIcon,
+  Search, SlidersHorizontal, Pencil, Eye, X, CalendarDays, Map,
+  MessageSquare, Loader2, CalendarIcon,
 } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -190,46 +189,7 @@ const ListingsPage = () => {
     });
   }, [user]);
 
-  const [applyingId, setApplyingId] = useState<string | null>(null);
   const [contactingId, setContactingId] = useState<string | null>(null);
-  const [appliedListings, setAppliedListings] = useState<Set<string>>(new Set());
-  const [applicationMessage, setApplicationMessage] = useState("");
-  const [showApplyForm, setShowApplyForm] = useState(false);
-
-  // Load existing applications
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("applications").select("listing_id").eq("applicant_id", user.id).then(({ data }) => {
-      if (data) setAppliedListings(new Set(data.map((d) => d.listing_id)));
-    });
-  }, [user]);
-
-  const handleApply = async (listing: ListingItem) => {
-    if (!user) { requireAuth(() => handleApply(listing)); return; }
-    if (appliedListings.has(listing.id)) { toast.info("You've already applied to this listing."); return; }
-    setApplyingId(listing.id);
-    const { error } = await supabase.from("applications").insert({
-      applicant_id: user.id,
-      listing_id: listing.id,
-      message: applicationMessage || null,
-      status: "pending",
-    });
-    setApplyingId(null);
-    if (error) { toast.error("Failed to submit application. Please try again."); return; }
-    setAppliedListings((prev) => new Set(prev).add(listing.id));
-    setApplicationMessage("");
-    setShowApplyForm(false);
-    toast.success("Application submitted! The tenant will be notified.");
-
-    // Also create a notification for the listing owner
-    await supabase.from("notifications").insert({
-      user_id: listing.tenant_id,
-      title: "New Application",
-      message: `Someone applied to your listing "${listing.headline || "Untitled"}"`,
-      type: "application",
-      link: "/tenant/applicants",
-    });
-  };
 
   const handleContact = async (listing: ListingItem) => {
     if (!user) { requireAuth(() => handleContact(listing)); return; }
@@ -595,35 +555,6 @@ const ListingsPage = () => {
                       <Button variant="outline" className="w-full" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
                         {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a Message</>}
                       </Button>
-                      {appliedListings.has(selectedListing.id) ? (
-                        <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald/30 bg-emerald/10 py-3 text-sm font-medium text-emerald">
-                          <CheckCircle2 className="h-4 w-4" /> Application Submitted
-                        </div>
-                      ) : showApplyForm ? (
-                        <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-                          <h4 className="text-sm font-semibold text-foreground">Apply to this listing</h4>
-                          <Textarea
-                            placeholder="Introduce yourself — why are you interested in this apartment? (optional)"
-                            value={applicationMessage}
-                            onChange={(e) => setApplicationMessage(e.target.value)}
-                            rows={3}
-                            className="resize-none"
-                          />
-                          <div className="flex gap-2">
-                            <Button className="flex-1" onClick={() => handleApply(selectedListing)} disabled={applyingId === selectedListing.id}>
-                              {applyingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Submitting...</> : <><Send className="mr-1 h-4 w-4" />Submit Application</>}
-                            </Button>
-                            <Button variant="outline" onClick={() => { setShowApplyForm(false); setApplicationMessage(""); }}>Cancel</Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Button variant="outline" className="w-full" size="lg" onClick={() => {
-                          if (!user) { requireAuth(() => setShowApplyForm(true)); return; }
-                          setShowApplyForm(true);
-                        }}>
-                          <Zap className="mr-1 h-4 w-4" /> Apply Now
-                        </Button>
-                      )}
                       <Button variant="outline" className="w-full" onClick={() => toggleSave(selectedListing.id)}>
                         <Heart className={`mr-1 h-4 w-4 ${savedListings.has(selectedListing.id) ? "fill-primary text-primary" : ""}`} />
                         {savedListings.has(selectedListing.id) ? "Saved" : "Save Listing"}
