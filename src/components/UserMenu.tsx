@@ -102,10 +102,22 @@ const UserMenu = () => {
 
   const menuContent = user ? authedMenuItems : guestMenuItems;
 
-  const triggerButton = (
+  const triggerButton = user ? (
     <button
       onClick={() => setOpen(!open)}
-      className="flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-sm transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] hover:shadow-md"
+      className="flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-sm transition-all duration-150 ease-in-out hover:bg-accent hover:shadow-md overflow-hidden"
+      aria-label="Open menu"
+    >
+      {avatarUrl ? (
+        <img src={avatarUrl} alt="" className="h-full w-full object-cover rounded-full" />
+      ) : (
+        <span className="text-sm font-semibold text-foreground">{initials}</span>
+      )}
+    </button>
+  ) : (
+    <button
+      onClick={() => setOpen(!open)}
+      className="flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-sm transition-all duration-150 ease-in-out hover:bg-accent hover:shadow-md"
       aria-label="Open menu"
     >
       <Menu className="h-5 w-5 text-foreground" />
