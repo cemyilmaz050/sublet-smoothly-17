@@ -65,6 +65,8 @@ const ListingsPage = () => {
   const [selectedListing, setSelectedListing] = useState<ListingItem | null>(null);
   const [savedListings, setSavedListings] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"map" | "calendar">("map");
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [calendarSelectedDate, setCalendarSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
