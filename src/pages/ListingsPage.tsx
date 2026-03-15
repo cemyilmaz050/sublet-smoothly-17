@@ -124,7 +124,7 @@ const ListingsPage = () => {
     }).then();
   }, [selectedListing?.id]);
 
-  const allListings = [...dbListings, ...mockListings];
+  const allListings = dbListings;
 
   const filtered = allListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
