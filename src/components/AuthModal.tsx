@@ -400,10 +400,14 @@ const AuthModal = () => {
 
               {/* SIGNUP TAB */}
               <TabsContent value="signup" className="mt-0 space-y-4">
-                <Button variant="outline" className="w-full h-12" size="lg" onClick={handleGoogleSignIn}>
-                  <GoogleIcon />
-                  Continue with Google
-                </Button>
+                <button
+                  onClick={handleGoogleSignIn}
+                  disabled={googleLoading}
+                  className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-card px-4 h-12 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-accent/50 hover:shadow-md disabled:opacity-60 disabled:pointer-events-none"
+                >
+                  {googleLoading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <GoogleIcon />}
+                  {googleLoading ? "Connecting..." : "Continue with Google"}
+                </button>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                   <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">or</span></div>

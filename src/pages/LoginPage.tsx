@@ -93,7 +93,6 @@ const LoginPage = () => {
         return;
       }
       if (data.session) {
-        toast.success("Logged in as Boston Brokerage Group staff!");
         navigate("/manager", { replace: true });
       }
     } catch {
