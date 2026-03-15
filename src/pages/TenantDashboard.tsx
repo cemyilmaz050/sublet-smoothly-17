@@ -169,7 +169,10 @@ const TenantDashboard = () => {
         {/* ID Verification */}
         <TenantIdVerification idVerified={idVerified} onVerified={() => setIdVerified(true)} />
 
-        {/* SECTION 1: My Listing */}
+        {/* SECTION 1: Knocks */}
+        <KnocksSection />
+
+        {/* SECTION 2: My Listing */}
         <section>
           <h2 className="mb-4 text-lg font-semibold text-foreground">My Listing</h2>
 

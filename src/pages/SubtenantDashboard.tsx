@@ -194,6 +194,43 @@ const SubtenantDashboard = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="knocks">
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2].map((i) => <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />)}
+              </div>
+            ) : knockedListings.length === 0 ? (
+              <EmptyState
+                icon={DoorOpen}
+                title="No knocks yet"
+                description="Knock on listings you're interested in — it's a quick way to signal interest."
+                actionLabel="Browse Listings"
+                onAction={() => navigate("/listings")}
+              />
+            ) : (
+              <div className="space-y-3">
+                {knockedListings.map((knock) => (
+                  <Card key={knock.id} className="shadow-sm">
+                    <CardContent className="flex items-center justify-between p-5">
+                      <div>
+                        <h3 className="font-semibold text-foreground">{knock.listing_headline}</h3>
+                        <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5" /> {knock.listing_address || "Unknown"}
+                        </p>
+                        <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" /> Knocked {formatDate(knock.created_at)}
+                        </p>
+                      </div>
+                      <Badge variant={knock.responded ? "default" : "secondary"} className="capitalize text-xs">
+                        {knock.responded ? "Responded ✓" : "Waiting"}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
           <TabsContent value="saved">
             {loading ? (
               <div className="space-y-3">
