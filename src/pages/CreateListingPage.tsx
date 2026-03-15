@@ -327,8 +327,86 @@ const CreateListingPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Delete button — only on edit */}
+        {editId && <DeleteListingSection listingId={editId} headline={form.headline || form.address || "this listing"} />}
       </div>
     </div>
+  );
+};
+
+/* ---- Delete section at bottom of edit page ---- */
+const DeleteListingSection = ({ listingId, headline }: { listingId: string; headline: string }) => {
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const { data: activeBookings } = await supabase
+        .from("bookings")
+        .select("id")
+        .eq("listing_id", listingId)
+        .in("status", ["confirmed"]);
+
+      if (activeBookings && activeBookings.length > 0) {
+        toast.error("You have an active booking for this listing. Please resolve the booking before deleting.");
+        setDeleting(false);
+        setOpen(false);
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke("delete-listing", {
+        body: { listingId },
+      });
+      if (error) throw error;
+      toast.success("Listing deleted successfully.");
+      navigate("/tenant/dashboard");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete listing.");
+    } finally {
+      setDeleting(false);
+      setOpen(false);
+    }
+  };
+
+  return (
+    <>
+      <Card className="mt-6 border-destructive/30 shadow-card">
+        <CardContent className="flex items-center justify-between p-6">
+          <div>
+            <p className="text-sm font-semibold text-destructive">Danger Zone</p>
+            <p className="text-xs text-muted-foreground">Permanently delete this listing and all related data.</p>
+          </div>
+          <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => setOpen(true)}>
+            <Trash2 className="mr-2 h-4 w-4" /> Delete Listing
+          </Button>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this listing?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone and all applications and messages related to this listing will be permanently removed.
+              <span className="mt-2 block font-medium text-foreground">"{headline}"</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...</> : "Yes, Delete Listing"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
