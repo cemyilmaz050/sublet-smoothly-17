@@ -463,6 +463,7 @@ const ListingsPage = () => {
                             <StarRating rating={listing.avg_rating || 0} size="sm" showCount count={listing.review_count} />
                           </div>
                         )}
+                        <KnockActivity knockCount={(listing as any).knock_count || 0} />
                       </div>
                       <div className="mt-3 flex items-center gap-2">
                         {!isOwnListing(listing) && (
