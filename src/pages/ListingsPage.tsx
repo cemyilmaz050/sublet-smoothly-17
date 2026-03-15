@@ -388,10 +388,13 @@ const ListingsPage = () => {
 
       {/* Split Screen */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Listings Cards */}
-        <div className="w-full overflow-y-auto lg:w-[45%]">
-          <div className="p-4 lg:p-6">
-            <p className="mb-4 text-sm text-muted-foreground">
+        {/* Left: Listings Cards — hidden on mobile when map view is active */}
+        <div className={cn(
+          "w-full overflow-y-auto lg:w-[45%]",
+          mobileView === "map" && "hidden lg:block"
+        )}>
+          <div className="p-3 sm:p-4 lg:p-6">
+            <p className="mb-3 text-sm text-muted-foreground">
               {filtered.length} listing{filtered.length !== 1 ? "s" : ""} found
               {calendarSelectedDate && viewMode === "calendar" && (
                 <span className="ml-2">
@@ -406,7 +409,7 @@ const ListingsPage = () => {
               )}
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filtered.map((listing, index) => (
                 <motion.div
                   key={listing.id}
@@ -416,10 +419,10 @@ const ListingsPage = () => {
                   onMouseEnter={() => setHoveredId(listing.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={() => setSelectedListing(listing)}
-                  className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-elevated"
+                  className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-elevated active:scale-[0.99]"
                 >
                   <div className="flex flex-col sm:flex-row">
-                    <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-auto sm:w-48 sm:min-h-[140px]">
+                    <div className="relative aspect-[16/10] w-full overflow-hidden sm:aspect-auto sm:w-48 sm:min-h-[140px]">
                       {listing.photos && listing.photos.length > 0 ? (
                         <img src={listing.photos[0]} alt={listing.headline || ""} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
                       ) : (
@@ -442,10 +445,10 @@ const ListingsPage = () => {
                         <div className="absolute right-2 top-2"><Badge className="bg-accent text-accent-foreground text-xs">Managed by you</Badge></div>
                       )}
                     </div>
-                    <div className="flex flex-1 flex-col justify-between p-4">
+                    <div className="flex flex-1 flex-col justify-between p-3 sm:p-4">
                       <div>
                         <div className="flex items-start justify-between">
-                          <h3 className="font-semibold text-foreground group-hover:text-primary line-clamp-1">{listing.headline || "Untitled"}</h3>
+                          <h3 className="font-semibold text-foreground group-hover:text-primary line-clamp-1 text-[15px]">{listing.headline || "Untitled"}</h3>
                           {listing.monthly_rent && (
                             <p className="ml-2 whitespace-nowrap text-lg font-bold text-primary">
                               ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
@@ -466,7 +469,7 @@ const ListingsPage = () => {
                         )}
                         <div className="ml-auto flex items-center gap-1.5">
                           {role !== "manager" && role !== "tenant" && (
-                            <button onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }} className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-accent">
+                            <button onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }} className="flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-full transition-colors hover:bg-accent active:bg-accent">
                               <Heart className={`h-4 w-4 ${savedListings.has(listing.id) ? "fill-primary text-primary" : "text-muted-foreground"}`} />
                             </button>
                           )}
@@ -483,10 +486,13 @@ const ListingsPage = () => {
           </div>
         </div>
 
-        {/* Right: Map or Calendar */}
-        <div className="relative hidden border-l lg:block lg:w-[55%]">
+        {/* Right: Map or Calendar — full width on mobile when map view active */}
+        <div className={cn(
+          "relative border-l lg:block lg:w-[55%]",
+          mobileView === "map" ? "block w-full" : "hidden"
+        )}>
           {viewMode === "calendar" ? (
-            <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden">
+            <div className="sticky top-0 h-[calc(100dvh-8rem)] overflow-hidden">
               <CalendarView
                 listings={allListings}
                 onDayClick={setCalendarSelectedDate}
@@ -494,7 +500,7 @@ const ListingsPage = () => {
               />
             </div>
           ) : (
-            <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden">
+            <div className="sticky top-0 h-[calc(100dvh-8rem)] overflow-hidden">
               <ListingsMap
                 listings={filtered}
                 hoveredId={hoveredId}
