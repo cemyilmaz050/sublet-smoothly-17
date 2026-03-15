@@ -11,6 +11,7 @@ import DashboardMessages from "@/components/tenant/DashboardMessages";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
+import KnocksSection from "@/components/tenant/KnocksSection";
 
 interface Listing {
   id: string;
