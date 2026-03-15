@@ -73,7 +73,7 @@ const ListingsPage = () => {
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, property_type, knock_count")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, property_type, knock_count, latitude, longitude")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
@@ -370,6 +370,12 @@ const ListingsPage = () => {
               )}
             </p>
 
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Loading listings...</p>
+              </div>
+            ) : (
             <div className="space-y-3 sm:space-y-4">
               {filtered.map((listing, index) => (
                 <motion.div
@@ -452,6 +458,7 @@ const ListingsPage = () => {
                 <div className="py-16 text-center text-muted-foreground">No listings found matching your search.</div>
               )}
             </div>
+            )}
           </div>
         </div>
 
