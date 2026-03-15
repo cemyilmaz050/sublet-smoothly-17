@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
@@ -14,6 +15,24 @@ const UserMenu = () => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [initials, setInitials] = useState<string>("");
+
+  useEffect(() => {
+    if (!user) { setAvatarUrl(null); setInitials(""); return; }
+    // Get initials from user metadata
+    const meta = user.user_metadata || {};
+    const first = (meta.first_name || meta.full_name?.split(" ")[0] || "").charAt(0).toUpperCase();
+    const last = (meta.last_name || meta.full_name?.split(" ").slice(-1)[0] || "").charAt(0).toUpperCase();
+    setInitials(first + last || user.email?.charAt(0).toUpperCase() || "U");
+    // Fetch avatar from profile
+    supabase.from("profiles").select("avatar_url, first_name, last_name").eq("id", user.id).single().then(({ data }) => {
+      if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      if (data?.first_name || data?.last_name) {
+        setInitials(((data.first_name || "").charAt(0) + (data.last_name || "").charAt(0)).toUpperCase() || initials);
+      }
+    });
+  }, [user]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -83,10 +102,22 @@ const UserMenu = () => {
 
   const menuContent = user ? authedMenuItems : guestMenuItems;
 
-  const triggerButton = (
+  const triggerButton = user ? (
     <button
       onClick={() => setOpen(!open)}
-      className="flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-sm transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] hover:shadow-md"
+      className="flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-sm transition-all duration-150 ease-in-out hover:bg-accent hover:shadow-md overflow-hidden"
+      aria-label="Open menu"
+    >
+      {avatarUrl ? (
+        <img src={avatarUrl} alt="" className="h-full w-full object-cover rounded-full" />
+      ) : (
+        <span className="text-sm font-semibold text-foreground">{initials}</span>
+      )}
+    </button>
+  ) : (
+    <button
+      onClick={() => setOpen(!open)}
+      className="flex h-10 w-10 items-center justify-center rounded-full border bg-card shadow-sm transition-all duration-150 ease-in-out hover:bg-accent hover:shadow-md"
       aria-label="Open menu"
     >
       <Menu className="h-5 w-5 text-foreground" />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -56,16 +56,23 @@ const AuthModal = () => {
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   const handleGoogleSignIn = async () => {
+    if (googleLoading) return;
+    setGoogleLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (result?.error) {
         toast.error(result.error.message || "Google sign-in failed");
+        setGoogleLoading(false);
       }
+      // Don't reset loading — page will reload after OAuth
     } catch (err: any) {
       toast.error(err.message || "Google sign-in failed");
+      setGoogleLoading(false);
     }
   };
 
@@ -115,7 +122,6 @@ const AuthModal = () => {
         return;
       }
       if (data.session) {
-        toast.success("Logged in successfully!");
         executePendingAction();
         resetState();
       }
@@ -182,7 +188,6 @@ const AuthModal = () => {
       }
 
       if (data.session) {
-        toast.success("Account created!");
         executePendingAction();
         resetState();
       }
@@ -226,7 +231,13 @@ const AuthModal = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto p-0 gap-0">
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto p-0 gap-0" aria-describedby="auth-modal-desc">
+        <DialogTitle className="sr-only">
+          {forgotMode ? "Reset Password" : emailSent ? "Check Your Email" : "Welcome to SubIn"}
+        </DialogTitle>
+        <DialogDescription id="auth-modal-desc" className="sr-only">
+          {forgotMode ? "Reset your password" : emailSent ? "Verify your email" : "Sign in or create an account"}
+        </DialogDescription>
         {/* Header */}
         <div className="flex items-center gap-3 border-b px-5 sm:px-6 py-4 sm:py-5">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary shrink-0">
@@ -314,10 +325,14 @@ const AuthModal = () => {
 
               {/* LOGIN TAB */}
               <TabsContent value="login" className="mt-0 space-y-4">
-                <Button variant="outline" className="w-full h-12" size="lg" onClick={handleGoogleSignIn}>
-                  <GoogleIcon />
-                  Continue with Google
-                </Button>
+                <button
+                  onClick={handleGoogleSignIn}
+                  disabled={googleLoading}
+                  className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-card px-4 h-12 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-accent/50 hover:shadow-md disabled:opacity-60 disabled:pointer-events-none"
+                >
+                  {googleLoading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <GoogleIcon />}
+                  {googleLoading ? "Connecting..." : "Continue with Google"}
+                </button>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                   <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">or</span></div>
@@ -385,10 +400,14 @@ const AuthModal = () => {
 
               {/* SIGNUP TAB */}
               <TabsContent value="signup" className="mt-0 space-y-4">
-                <Button variant="outline" className="w-full h-12" size="lg" onClick={handleGoogleSignIn}>
-                  <GoogleIcon />
-                  Continue with Google
-                </Button>
+                <button
+                  onClick={handleGoogleSignIn}
+                  disabled={googleLoading}
+                  className="flex w-full items-center justify-center gap-2.5 rounded-lg border border-border bg-card px-4 h-12 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-accent/50 hover:shadow-md disabled:opacity-60 disabled:pointer-events-none"
+                >
+                  {googleLoading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <GoogleIcon />}
+                  {googleLoading ? "Connecting..." : "Continue with Google"}
+                </button>
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
                   <div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">or</span></div>

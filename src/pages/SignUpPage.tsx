@@ -142,8 +142,7 @@ const SignUpPage = () => {
       }
 
       if (data.session) {
-        toast.success("Account created successfully!");
-        navigate("/listings");
+        navigate("/listings", { replace: true });
         return;
       }
 
