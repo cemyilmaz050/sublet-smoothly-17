@@ -61,8 +61,7 @@ const LoginPage = () => {
         return;
       }
       if (data.session) {
-        toast.success("Logged in successfully!");
-        navigate("/dashboard", { replace: true });
+        navigate("/listings", { replace: true });
       }
     } catch (err: any) {
       setLoginError(err.message || "An unexpected error occurred. Please try again.");
