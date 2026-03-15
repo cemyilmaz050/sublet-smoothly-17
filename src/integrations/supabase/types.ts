@@ -338,6 +338,54 @@ export type Database = {
         }
         Relationships: []
       }
+      knocks: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          dismissed: boolean
+          id: string
+          knocker_id: string
+          listing_id: string
+          responded: boolean
+          tenant_id: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          dismissed?: boolean
+          id?: string
+          knocker_id: string
+          listing_id: string
+          responded?: boolean
+          tenant_id: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          dismissed?: boolean
+          id?: string
+          knocker_id?: string
+          listing_id?: string
+          responded?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knocks_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knocks_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_views: {
         Row: {
           id: string
@@ -382,6 +430,7 @@ export type Database = {
           headline: string | null
           house_rules: string | null
           id: string
+          knock_count: number
           latitude: number | null
           longitude: number | null
           management_group_id: string | null
@@ -418,6 +467,7 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
+          knock_count?: number
           latitude?: number | null
           longitude?: number | null
           management_group_id?: string | null
@@ -454,6 +504,7 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
+          knock_count?: number
           latitude?: number | null
           longitude?: number | null
           management_group_id?: string | null
