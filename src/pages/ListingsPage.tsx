@@ -584,6 +584,13 @@ const ListingsPage = () => {
                   )}
                   {!isOwnListing(selectedListing) && (
                     <>
+                      <KnockButton
+                        listingId={selectedListing.id}
+                        tenantId={selectedListing.tenant_id}
+                        listingHeadline={selectedListing.headline}
+                        listingAddress={selectedListing.address}
+                        knockCount={(selectedListing as any).knock_count || 0}
+                      />
                       <Button variant="outline" className="w-full" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
                         {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a Message</>}
                       </Button>

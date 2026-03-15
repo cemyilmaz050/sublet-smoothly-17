@@ -99,6 +99,16 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
         <a href="${data.action_url}" style="${btnStyle}">Review Application</a>
         ${footer}</div>`;
 
+    case "knock":
+      return `<div style="${baseStyle}">${logo}
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Someone knocked on your listing 🚪</h1>
+        <p style="${mutedStyle}"><strong>${data.knocker_name}</strong> is interested in your place at <strong>${data.listing_address || data.listing_title}</strong>. Send them a message to start the conversation.</p>
+        <div style="margin: 24px 0; display: flex; gap: 12px;">
+          <a href="${data.message_url}" style="${btnStyle}">Message Them</a>
+          <a href="${data.profile_url}" style="${btnStyle} background: #f3f4f6; color: #1a1a1a;">View Their Profile</a>
+        </div>
+        ${footer}</div>`;
+
     default:
       return `<div style="${baseStyle}">${logo}<p>${data.message || ""}</p>${footer}</div>`;
   }
