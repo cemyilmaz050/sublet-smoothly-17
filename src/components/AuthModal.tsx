@@ -56,16 +56,23 @@ const AuthModal = () => {
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
 
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   const handleGoogleSignIn = async () => {
+    if (googleLoading) return;
+    setGoogleLoading(true);
     try {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (result?.error) {
         toast.error(result.error.message || "Google sign-in failed");
+        setGoogleLoading(false);
       }
+      // Don't reset loading — page will reload after OAuth
     } catch (err: any) {
       toast.error(err.message || "Google sign-in failed");
+      setGoogleLoading(false);
     }
   };
 
