@@ -26,16 +26,27 @@ interface ListingMapItem {
 }
 
 const LOCATION_COORDS: Record<string, [number, number]> = {
+  // Boston area
+  "boston, ma": [42.3601, -71.0589],
+  "roxbury crossing, ma": [42.3312, -71.0995],
+  "roxbury, ma": [42.3312, -71.0883],
+  "newbury street": [42.3510, -71.0810],
+  "back bay": [42.3503, -71.0810],
+  "beacon hill": [42.3588, -71.0707],
+  "south end": [42.3420, -71.0724],
+  "fenway": [42.3467, -71.0972],
+  "allston, ma": [42.3539, -71.1337],
+  "brighton, ma": [42.3484, -71.1564],
+  "cambridge, ma": [42.3736, -71.1097],
+  "somerville, ma": [42.3876, -71.0995],
+  "brookline, ma": [42.3318, -71.1212],
+  "jamaica plain": [42.3097, -71.1151],
+  "dorchester, ma": [42.3016, -71.0674],
+  "south boston": [42.3381, -71.0476],
+  "charlestown, ma": [42.3782, -71.0602],
+  // NYC area (keep for flexibility)
   "manhattan, ny": [40.7831, -73.9712],
   "brooklyn, ny": [40.6782, -73.9442],
-  "jersey city, nj": [40.7178, -74.0431],
-  "harlem, ny": [40.8116, -73.9465],
-  "queens, ny": [40.7282, -73.7949],
-  "hoboken, nj": [40.744, -74.0324],
-  "astoria, ny": [40.7721, -73.9301],
-  "williamsburg, ny": [40.7081, -73.9571],
-  "upper west side, ny": [40.787, -73.9754],
-  "east village, ny": [40.7265, -73.9815],
   "new york, ny": [40.7128, -74.006],
 };
 
