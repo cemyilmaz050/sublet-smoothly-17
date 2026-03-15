@@ -188,7 +188,6 @@ const AuthModal = () => {
       }
 
       if (data.session) {
-        toast.success("Account created!");
         executePendingAction();
         resetState();
       }
