@@ -1,11 +1,19 @@
 import { useEffect, useState, useCallback } from "react";
-import { Home, ExternalLink, Pencil } from "lucide-react";
+import { Home, ExternalLink, Pencil, MoreVertical, Pause, Play, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 import DashboardMessages from "@/components/tenant/DashboardMessages";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
@@ -30,6 +38,7 @@ const statusStyle: Record<string, string> = {
   active: "bg-emerald/15 text-emerald border-emerald/30",
   pending: "bg-amber/15 text-amber border-amber/30",
   draft: "bg-muted text-muted-foreground border-border",
+  paused: "bg-amber/15 text-amber border-amber/30",
   expired: "bg-destructive/15 text-destructive border-destructive/30",
   rejected: "bg-destructive/15 text-destructive border-destructive/30",
 };
@@ -51,6 +60,8 @@ const TenantDashboard = () => {
   const [conversations, setConversations] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [idVerified, setIdVerified] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Listing | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!user) return;
@@ -59,6 +70,7 @@ const TenantDashboard = () => {
       .from("listings")
       .select("id, headline, address, monthly_rent, photos, status, available_from, available_until, view_count, save_count")
       .eq("tenant_id", user.id)
+      .neq("status", "deleted" as any)
       .order("created_at", { ascending: false });
     setListings((listingsData as Listing[]) || []);
 
@@ -80,55 +92,34 @@ const TenantDashboard = () => {
       const enriched = await Promise.all(
         convos.map(async (c: any) => {
           const otherId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
-
-          // Fetch other user's profile
           const { data: profile } = await supabase
-            .from("profiles_public" as any)
-            .select("first_name, last_name")
+            .from("profiles_public")
+            .select("first_name, last_name, avatar_url")
             .eq("id", otherId)
-            .maybeSingle() as { data: { first_name: string | null; last_name: string | null } | null };
-
-          const otherFirstName = profile?.first_name || "User";
-          const otherLastName = profile?.last_name || "";
-          const otherName = otherLastName ? `${otherFirstName} ${otherLastName}` : otherFirstName;
-
-          const { data: lastMsg } = await supabase
+            .single() as any;
+          const { data: msgs } = await supabase
             .from("messages")
-            .select("content, read, sender_id, created_at")
+            .select("content, created_at, sender_id, read")
             .eq("conversation_id", c.id)
             .order("created_at", { ascending: false })
             .limit(1) as any;
-
+          const lastMsg = msgs?.[0];
           const { count } = await supabase
             .from("messages")
             .select("id", { count: "exact", head: true })
             .eq("conversation_id", c.id)
             .eq("read", false)
             .neq("sender_id", user.id) as any;
-
-          let listingHeadline = "";
-          let listingAddress = "";
-          if (c.listing_id) {
-            const { data: l } = await supabase.from("listings").select("headline, address").eq("id", c.listing_id).maybeSingle() as any;
-            listingHeadline = l?.headline || "";
-            listingAddress = l?.address || "";
-          }
-
           return {
             ...c,
-            other_id: otherId,
-            other_name: otherName,
-            other_initial: otherFirstName.charAt(0).toUpperCase(),
-            last_message: lastMsg?.[0]?.content || "",
-            last_message_time: lastMsg?.[0]?.created_at || c.last_message_at,
-            unread_count: count || 0,
-            listing_headline: listingHeadline,
-            listing_address: listingAddress,
+            otherUser: profile || { first_name: "User", last_name: "" },
+            lastMessage: lastMsg,
+            unread: count || 0,
           };
         })
       );
       setConversations(enriched);
-      setUnreadCount(enriched.reduce((sum: number, c: any) => sum + c.unread_count, 0));
+      setUnreadCount(enriched.reduce((sum: number, c: any) => sum + c.unread, 0));
     } else {
       setConversations([]);
       setUnreadCount(0);
@@ -157,9 +148,53 @@ const TenantDashboard = () => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  const handlePauseToggle = async (listing: Listing) => {
+    const newStatus = listing.status === "paused" ? "active" : "paused";
+    const { error } = await supabase
+      .from("listings")
+      .update({ status: newStatus as any })
+      .eq("id", listing.id);
+    if (error) {
+      toast.error("Failed to update listing status.");
+    } else {
+      toast.success(newStatus === "paused" ? "Listing paused." : "Listing is live again!");
+      fetchData();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const { data: activeBookings } = await supabase
+        .from("bookings")
+        .select("id, status")
+        .eq("listing_id", deleteTarget.id)
+        .in("status", ["confirmed"]);
+
+      if (activeBookings && activeBookings.length > 0) {
+        toast.error("You have an active booking for this listing. Please resolve the booking before deleting.");
+        setDeleting(false);
+        setDeleteTarget(null);
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke("delete-listing", {
+        body: { listingId: deleteTarget.id },
+      });
+      if (error) throw error;
+      toast.success("Listing deleted successfully.");
+      fetchData();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete listing.");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      
 
       {/* Main content */}
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 space-y-8">
@@ -195,10 +230,10 @@ const TenantDashboard = () => {
           ) : (
             /* Listing cards */
             <div className="space-y-4">
-              {listings.slice(0, 1).map((listing) => (
+              {listings.map((listing) => (
                 <div
                   key={listing.id}
-                  className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:flex-row"
+                  className="relative flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm sm:flex-row"
                 >
                   {/* Photo */}
                   <div className="relative aspect-square w-full shrink-0 sm:w-48">
@@ -222,12 +257,40 @@ const TenantDashboard = () => {
                         <h3 className="text-base font-semibold text-foreground line-clamp-1">
                           {listing.headline || "Untitled Listing"}
                         </h3>
-                        <Badge
-                          variant="outline"
-                          className={`shrink-0 capitalize text-xs ${statusStyle[listing.status] || ""}`}
-                        >
-                          {listing.status}
-                        </Badge>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge
+                            variant="outline"
+                            className={`capitalize text-xs ${statusStyle[listing.status] || ""}`}
+                          >
+                            {listing.status}
+                          </Badge>
+                          {/* 3-dot menu */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted">
+                                <MoreVertical className="h-4 w-4" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44">
+                              <DropdownMenuItem onClick={() => navigate(`/listings/edit/${listing.id}`)}>
+                                <Pencil className="mr-2 h-4 w-4" /> Edit Listing
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handlePauseToggle(listing)}>
+                                {listing.status === "paused" ? (
+                                  <><Play className="mr-2 h-4 w-4" /> Unpause Listing</>
+                                ) : (
+                                  <><Pause className="mr-2 h-4 w-4" /> Pause Listing</>
+                                )}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => setDeleteTarget(listing)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete Listing
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{listing.address || "No address"}</p>
                       <p className="mt-2 text-2xl font-bold text-primary">
@@ -264,13 +327,44 @@ const TenantDashboard = () => {
           )}
         </section>
 
-        {/* SECTION 2: Messages */}
+        {/* SECTION 3: Messages */}
         <section>
           <DashboardMessages conversations={conversations} unreadCount={unreadCount} />
         </section>
       </main>
 
       <SubletFlowOverlay open={showSublet} onClose={() => setShowSublet(false)} />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to delete this listing?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone and all applications and messages related to this listing will be permanently removed.
+              {deleteTarget && (
+                <span className="mt-2 block font-medium text-foreground">
+                  "{deleteTarget.headline || deleteTarget.address || "Untitled"}"
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...</>
+              ) : (
+                "Yes, Delete Listing"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

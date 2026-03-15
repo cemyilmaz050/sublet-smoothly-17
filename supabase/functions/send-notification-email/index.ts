@@ -14,7 +14,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 interface EmailRequest {
   to: string;
   subject: string;
-  type: "meeting_request" | "meeting_confirmed" | "booking_confirmed" | "new_message" | "listing_live" | "application_received" | "knock";
+  type: "meeting_request" | "meeting_confirmed" | "booking_confirmed" | "new_message" | "listing_live" | "application_received" | "knock" | "listing_deleted";
   data: Record<string, any>;
 }
 
@@ -107,6 +107,13 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
           <a href="${data.message_url}" style="${btnStyle}">Message Them</a>
           <a href="${data.profile_url}" style="${btnStyle} background: #f3f4f6; color: #1a1a1a;">View Their Profile</a>
         </div>
+        ${footer}</div>`;
+
+    case "listing_deleted":
+      return `<div style="${baseStyle}">${logo}
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Listing Deleted</h1>
+        <p style="${mutedStyle}">Your listing "<strong>${data.listing_title}</strong>" has been successfully deleted from SubIn.</p>
+        <p style="${mutedStyle}">All related applications have been removed and any active deposits have been refunded.</p>
         ${footer}</div>`;
 
     default:
