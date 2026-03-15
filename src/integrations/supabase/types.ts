@@ -1098,7 +1098,14 @@ export type Database = {
     }
     Enums: {
       guest_policy: "no_guests" | "occasional_guests" | "guests_allowed"
-      listing_status: "draft" | "pending" | "active" | "expired" | "rejected"
+      listing_status:
+        | "draft"
+        | "pending"
+        | "active"
+        | "expired"
+        | "rejected"
+        | "paused"
+        | "deleted"
       property_type: "apartment" | "condo" | "studio" | "house"
     }
     CompositeTypes: {
@@ -1228,7 +1235,15 @@ export const Constants = {
   public: {
     Enums: {
       guest_policy: ["no_guests", "occasional_guests", "guests_allowed"],
-      listing_status: ["draft", "pending", "active", "expired", "rejected"],
+      listing_status: [
+        "draft",
+        "pending",
+        "active",
+        "expired",
+        "rejected",
+        "paused",
+        "deleted",
+      ],
       property_type: ["apartment", "condo", "studio", "house"],
     },
   },
