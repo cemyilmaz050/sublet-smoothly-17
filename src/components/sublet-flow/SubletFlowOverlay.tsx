@@ -50,7 +50,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     supabase.from("profiles").select("id_verified").eq("id", user.id).single()
       .then(({ data: p }) => setIdVerified(p?.id_verified ?? false));
   }, [user]);
-  const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const update = useCallback((partial: Partial<SubletFlowData>) => setData((p) => ({ ...p, ...partial })), []);
 
