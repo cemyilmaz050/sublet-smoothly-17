@@ -52,6 +52,14 @@ function PersistentNavbar() {
   return <Navbar />;
 }
 
+/** Hide footer on full-screen pages like messages and manager portal */
+function PersistentFooter() {
+  const location = useLocation();
+  if (location.pathname.startsWith("/manager")) return null;
+  if (location.pathname.startsWith("/messages")) return null;
+  return <Footer />;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -112,7 +120,7 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>
-              <Footer />
+              <PersistentFooter />
             </div>
           </AuthModalProvider>
         </AuthProvider>
