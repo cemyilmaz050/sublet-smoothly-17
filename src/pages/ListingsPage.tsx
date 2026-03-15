@@ -547,6 +547,9 @@ const ListingsPage = () => {
                   )}
                   {!isOwnListing(selectedListing) && (
                     <>
+                      <Button variant="outline" className="w-full" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
+                        {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a Message</>}
+                      </Button>
                       {appliedListings.has(selectedListing.id) ? (
                         <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald/30 bg-emerald/10 py-3 text-sm font-medium text-emerald">
                           <CheckCircle2 className="h-4 w-4" /> Application Submitted
