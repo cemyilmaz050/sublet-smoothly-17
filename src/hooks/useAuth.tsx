@@ -63,25 +63,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Set up auth listener FIRST (before getSession)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
+      (event, newSession) => {
         if (!mounted) return;
 
         setSession(newSession);
         setUser(newSession?.user ?? null);
 
         if (newSession?.user) {
-          // Non-blocking profile fetch — don't await in the callback
-          fetchProfile(newSession.user.id).then(() => {
-            if (mounted && !initialReady) {
-              initialReady = true;
-              setIsReady(true);
-            }
-          });
+          // Non-blocking profile fetch — use setTimeout to avoid deadlocks
+          setTimeout(() => {
+            if (!mounted) return;
+            fetchProfile(newSession.user.id).then(() => {
+              if (mounted) {
+                initialReady = true;
+                setIsReady(true);
+              }
+            });
+          }, 0);
         } else {
           setRole(null);
           setOnboardingComplete(null);
           setDocumentsStatus(null);
-          if (mounted && !initialReady) {
+          if (mounted) {
             initialReady = true;
             setIsReady(true);
           }
@@ -90,20 +93,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // THEN check existing session
-    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+    supabase.auth.getSession().then(({ data: { session: existingSession } }) => {
       if (!mounted) return;
-      setSession(existingSession);
-      setUser(existingSession?.user ?? null);
       if (existingSession?.user) {
-        await fetchProfile(existingSession.user.id);
+        setSession(existingSession);
+        setUser(existingSession.user);
+        fetchProfile(existingSession.user.id).then(() => {
+          if (mounted && !initialReady) {
+            initialReady = true;
+            setIsReady(true);
+          }
+        });
       } else {
+        setSession(null);
+        setUser(null);
         setRole(null);
         setOnboardingComplete(null);
         setDocumentsStatus(null);
-      }
-      if (mounted && !initialReady) {
-        initialReady = true;
-        setIsReady(true);
+        if (mounted && !initialReady) {
+          initialReady = true;
+          setIsReady(true);
+        }
       }
     });
 
