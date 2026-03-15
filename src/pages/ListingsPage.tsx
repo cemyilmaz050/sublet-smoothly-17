@@ -65,6 +65,8 @@ const ListingsPage = () => {
   const [selectedListing, setSelectedListing] = useState<ListingItem | null>(null);
   const [savedListings, setSavedListings] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"map" | "calendar">("map");
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [calendarSelectedDate, setCalendarSelectedDate] = useState<string | null>(null);
 
   useEffect(() => {
@@ -280,17 +282,18 @@ const ListingsPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="flex min-h-[100dvh] flex-col bg-background">
       
 
-      {/* Search & Filter Bar */}
+      {/* Search & Filter Bar — scrollable on mobile */}
       <div className="border-b bg-card/80 backdrop-blur-sm">
-        <div className="flex items-center gap-3 px-4 py-3 lg:px-6">
-          <div className="flex flex-1 items-center gap-2 rounded-lg border bg-background px-3">
-            <Search className="h-4 w-4 text-muted-foreground" />
+        {/* Row 1: Search + key filters */}
+        <div className="flex items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4 sm:py-3 lg:px-6">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-lg border bg-background px-3">
+            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
             <Input
-              placeholder="Search by location or keyword..."
-              className="border-0 bg-transparent shadow-none focus-visible:ring-0"
+              placeholder="Search location..."
+              className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-[16px]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -299,9 +302,9 @@ const ListingsPage = () => {
             )}
           </div>
           <Select value={priceFilter} onValueChange={setPriceFilter}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[120px] sm:w-[160px] shrink-0">
               <DollarSign className="mr-1 h-4 w-4" />
-              <SelectValue placeholder="Price range" />
+              <SelectValue placeholder="Price" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All prices</SelectItem>
@@ -310,9 +313,19 @@ const ListingsPage = () => {
               <SelectItem value="2500+">$2,500+</SelectItem>
             </SelectContent>
           </Select>
+          <Button variant="outline" size="icon" className="shrink-0 h-9 w-9 sm:hidden" onClick={() => setShowMobileFilters(!showMobileFilters)}>
+            <SlidersHorizontal className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Row 2: Date filters — hidden on mobile unless toggled */}
+        <div className={cn(
+          "items-center gap-2 px-3 pb-2 sm:flex sm:px-4 sm:pb-3 lg:px-6",
+          showMobileFilters ? "flex" : "hidden sm:flex"
+        )}>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveInDate && "text-muted-foreground")}>
+              <Button variant="outline" size="sm" className={cn("flex-1 sm:flex-none sm:w-[140px] justify-start text-left font-normal text-xs h-10 sm:h-9", !moveInDate && "text-muted-foreground")}>
                 <CalendarIcon className="mr-1 h-3.5 w-3.5" />
                 {moveInDate ? format(moveInDate, "MMM d") : "Move in"}
               </Button>
@@ -323,7 +336,7 @@ const ListingsPage = () => {
           </Popover>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("w-[140px] justify-start text-left font-normal text-xs h-9", !moveOutDate && "text-muted-foreground")}>
+              <Button variant="outline" size="sm" className={cn("flex-1 sm:flex-none sm:w-[140px] justify-start text-left font-normal text-xs h-10 sm:h-9", !moveOutDate && "text-muted-foreground")}>
                 <CalendarIcon className="mr-1 h-3.5 w-3.5" />
                 {moveOutDate ? format(moveOutDate, "MMM d") : "Move out"}
               </Button>
@@ -333,29 +346,39 @@ const ListingsPage = () => {
             </PopoverContent>
           </Popover>
           {(moveInDate || moveOutDate) && (
-            <button onClick={() => { setMoveInDate(undefined); setMoveOutDate(undefined); }} className="text-xs text-primary hover:underline">
+            <button onClick={() => { setMoveInDate(undefined); setMoveOutDate(undefined); }} className="text-xs text-primary hover:underline whitespace-nowrap">
               Clear dates
             </button>
           )}
-          <Button variant="outline" size="sm" className="gap-1.5">
-            <SlidersHorizontal className="h-4 w-4" />
-            Filters
-          </Button>
-          {/* Calendar/Map toggle */}
-          <div className="hidden lg:flex items-center gap-1 rounded-lg border p-0.5">
+          <div className="hidden sm:flex items-center gap-1.5 ml-auto">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <SlidersHorizontal className="h-4 w-4" />
+              Filters
+            </Button>
+          </div>
+          {/* Map/List/Calendar toggle — visible on all sizes */}
+          <div className="flex items-center gap-1 rounded-lg border p-0.5 ml-auto sm:ml-0">
             <Button
-              variant={viewMode === "map" ? "default" : "ghost"}
+              variant={mobileView === "list" ? "default" : "ghost"}
               size="sm"
-              className="h-7 px-2.5 text-xs"
-              onClick={() => { setViewMode("map"); setCalendarSelectedDate(null); }}
+              className="h-7 px-2 text-xs"
+              onClick={() => { setMobileView("list"); setViewMode("map"); setCalendarSelectedDate(null); }}
+            >
+              List
+            </Button>
+            <Button
+              variant={mobileView === "map" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={() => { setMobileView("map"); setViewMode("map"); }}
             >
               <Map className="mr-1 h-3.5 w-3.5" /> Map
             </Button>
             <Button
-              variant={viewMode === "calendar" ? "default" : "ghost"}
+              variant={viewMode === "calendar" && mobileView === "list" ? "default" : "ghost"}
               size="sm"
-              className="h-7 px-2.5 text-xs"
-              onClick={() => setViewMode("calendar")}
+              className="hidden lg:flex h-7 px-2 text-xs"
+              onClick={() => { setViewMode("calendar"); setMobileView("list"); }}
             >
               <CalendarDays className="mr-1 h-3.5 w-3.5" /> Calendar
             </Button>
@@ -365,10 +388,13 @@ const ListingsPage = () => {
 
       {/* Split Screen */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Listings Cards */}
-        <div className="w-full overflow-y-auto lg:w-[45%]">
-          <div className="p-4 lg:p-6">
-            <p className="mb-4 text-sm text-muted-foreground">
+        {/* Left: Listings Cards — hidden on mobile when map view is active */}
+        <div className={cn(
+          "w-full overflow-y-auto lg:w-[45%]",
+          mobileView === "map" && "hidden lg:block"
+        )}>
+          <div className="p-3 sm:p-4 lg:p-6">
+            <p className="mb-3 text-sm text-muted-foreground">
               {filtered.length} listing{filtered.length !== 1 ? "s" : ""} found
               {calendarSelectedDate && viewMode === "calendar" && (
                 <span className="ml-2">
@@ -383,7 +409,7 @@ const ListingsPage = () => {
               )}
             </p>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filtered.map((listing, index) => (
                 <motion.div
                   key={listing.id}
@@ -393,10 +419,10 @@ const ListingsPage = () => {
                   onMouseEnter={() => setHoveredId(listing.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   onClick={() => setSelectedListing(listing)}
-                  className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-elevated"
+                  className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-elevated active:scale-[0.99]"
                 >
                   <div className="flex flex-col sm:flex-row">
-                    <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-auto sm:w-48 sm:min-h-[140px]">
+                    <div className="relative aspect-[16/10] w-full overflow-hidden sm:aspect-auto sm:w-48 sm:min-h-[140px]">
                       {listing.photos && listing.photos.length > 0 ? (
                         <img src={listing.photos[0]} alt={listing.headline || ""} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
                       ) : (
@@ -419,10 +445,10 @@ const ListingsPage = () => {
                         <div className="absolute right-2 top-2"><Badge className="bg-accent text-accent-foreground text-xs">Managed by you</Badge></div>
                       )}
                     </div>
-                    <div className="flex flex-1 flex-col justify-between p-4">
+                    <div className="flex flex-1 flex-col justify-between p-3 sm:p-4">
                       <div>
                         <div className="flex items-start justify-between">
-                          <h3 className="font-semibold text-foreground group-hover:text-primary line-clamp-1">{listing.headline || "Untitled"}</h3>
+                          <h3 className="font-semibold text-foreground group-hover:text-primary line-clamp-1 text-[15px]">{listing.headline || "Untitled"}</h3>
                           {listing.monthly_rent && (
                             <p className="ml-2 whitespace-nowrap text-lg font-bold text-primary">
                               ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
@@ -443,7 +469,7 @@ const ListingsPage = () => {
                         )}
                         <div className="ml-auto flex items-center gap-1.5">
                           {role !== "manager" && role !== "tenant" && (
-                            <button onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }} className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-accent">
+                            <button onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }} className="flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-full transition-colors hover:bg-accent active:bg-accent">
                               <Heart className={`h-4 w-4 ${savedListings.has(listing.id) ? "fill-primary text-primary" : "text-muted-foreground"}`} />
                             </button>
                           )}
@@ -460,10 +486,13 @@ const ListingsPage = () => {
           </div>
         </div>
 
-        {/* Right: Map or Calendar */}
-        <div className="relative hidden border-l lg:block lg:w-[55%]">
+        {/* Right: Map or Calendar — full width on mobile when map view active */}
+        <div className={cn(
+          "relative border-l lg:block lg:w-[55%]",
+          mobileView === "map" ? "block w-full" : "hidden"
+        )}>
           {viewMode === "calendar" ? (
-            <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden">
+            <div className="sticky top-0 h-[calc(100dvh-8rem)] overflow-hidden">
               <CalendarView
                 listings={allListings}
                 onDayClick={setCalendarSelectedDate}
@@ -471,7 +500,7 @@ const ListingsPage = () => {
               />
             </div>
           ) : (
-            <div className="sticky top-0 h-[calc(100vh-7.5rem)] overflow-hidden">
+            <div className="sticky top-0 h-[calc(100dvh-8rem)] overflow-hidden">
               <ListingsMap
                 listings={filtered}
                 hoveredId={hoveredId}
@@ -485,7 +514,7 @@ const ListingsPage = () => {
 
       {/* Listing Detail Drawer */}
       <Sheet open={!!selectedListing} onOpenChange={(open) => !open && setSelectedListing(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-lg">
+        <SheetContent className="w-full overflow-y-auto sm:max-w-lg safe-bottom">
           {selectedListing && (
             <>
               <SheetHeader>

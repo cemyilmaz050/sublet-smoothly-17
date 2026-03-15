@@ -258,9 +258,9 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">Time</label>
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5">
                   {timeSlots.map((t) => (
-                    <Button key={t} variant={schedulingTime === t ? "default" : "outline"} size="sm" className="text-xs h-10 sm:h-8" onClick={() => setSchedulingTime(t)}>{t}</Button>
+                    <Button key={t} variant={schedulingTime === t ? "default" : "outline"} size="sm" className="text-xs h-11 sm:h-8" onClick={() => setSchedulingTime(t)}>{t}</Button>
                   ))}
                 </div>
               </div>
