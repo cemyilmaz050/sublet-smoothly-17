@@ -167,6 +167,7 @@ export type Database = {
       catalog_properties: {
         Row: {
           address: string
+          building_amenities: string[] | null
           created_at: string | null
           id: string
           manager_id: string
@@ -174,9 +175,11 @@ export type Database = {
           photo_url: string | null
           property_type: string | null
           units_count: number | null
+          updated_at: string | null
         }
         Insert: {
           address: string
+          building_amenities?: string[] | null
           created_at?: string | null
           id?: string
           manager_id: string
@@ -184,9 +187,11 @@ export type Database = {
           photo_url?: string | null
           property_type?: string | null
           units_count?: number | null
+          updated_at?: string | null
         }
         Update: {
           address?: string
+          building_amenities?: string[] | null
           created_at?: string | null
           id?: string
           manager_id?: string
@@ -194,6 +199,7 @@ export type Database = {
           photo_url?: string | null
           property_type?: string | null
           units_count?: number | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -215,45 +221,87 @@ export type Database = {
       catalog_units: {
         Row: {
           amenities: string[] | null
+          available_from: string | null
+          available_until: string | null
+          base_rent: number | null
           bathrooms: number | null
           bedrooms: number | null
           created_at: string | null
+          custom_rules: string | null
           description: string | null
           floor: number | null
           id: string
+          included_utilities: string[] | null
+          nearby_landmarks: string[] | null
+          no_parties: boolean | null
+          no_smoking: boolean | null
           occupancy_status: string | null
+          pets_allowed: boolean | null
           photos: string[] | null
           property_id: string
+          quiet_hours: boolean | null
+          security_deposit: number | null
+          space_type: string | null
           sqft: number | null
           unit_number: string
+          updated_at: string | null
+          utilities_included: boolean | null
         }
         Insert: {
           amenities?: string[] | null
+          available_from?: string | null
+          available_until?: string | null
+          base_rent?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string | null
+          custom_rules?: string | null
           description?: string | null
           floor?: number | null
           id?: string
+          included_utilities?: string[] | null
+          nearby_landmarks?: string[] | null
+          no_parties?: boolean | null
+          no_smoking?: boolean | null
           occupancy_status?: string | null
+          pets_allowed?: boolean | null
           photos?: string[] | null
           property_id: string
+          quiet_hours?: boolean | null
+          security_deposit?: number | null
+          space_type?: string | null
           sqft?: number | null
           unit_number: string
+          updated_at?: string | null
+          utilities_included?: boolean | null
         }
         Update: {
           amenities?: string[] | null
+          available_from?: string | null
+          available_until?: string | null
+          base_rent?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           created_at?: string | null
+          custom_rules?: string | null
           description?: string | null
           floor?: number | null
           id?: string
+          included_utilities?: string[] | null
+          nearby_landmarks?: string[] | null
+          no_parties?: boolean | null
+          no_smoking?: boolean | null
           occupancy_status?: string | null
+          pets_allowed?: boolean | null
           photos?: string[] | null
           property_id?: string
+          quiet_hours?: boolean | null
+          security_deposit?: number | null
+          space_type?: string | null
           sqft?: number | null
           unit_number?: string
+          updated_at?: string | null
+          utilities_included?: boolean | null
         }
         Relationships: [
           {
