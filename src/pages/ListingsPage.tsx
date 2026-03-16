@@ -464,7 +464,7 @@ const ListingsPage = () => {
 
           {/* Right: Map — fills remaining height, never scrolls */}
           <div className={cn(
-            "lg:block lg:w-[55%] border-l",
+            "lg:block lg:w-[55%] border-l relative z-[1] overflow-hidden",
             mobileView === "map" ? "block w-full" : "hidden"
           )}>
             <div className="h-full">
