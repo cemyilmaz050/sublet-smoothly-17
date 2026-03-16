@@ -65,7 +65,7 @@ const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false }:
 
           <div className="mt-6 rounded-xl border border-amber/30 bg-amber/5 p-4">
             <p className="text-sm text-foreground font-medium">Under review by Boston Brokerage Group</p>
-            <p className="mt-1 text-xs text-muted-foreground">Usually approved within 24 hours ⏱️</p>
+            <p className="mt-1 text-xs text-muted-foreground">Usually approved within 24 hours</p>
           </div>
 
           <p className="mt-4 text-sm text-muted-foreground">
