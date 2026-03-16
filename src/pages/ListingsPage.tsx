@@ -466,7 +466,11 @@ const ListingsPage = () => {
                 </motion.div>
               ))}
               {filtered.length === 0 && !loading && (
-                <div className="py-16 text-center text-muted-foreground">No listings found matching your search.</div>
+                <div className="flex flex-col items-center py-16 text-center">
+                  <p className="text-4xl mb-3">🏙️</p>
+                  <p className="text-base font-semibold text-foreground">No places here yet</p>
+                  <p className="mt-1 text-sm text-muted-foreground max-w-xs">Boston is filling up fast though. Check back soon or broaden your search!</p>
+                </div>
               )}
             </div>
             )}
