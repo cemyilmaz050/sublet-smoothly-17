@@ -12,12 +12,12 @@ interface Props {
 const ListingStep1 = ({ data, onChange, errors }: Props) => {
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-foreground">Property Basics</h2>
+      <h2 className="text-xl font-semibold text-foreground">About your place 🏠</h2>
       <div>
-        <Label htmlFor="address">Property Address *</Label>
+        <Label htmlFor="address">Address *</Label>
         <Input
           id="address"
-          placeholder="123 Main St, City, State, ZIP"
+          placeholder="123 Main St, Boston, MA"
           className="mt-1.5"
           value={data.address}
           onChange={(e) => onChange({ address: e.target.value })}
@@ -36,7 +36,7 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
           />
         </div>
         <div>
-          <Label>Property Type *</Label>
+          <Label>Type *</Label>
           <Select value={data.property_type} onValueChange={(v) => onChange({ property_type: v as any })}>
             <SelectTrigger className="mt-1.5">
               <SelectValue placeholder="Select type" />
@@ -53,41 +53,20 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
       <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="bedrooms">Bedrooms *</Label>
-          <Input
-            id="bedrooms"
-            type="number"
-            min={0}
-            placeholder="2"
-            className="mt-1.5"
-            value={data.bedrooms}
-            onChange={(e) => onChange({ bedrooms: e.target.value ? Number(e.target.value) : "" })}
-          />
+          <Input id="bedrooms" type="number" min={0} placeholder="2" className="mt-1.5"
+            value={data.bedrooms} onChange={(e) => onChange({ bedrooms: e.target.value ? Number(e.target.value) : "" })} />
           {errors.bedrooms && <p className="mt-1 text-sm text-destructive">{errors.bedrooms}</p>}
         </div>
         <div>
           <Label htmlFor="bathrooms">Bathrooms *</Label>
-          <Input
-            id="bathrooms"
-            type="number"
-            min={0}
-            placeholder="1"
-            className="mt-1.5"
-            value={data.bathrooms}
-            onChange={(e) => onChange({ bathrooms: e.target.value ? Number(e.target.value) : "" })}
-          />
+          <Input id="bathrooms" type="number" min={0} placeholder="1" className="mt-1.5"
+            value={data.bathrooms} onChange={(e) => onChange({ bathrooms: e.target.value ? Number(e.target.value) : "" })} />
           {errors.bathrooms && <p className="mt-1 text-sm text-destructive">{errors.bathrooms}</p>}
         </div>
         <div>
           <Label htmlFor="sqft">Sq Ft</Label>
-          <Input
-            id="sqft"
-            type="number"
-            min={0}
-            placeholder="750"
-            className="mt-1.5"
-            value={data.sqft}
-            onChange={(e) => onChange({ sqft: e.target.value ? Number(e.target.value) : "" })}
-          />
+          <Input id="sqft" type="number" min={0} placeholder="750" className="mt-1.5"
+            value={data.sqft} onChange={(e) => onChange({ sqft: e.target.value ? Number(e.target.value) : "" })} />
         </div>
       </div>
     </div>

@@ -69,6 +69,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
   }, [listing.tenant_id]);
 
   const monthlyRent = listing.monthly_rent ?? 0;
+  const weeklyRent = Math.round(monthlyRent / 4);
   const depositAmount = monthlyRent * DEPOSIT_MONTHS;
   const platformFee = Math.round(monthlyRent * (PLATFORM_FEE_PERCENT / 100));
   const totalDue = depositAmount + platformFee;
@@ -91,7 +92,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
 
   const handleScheduleSubmit = async () => {
     if (!user) return;
-    if (!schedulingDate) { toast.error("Please pick a date."); return; }
+    if (!schedulingDate) { toast.error("Pick a date first!"); return; }
 
     setSubmittingSchedule(true);
 
@@ -108,14 +109,13 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
         .from("conversations")
         .insert({ participant_1: user.id, participant_2: listing.tenant_id, listing_id: listing.id })
         .select("id").single();
-      if (error || !newConvo) { toast.error("Failed to create conversation."); setSubmittingSchedule(false); return; }
+      if (error || !newConvo) { toast.error("Couldn't start a conversation. Try again!"); setSubmittingSchedule(false); return; }
       convoId = newConvo.id;
     }
 
     const dateStr = format(schedulingDate, "EEEE, MMMM d, yyyy");
-    const content = `📅 Meeting Request\n\nHi, I would like to schedule a viewing for ${dateStr} at ${schedulingTime}.${scheduleMessage ? `\n\n${scheduleMessage}` : ""}`;
+    const content = `📅 Meeting Request\n\nHey! I'd love to come check out the place on ${dateStr} at ${schedulingTime}.${scheduleMessage ? `\n\n${scheduleMessage}` : ""}`;
 
-    // Record meeting in meetings table
     await supabase.from("meetings" as any).insert({
       listing_id: listing.id,
       requester_id: user.id,
@@ -129,16 +129,15 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
 
     await supabase.from("messages").insert({ conversation_id: convoId, sender_id: user.id, content });
     await supabase.from("notifications").insert({
-      user_id: listing.tenant_id, title: "Meeting Request 📅",
-      message: `Someone wants to visit "${listing.headline || "your apartment"}" on ${dateStr} at ${schedulingTime}`,
+      user_id: listing.tenant_id, title: "Someone wants to check out your place! 📅",
+      message: `They want to visit "${listing.headline || "your apartment"}" on ${dateStr} at ${schedulingTime}`,
       type: "meeting", link: "/messages",
     });
 
-    // Trigger email notification
     supabase.functions.invoke("send-notification-email", {
       body: {
         to: listing.tenant_id,
-        subject: `New Meeting Request for ${listing.headline || "your listing"}`,
+        subject: `Someone wants to check out ${listing.headline || "your listing"}`,
         type: "meeting_request",
         data: {
           listing_title: listing.headline || "Your apartment",
@@ -148,11 +147,11 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
           action_url: `${window.location.origin}/messages`,
         },
       },
-    }).catch(() => {}); // fire and forget
+    }).catch(() => {});
 
     setSubmittingSchedule(false);
     setScheduleSent(true);
-    toast.success("Meeting request sent!");
+    toast.success("Meeting request sent! 🎉");
   };
 
   const handleSecureNow = async () => {
@@ -170,13 +169,13 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       if (error) throw error;
       if (data?.url) window.location.href = data.url;
     } catch {
-      toast.error("Payment setup failed. Please try again.");
+      toast.error("Oops! Payment setup didn't work. Give it another shot.");
     } finally {
       setPaymentLoading(false);
     }
   };
 
-  const tenantName = tenantProfile?.first_name || "Tenant";
+  const tenantName = tenantProfile?.first_name || "Host";
   const tenantInitial = tenantName.charAt(0).toUpperCase();
 
   const timeSlots = [
@@ -203,40 +202,50 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       </div>
 
       <div className="h-px bg-border" />
-      <h4 className="text-base font-bold text-foreground">Secure This Place</h4>
+      
+      {/* Weekly breakdown */}
+      {monthlyRent > 0 && (
+        <div className="text-center">
+          <p className="text-2xl font-bold text-primary">${monthlyRent.toLocaleString()}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+          <p className="text-xs text-muted-foreground">~${weeklyRent.toLocaleString()}/week</p>
+          {monthlyRent < 2000 && (
+            <p className="mt-1 text-xs text-emerald font-medium">Cheaper than a Boston hotel for the summer 🎉</p>
+          )}
+        </div>
+      )}
 
       <Button variant="outline" className="w-full justify-start gap-2 h-12 text-sm" onClick={handleScheduleClick}>
         <CalendarDays className="h-4 w-4 text-primary shrink-0" />
         <div className="text-left min-w-0">
-          <span className="font-semibold">Schedule a Meeting</span>
-          <span className="block text-xs text-muted-foreground truncate">Visit the apartment or meet the tenant</span>
+          <span className="font-semibold">Come check it out</span>
+          <span className="block text-xs text-muted-foreground truncate">Visit the apartment or meet the host</span>
         </div>
       </Button>
 
       <Button className="w-full justify-start gap-2 h-12 text-sm" onClick={handlePaymentClick}>
-        <CreditCard className="h-4 w-4 shrink-0" />
+        <Lock className="h-4 w-4 shrink-0" />
         <div className="text-left min-w-0">
-          <span className="font-semibold">Secure the Place Now</span>
-          <span className="block text-xs text-primary-foreground/80 truncate">Pay deposit to reserve this apartment</span>
+          <span className="font-semibold">Lock it in 🔒</span>
+          <span className="block text-xs text-primary-foreground/80 truncate">Pay deposit to reserve this place</span>
         </div>
       </Button>
 
       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <ShieldCheck className="h-3.5 w-3.5 text-emerald shrink-0" />
-        Your deposit is protected until your move-in is confirmed.
+        Your deposit is protected until move-in is confirmed.
       </p>
 
       {/* Schedule Modal */}
       <Dialog open={showScheduleModal} onOpenChange={(open) => { setShowScheduleModal(open); if (!open) { setScheduleSent(false); setSchedulingDate(undefined); setScheduleMessage(""); } }}>
         <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Schedule a Meeting</DialogTitle>
-            <DialogDescription>Pick a date and time to visit {listing.headline || "this apartment"}.</DialogDescription>
+            <DialogTitle>Come check it out 👀</DialogTitle>
+            <DialogDescription>Pick a day and time to visit {listing.headline || "this place"}.</DialogDescription>
           </DialogHeader>
           {scheduleSent ? (
             <div className="flex flex-col items-center gap-3 py-6">
               <CheckCircle2 className="h-12 w-12 text-emerald" />
-              <p className="text-sm font-semibold text-foreground">Request Sent!</p>
+              <p className="text-sm font-semibold text-foreground">Request sent! 🎉</p>
               <p className="text-xs text-muted-foreground text-center">{tenantName} will get back to you soon.</p>
               <Button variant="outline" className="h-12 min-w-[120px]" onClick={() => setShowScheduleModal(false)}>Done</Button>
             </div>
@@ -266,27 +275,26 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">
-                  Introduce yourself <span className="text-muted-foreground font-normal">(optional)</span>
+                  Say hi 👋 <span className="text-muted-foreground font-normal">(optional)</span>
                 </label>
-                <Textarea placeholder="Hi! I'm looking for a summer sublet..." value={scheduleMessage} onChange={(e) => setScheduleMessage(e.target.value)} rows={3} className="resize-none text-base" />
+                <Textarea placeholder="Hey! I'm a BU student looking for a summer sublet..." value={scheduleMessage} onChange={(e) => setScheduleMessage(e.target.value)} rows={3} className="resize-none text-base" />
               </div>
               <Button className="w-full h-12" onClick={handleScheduleSubmit} disabled={submittingSchedule || !schedulingDate}>
-                {submittingSchedule ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Sending...</> : <><CalendarDays className="mr-1 h-4 w-4" /> Send Meeting Request</>}
+                {submittingSchedule ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Sending...</> : <><CalendarDays className="mr-1 h-4 w-4" /> Send Request</>}
               </Button>
             </div>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Payment Modal — mobile-optimized */}
+      {/* Payment Modal */}
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
         <DialogContent className="sm:max-w-sm max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Secure This Place</DialogTitle>
-            <DialogDescription>Reserve {listing.headline || "this apartment"} with an initial deposit.</DialogDescription>
+            <DialogTitle>Lock it in 🔒</DialogTitle>
+            <DialogDescription>Reserve {listing.headline || "this place"} with a deposit.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Cost breakdown */}
             <div className="rounded-lg border bg-muted/30 p-3 sm:p-4 space-y-3">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Security Deposit ({DEPOSIT_MONTHS} mo)</span>
@@ -303,35 +311,25 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
               </div>
             </div>
 
-            {/* Cancellation policy */}
             <CancellationPolicy compact />
 
-            {/* Trust & security */}
             <div className="flex items-start gap-2 rounded-lg bg-emerald/10 p-3">
               <ShieldCheck className="h-4 w-4 text-emerald shrink-0 mt-0.5" />
-              <p className="text-xs text-emerald leading-relaxed">Your deposit is fully protected. If move-in isn't confirmed, you'll receive a full refund.</p>
+              <p className="text-xs text-emerald leading-relaxed">Your deposit is fully protected. If move-in isn't confirmed, you get a full refund.</p>
             </div>
 
-            {/* Accepted payment methods */}
             <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
               <CreditCard className="h-3.5 w-3.5" />
-              <span>Visa</span>
-              <span>•</span>
-              <span>Mastercard</span>
-              <span>•</span>
-              <span>Apple Pay</span>
-              <span>•</span>
-              <span>Google Pay</span>
+              <span>Visa</span><span>•</span><span>Mastercard</span><span>•</span><span>Apple Pay</span><span>•</span><span>Google Pay</span>
             </div>
 
-            {/* CTA */}
             <Button className="w-full h-[52px] text-base font-semibold" onClick={handleSecureNow} disabled={paymentLoading}>
               {paymentLoading ? (
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               ) : (
                 <Lock className="mr-1.5 h-4 w-4" />
               )}
-              {paymentLoading ? "Processing..." : `Pay $${totalDue.toLocaleString()} & Reserve`}
+              {paymentLoading ? "Processing..." : `Pay $${totalDue.toLocaleString()} & Lock It In`}
             </Button>
             <p className="flex items-center justify-center gap-1 text-center text-[11px] text-muted-foreground">
               <Lock className="h-3 w-3" /> Secure checkout powered by Stripe
