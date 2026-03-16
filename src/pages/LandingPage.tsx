@@ -257,7 +257,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-foreground">Sublet Stories 💬</h2>
+            <h2 className="text-3xl font-bold text-foreground">Sublet Stories</h2>
             <p className="mt-3 text-muted-foreground">Real students. Real places. Real easy.</p>
           </motion.div>
 
