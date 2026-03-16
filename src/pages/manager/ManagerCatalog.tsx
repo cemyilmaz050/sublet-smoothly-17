@@ -201,24 +201,6 @@ const ManagerCatalog = () => {
                     Edit
                   </Button>
 
-                  {/* Status toggle */}
-                  {prop.totalListings > 0 && (
-                    <Button
-                      size="sm"
-                      variant={prop.activeCount > 0 ? "outline" : "default"}
-                      className="text-xs"
-                      disabled={toggling === prop.id}
-                      onClick={() => handleToggleStatus(prop)}
-                    >
-                      {toggling === prop.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : prop.activeCount > 0 ? (
-                        <><EyeOff className="mr-1 h-3.5 w-3.5" />Unpublish</>
-                      ) : (
-                        <><Eye className="mr-1 h-3.5 w-3.5" />Publish</>
-                      )}
-                    </Button>
-                  )}
 
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

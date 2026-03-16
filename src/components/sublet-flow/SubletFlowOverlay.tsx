@@ -298,7 +298,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <h1 className="text-3xl font-bold text-foreground">{successMessage}</h1>
           <p className="text-muted-foreground max-w-md">
             {data.path === "management"
-              ? "Your property manager will review your request and get back to you shortly."
+              ? "Boston Brokerage Group will review your listing and notify you by email once it's live on SubIn."
               : "Your listing is now visible to thousands of potential subtenants."}
           </p>
           <div className="flex flex-col gap-2 mt-4 w-full max-w-xs">

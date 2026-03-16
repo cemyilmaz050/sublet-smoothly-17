@@ -391,8 +391,8 @@ const ManagerCatalogEditor = () => {
           <h1 className="text-2xl font-bold text-foreground">
             {isNew ? "Add New Property" : (property?.name || property?.address || "Edit Property")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" /> {isNew ? "Create a new listing" : "Property Catalog Editor"}
+           <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
+            <MapPin className="h-3.5 w-3.5" /> {isNew ? "Add to catalog — subletters will choose from this" : "Property Catalog Editor"}
           </p>
         </div>
       </div>
