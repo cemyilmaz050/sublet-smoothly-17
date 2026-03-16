@@ -149,7 +149,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="z-[10000] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
+              className="z-[600] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
             >
               <div className="mb-4"><SubInWordmark /></div>
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
