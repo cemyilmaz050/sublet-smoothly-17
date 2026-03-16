@@ -147,7 +147,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
             transition={{ duration: 0.3, ease: "easeOut" }}
             className="mx-4 w-full max-w-md rounded-3xl bg-card p-8 text-center shadow-2xl"
           >
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
               <span className="text-3xl">🗝️</span>
             </div>
             <h2 className="text-2xl font-bold text-foreground">Welcome back!</h2>
