@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft, Save, Loader2, X, Plus, Upload, MapPin, Rocket, Link as LinkIcon,
+  ArrowLeft, Save, Loader2, X, Plus, Upload, MapPin, Link as LinkIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
