@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin, Wifi, Sofa, Snowflake, Flame, Car, PawPrint, WashingMachine, Tv, CookingPot, Dumbbell, ArrowUpDown, Accessibility, icons } from "lucide-react";
 import TenantIdVerification from "@/components/TenantIdVerification";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,27 @@ interface SubletFlowOverlayProps {
 const PATH_A_STEPS = ["path-select", "mgmt-search", "mgmt-property", "mgmt-dates"] as const;
 const PATH_B_STEPS = ["path-select", "own-type", "own-space", "own-location", "own-describe", "own-details", "own-amenities", "own-photos", "own-pricing", "own-dates", "own-rules", "own-review"] as const;
 
+const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
+const BBG_SEARCH_TERMS = ["boston", "brokerage", "bbg", "management", "bostonbrokerage", "bostonbrokeragegroup"];
+const BBG_FALLBACK_MANAGER = {
+  id: BBG_PM_ID,
+  name: "Boston Brokerage Group",
+  slug: "bbg",
+  city: "Boston MA",
+  state: "MA",
+  verified: true,
+  status: "active",
+  logo_url: "",
+};
+
+const normalizeSearch = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const isBbgSearchQuery = (value: string) => {
+  const normalized = normalizeSearch(value);
+  if (!normalized) return true;
+  return BBG_SEARCH_TERMS.some((term) => term.includes(normalized) || normalized.includes(term));
+};
+
 const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -36,7 +58,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [mgmtSearch, setMgmtSearch] = useState("");
-  const [mgmtResults, setMgmtResults] = useState<any[]>([]);
+  const [mgmtResults, setMgmtResults] = useState<any[]>([BBG_FALLBACK_MANAGER]);
+  const [showOnlyBbgNote, setShowOnlyBbgNote] = useState(false);
   const [catalogProperties, setCatalogProperties] = useState<any[]>([]);
   const [expandedPropertyId, setExpandedPropertyId] = useState<string | null>(null);
   const [catalogUnits, setCatalogUnits] = useState<Record<string, any[]>>({});
@@ -67,66 +90,43 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     }
   }, [activeStep, steps]);
 
-  // BBG aliases for fuzzy matching
-  const BBG_ALIASES = ["boston", "brokerage", "bbg", "management", "boston brokerage"];
-  const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
-
-  // Load default suggestion (BBG) when entering management path
+  // Always keep BBG featured in search
   useEffect(() => {
     if (data.path !== "management") return;
-    if (data.managementGroupId) return; // already selected
-    supabase
-      .from("property_managers_public")
-      .select("*")
-      .eq("id", BBG_PM_ID)
-      .single()
-      .then(({ data: bbg }) => {
-        if (bbg) setMgmtResults([bbg]);
-      });
-  }, [data.path, data.managementGroupId]);
+    setMgmtResults([BBG_FALLBACK_MANAGER]);
+    setShowOnlyBbgNote(Boolean(mgmtSearch.trim()) && !isBbgSearchQuery(mgmtSearch));
+  }, [data.path, mgmtSearch]);
 
-  // Search management groups
+  // Hydrate BBG card from database when available
   useEffect(() => {
     if (data.path !== "management") return;
-    if (!mgmtSearch.trim()) {
-      // Show default BBG suggestion
-      supabase
+    let cancelled = false;
+
+    const loadBbg = async () => {
+      const { data: bbg } = await supabase
         .from("property_managers_public")
         .select("*")
         .eq("id", BBG_PM_ID)
-        .single()
-        .then(({ data: bbg }) => {
-          if (bbg) setMgmtResults([bbg]);
-        });
-      return;
-    }
-    const timer = setTimeout(async () => {
-      const search = mgmtSearch.trim().toLowerCase();
-      // Check if search matches any BBG alias
-      const matchesBbgAlias = BBG_ALIASES.some(alias => alias.includes(search) || search.includes(alias));
-      
-      const { data: results } = await supabase
-        .from("property_managers_public")
-        .select("*")
-        .ilike("name", `%${mgmtSearch}%`)
-        .limit(10);
-      
-      let finalResults = results || [];
-      
-      // If alias matched but BBG wasn't in results, fetch and prepend it
-      if (matchesBbgAlias && !finalResults.some((r: any) => r.id === BBG_PM_ID)) {
-        const { data: bbg } = await supabase
-          .from("property_managers_public")
-          .select("*")
-          .eq("id", BBG_PM_ID)
-          .single();
-        if (bbg) finalResults = [bbg, ...finalResults];
-      }
-      
-      setMgmtResults(finalResults);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [mgmtSearch, data.path]);
+        .maybeSingle();
+
+      if (cancelled || !bbg) return;
+
+      setMgmtResults([
+        {
+          ...BBG_FALLBACK_MANAGER,
+          ...bbg,
+          city: bbg.city || "Boston MA",
+          state: bbg.state || "MA",
+          verified: true,
+        },
+      ]);
+    };
+
+    loadBbg();
+    return () => {
+      cancelled = true;
+    };
+  }, [data.path]);
 
   // Load catalog properties when a management group is selected
   useEffect(() => {
@@ -353,55 +353,51 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <Input
           value={mgmtSearch}
           onChange={(e) => setMgmtSearch(e.target.value)}
-          placeholder="Search for your management company..."
+          placeholder="Search Boston Brokerage Group..."
           className="pr-10"
         />
-        {mgmtResults.length > 0 && (
-          <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated max-h-64 overflow-y-auto">
-            {!mgmtSearch.trim() && (
-              <div className="px-4 pt-3 pb-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested — Our verified partner</span>
-              </div>
-            )}
-            {mgmtResults.map((mgr: any) => (
-              <button
-                key={mgr.id}
-                onClick={() => {
-                  update({
-                    managementGroupId: mgr.id,
-                    managementGroupName: mgr.name,
-                    managementGroupLogo: mgr.logo_url || "",
-                  });
-                  setMgmtSearch("");
-                  revealNext();
-                }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  {mgr.logo_url ? <img src={mgr.logo_url} className="h-8 w-8 rounded" alt="" /> : <span className="text-xs font-bold text-primary">{mgr.name?.split(" ").map((w: string) => w[0]).join("").slice(0, 3).toUpperCase()}</span>}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-foreground">{mgr.name}</p>
-                    {mgr.verified && <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600"><CheckCircle className="h-3 w-3" />Verified Partner</span>}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Official SubIn partner — {mgr.city || "Boston"}{mgr.state ? `, ${mgr.state}` : ", MA"}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-        {mgmtSearch.trim() && mgmtResults.length === 0 && (
-          <div className="mt-3 w-full rounded-xl border bg-popover p-4 shadow-elevated">
-            <p className="text-sm text-muted-foreground">No results found.</p>
+
+        <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated">
+          {!mgmtSearch.trim() && (
+            <div className="px-4 pt-3 pb-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested — Our verified partner</span>
+            </div>
+          )}
+
+          {mgmtResults.map((mgr: any) => (
             <button
-              onClick={() => { update({ path: "own" }); setActiveStep(1); }}
-              className="mt-2 text-sm font-medium text-primary hover:underline"
+              key={mgr.id}
+              onClick={() => {
+                update({
+                  managementGroupId: mgr.id,
+                  managementGroupName: mgr.name,
+                  managementGroupLogo: mgr.logo_url || "",
+                });
+                setMgmtSearch("");
+                revealNext();
+              }}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors"
             >
-              My management group is not on the platform →
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                {mgr.logo_url ? <img src={mgr.logo_url} className="h-8 w-8 rounded" alt="" /> : <span className="text-xs font-bold text-primary">BBG</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-foreground">Boston Brokerage Group</p>
+                  <Badge variant="approved">Verified Partner</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">Official SubIn partner — Boston MA</p>
+              </div>
+              <Check className="h-4 w-4 text-primary" />
             </button>
-          </div>
-        )}
+          ))}
+
+          {showOnlyBbgNote && (
+            <div className="border-t px-4 py-2">
+              <p className="text-xs text-muted-foreground">Only Boston Brokerage Group is currently available on SubIn</p>
+            </div>
+          )}
+        </div>
       </div>
       {data.managementGroupId && (
         <div className="flex items-center gap-3 rounded-xl border-2 border-primary bg-primary/5 p-4">
