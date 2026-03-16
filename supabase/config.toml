@@ -25,5 +25,7 @@ project_id = "ixkzgpwxzhkjdzlcqkzk"
     verify_jwt = false
   [functions.stripe-identity-webhook]
     verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
   [functions.sync-appfolio-public]
     verify_jwt = false
