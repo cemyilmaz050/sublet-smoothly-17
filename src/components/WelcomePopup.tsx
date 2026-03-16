@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Check, ShieldCheck, CreditCard, Users, Sparkles, MessageSquare, GitCompare } from "lucide-react";
+import { Check, ShieldCheck, CreditCard, Users, Sparkles, MessageSquare, GitCompare, Home, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LS_KEY = "subin_welcome_choice";
@@ -22,25 +22,20 @@ export function useWelcomePopup() {
 
   useEffect(() => {
     if (!isReady) return;
-
-    // Logged-in users with a role → skip popup entirely
     if (user && role) return;
 
     const choice = getStoredChoice();
 
-    // First-time visitor → show after 500ms
     if (!choice) {
       const timer = setTimeout(() => setShow(true), 500);
       return () => clearTimeout(timer);
     }
 
-    // Returning user who previously chose "find" and completed questionnaire but didn't book
     if (choice === "find" && localStorage.getItem(LS_FINDER_DONE)) {
       const timer = setTimeout(() => setReturningMode("finder"), 500);
       return () => clearTimeout(timer);
     }
 
-    // Returning subletter
     if (choice === "sublet") {
       const timer = setTimeout(() => setReturningMode("subletter"), 500);
       return () => clearTimeout(timer);
@@ -112,11 +107,11 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
             className="mx-4 w-full max-w-md rounded-3xl bg-card p-8 text-center shadow-2xl"
           >
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-              <span className="text-3xl">🏠</span>
+              <Home className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-2xl font-bold text-foreground">Welcome back!</h2>
             <p className="mt-2 text-muted-foreground">
-              Ready to find your Boston summer home? Your preferences are saved 🏠
+              Ready to find your Boston summer home? Your preferences are saved.
             </p>
             <Button onClick={handleContinueSearch} className="mt-6 w-full rounded-xl py-6 text-base font-semibold">
               Continue my search
@@ -148,11 +143,11 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
             className="mx-4 w-full max-w-md rounded-3xl bg-card p-8 text-center shadow-2xl"
           >
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
-              <span className="text-3xl">🗝️</span>
+              <KeyRound className="h-8 w-8 text-foreground" />
             </div>
             <h2 className="text-2xl font-bold text-foreground">Welcome back!</h2>
             <p className="mt-2 text-muted-foreground">
-              Manage your listing or check your messages 🗝️
+              Manage your listing or check your messages.
             </p>
             <Button onClick={handleGoToDashboard} className="mt-6 w-full rounded-xl py-6 text-base font-semibold">
               Go to my dashboard
@@ -184,22 +179,19 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
             transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             className="absolute inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card pb-8 shadow-2xl"
           >
-            {/* Drag handle */}
             <div className="flex justify-center pt-3 pb-2">
               <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
             </div>
 
             <div className="px-6 pt-2">
-              {/* Logo + heading */}
               <div className="text-center mb-6">
                 <img src="/favicon.png" alt="SubIn" className="mx-auto mb-3 h-12 w-12 rounded-xl" />
-                <h2 className="text-2xl font-bold text-foreground">Welcome to SubIn 🏠</h2>
+                <h2 className="text-2xl font-bold text-foreground">Welcome to SubIn</h2>
                 <p className="mt-1.5 text-muted-foreground">What brings you here today?</p>
               </div>
 
-              {/* Find a place card — primary on mobile */}
               <OptionCard
-                emoji="🏠"
+                icon={<Home className="h-6 w-6" />}
                 title="I need a place this summer"
                 description="Answer 7 quick questions and our AI finds your perfect match"
                 bullets={["Personalized matches", "Compare side by side", "Message hosts instantly"]}
@@ -211,7 +203,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
 
               <div className="mt-4">
                 <OptionCard
-                  emoji="🗝️"
+                  icon={<KeyRound className="h-6 w-6" />}
                   title="I have a place to sublet"
                   description="List your apartment and find a verified subtenant fast"
                   bullets={["Verified renters only", "Managed by Boston Brokerage Group", "Get paid securely"]}
@@ -247,17 +239,15 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
           transition={{ duration: 0.3, ease: "easeOut" }}
           className="mx-4 w-full max-w-2xl rounded-3xl bg-card p-10 shadow-2xl"
         >
-          {/* Logo + heading */}
           <div className="text-center mb-8">
             <img src="/favicon.png" alt="SubIn" className="mx-auto mb-4 h-14 w-14 rounded-xl" />
-            <h2 className="text-3xl font-bold text-foreground">Welcome to SubIn 🏠</h2>
+            <h2 className="text-3xl font-bold text-foreground">Welcome to SubIn</h2>
             <p className="mt-2 text-lg text-muted-foreground">What brings you here today?</p>
           </div>
 
-          {/* Two cards side by side */}
           <div className="grid grid-cols-2 gap-5">
             <OptionCard
-              emoji="🗝️"
+              icon={<KeyRound className="h-6 w-6" />}
               title="I have a place to sublet"
               description="List your apartment and find a verified subtenant fast"
               bullets={["Verified renters only", "Managed by Boston Brokerage Group", "Get paid securely"]}
@@ -265,7 +255,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
               onClick={handleSublet}
             />
             <OptionCard
-              emoji="🏠"
+              icon={<Home className="h-6 w-6" />}
               title="I need a place this summer"
               description="Answer 7 quick questions and our AI finds your perfect match"
               bullets={["Personalized matches", "Compare side by side", "Message hosts instantly"]}
@@ -287,7 +277,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
 
 /* Reusable option card */
 function OptionCard({
-  emoji,
+  icon,
   title,
   description,
   bullets,
@@ -296,7 +286,7 @@ function OptionCard({
   highlighted = false,
   aiPowered = false,
 }: {
-  emoji: string;
+  icon: React.ReactNode;
   title: string;
   description: string;
   bullets: string[];
@@ -320,8 +310,8 @@ function OptionCard({
         </span>
       )}
 
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
-        <span className="text-2xl">{emoji}</span>
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        {icon}
       </div>
 
       <h3 className="text-center text-lg font-bold text-foreground group-hover:text-primary transition-colors">
