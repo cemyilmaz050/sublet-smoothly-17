@@ -104,10 +104,10 @@ const MOBILE_EXTRA = `
 
 const CLUSTER_STYLE = `
   ${PILL_COMMON}
-  background: #ffffff;
-  color: #4845D2;
-  border: 2px solid #4845D2;
-  box-shadow: 0 2px 8px rgba(72,69,210,0.15), 0 1px 2px rgba(0,0,0,0.04);
+  background: #4845D2;
+  color: #ffffff;
+  border: 1px solid #4845D2;
+  box-shadow: 0 4px 16px rgba(72,69,210,0.35), 0 2px 4px rgba(0,0,0,0.08);
   transform: translate(-50%, -100%);
   padding: 6px 14px;
   font-size: 12px;
@@ -140,9 +140,9 @@ function createClusterIcon(count: number, animDelay: number = 0) {
   return L.divIcon({
     className: "subin-cluster-marker",
     html: `<div style="${CLUSTER_STYLE} ${delayStyle}"
-      onmouseenter="this.style.background='#4845D2';this.style.color='#ffffff';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1.05)';this.querySelector('.notch').style.borderTopColor='#4845D2';"
-      onmouseleave="this.style.background='#ffffff';this.style.color='#4845D2';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';this.querySelector('.notch').style.borderTopColor='#ffffff';"
-    >${count} listings<span class="notch" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #ffffff;"></span></div>`,
+      onmouseenter="this.style.transform='translate(-50%,-100%) scale(1.08)';this.style.boxShadow='0 6px 20px rgba(72,69,210,0.45), 0 2px 4px rgba(0,0,0,0.08)';this.querySelector('.notch').style.borderTopColor='#3d3ab8';"
+      onmouseleave="this.style.transform='translate(-50%,-100%) scale(1)';this.style.boxShadow='0 4px 16px rgba(72,69,210,0.35), 0 2px 4px rgba(0,0,0,0.08)';this.querySelector('.notch').style.borderTopColor='#4845D2';"
+    >${count} listings<span class="notch" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #4845D2;"></span></div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
   });
