@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin, Wifi, Sofa, Snowflake, Flame, Car, PawPrint, WashingMachine, Tv, CookingPot, Dumbbell, ArrowUpDown, Accessibility, icons } from "lucide-react";
 import TenantIdVerification from "@/components/TenantIdVerification";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,27 @@ interface SubletFlowOverlayProps {
 const PATH_A_STEPS = ["path-select", "mgmt-search", "mgmt-property", "mgmt-dates"] as const;
 const PATH_B_STEPS = ["path-select", "own-type", "own-space", "own-location", "own-describe", "own-details", "own-amenities", "own-photos", "own-pricing", "own-dates", "own-rules", "own-review"] as const;
 
+const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
+const BBG_SEARCH_TERMS = ["boston", "brokerage", "bbg", "management", "bostonbrokerage", "bostonbrokeragegroup"];
+const BBG_FALLBACK_MANAGER = {
+  id: BBG_PM_ID,
+  name: "Boston Brokerage Group",
+  slug: "bbg",
+  city: "Boston MA",
+  state: "MA",
+  verified: true,
+  status: "active",
+  logo_url: "",
+};
+
+const normalizeSearch = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const isBbgSearchQuery = (value: string) => {
+  const normalized = normalizeSearch(value);
+  if (!normalized) return true;
+  return BBG_SEARCH_TERMS.some((term) => term.includes(normalized) || normalized.includes(term));
+};
+
 const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -36,7 +58,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [mgmtSearch, setMgmtSearch] = useState("");
-  const [mgmtResults, setMgmtResults] = useState<any[]>([]);
+  const [mgmtResults, setMgmtResults] = useState<any[]>([BBG_FALLBACK_MANAGER]);
+  const [showOnlyBbgNote, setShowOnlyBbgNote] = useState(false);
   const [catalogProperties, setCatalogProperties] = useState<any[]>([]);
   const [expandedPropertyId, setExpandedPropertyId] = useState<string | null>(null);
   const [catalogUnits, setCatalogUnits] = useState<Record<string, any[]>>({});
@@ -67,66 +90,43 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     }
   }, [activeStep, steps]);
 
-  // BBG aliases for fuzzy matching
-  const BBG_ALIASES = ["boston", "brokerage", "bbg", "management", "boston brokerage"];
-  const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
-
-  // Load default suggestion (BBG) when entering management path
+  // Always keep BBG featured in search
   useEffect(() => {
     if (data.path !== "management") return;
-    if (data.managementGroupId) return; // already selected
-    supabase
-      .from("property_managers_public")
-      .select("*")
-      .eq("id", BBG_PM_ID)
-      .single()
-      .then(({ data: bbg }) => {
-        if (bbg) setMgmtResults([bbg]);
-      });
-  }, [data.path, data.managementGroupId]);
+    setMgmtResults([BBG_FALLBACK_MANAGER]);
+    setShowOnlyBbgNote(Boolean(mgmtSearch.trim()) && !isBbgSearchQuery(mgmtSearch));
+  }, [data.path, mgmtSearch]);
 
-  // Search management groups
+  // Hydrate BBG card from database when available
   useEffect(() => {
     if (data.path !== "management") return;
-    if (!mgmtSearch.trim()) {
-      // Show default BBG suggestion
-      supabase
+    let cancelled = false;
+
+    const loadBbg = async () => {
+      const { data: bbg } = await supabase
         .from("property_managers_public")
         .select("*")
         .eq("id", BBG_PM_ID)
-        .single()
-        .then(({ data: bbg }) => {
-          if (bbg) setMgmtResults([bbg]);
-        });
-      return;
-    }
-    const timer = setTimeout(async () => {
-      const search = mgmtSearch.trim().toLowerCase();
-      // Check if search matches any BBG alias
-      const matchesBbgAlias = BBG_ALIASES.some(alias => alias.includes(search) || search.includes(alias));
-      
-      const { data: results } = await supabase
-        .from("property_managers_public")
-        .select("*")
-        .ilike("name", `%${mgmtSearch}%`)
-        .limit(10);
-      
-      let finalResults = results || [];
-      
-      // If alias matched but BBG wasn't in results, fetch and prepend it
-      if (matchesBbgAlias && !finalResults.some((r: any) => r.id === BBG_PM_ID)) {
-        const { data: bbg } = await supabase
-          .from("property_managers_public")
-          .select("*")
-          .eq("id", BBG_PM_ID)
-          .single();
-        if (bbg) finalResults = [bbg, ...finalResults];
-      }
-      
-      setMgmtResults(finalResults);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [mgmtSearch, data.path]);
+        .maybeSingle();
+
+      if (cancelled || !bbg) return;
+
+      setMgmtResults([
+        {
+          ...BBG_FALLBACK_MANAGER,
+          ...bbg,
+          city: bbg.city || "Boston MA",
+          state: bbg.state || "MA",
+          verified: true,
+        },
+      ]);
+    };
+
+    loadBbg();
+    return () => {
+      cancelled = true;
+    };
+  }, [data.path]);
 
   // Load catalog properties when a management group is selected
   useEffect(() => {
