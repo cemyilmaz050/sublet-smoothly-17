@@ -6,6 +6,7 @@ export interface ListingFormData {
   bedrooms: number | "";
   bathrooms: number | "";
   sqft: number | "";
+  management_type: "bbg" | "self" | "";
 
   // Step 2: Photos & Description
   photos: File[];
