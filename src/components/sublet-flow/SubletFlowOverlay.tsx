@@ -288,8 +288,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
               data.path === card.value ? "border-primary bg-accent shadow-sm" : "border-border hover:border-primary/40 hover:bg-accent/50"
             }`}
           >
-            <div className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl ${data.path === card.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              {card.value === "management" ? "🏢" : "🔑"}
+            <div className={`flex h-14 w-14 items-center justify-center rounded-full ${data.path === card.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              {card.icon}
             </div>
             <p className="text-base font-semibold text-foreground">{card.title}</p>
             <p className="text-xs text-muted-foreground">{card.subtitle}</p>
