@@ -511,8 +511,9 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
             disabled={saving || !data.confirmPermission}
             className="w-full"
           >
-            {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</> : <><Home className="mr-2 h-4 w-4" /> Publish Property</>}
+            {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</> : <><Home className="mr-2 h-4 w-4" /> Submit for Approval</>}
           </Button>
+          <p className="text-xs text-muted-foreground text-center mt-2">Your listing will be submitted to {data.managementGroupName} for approval before going live on SubIn.</p>
         </div>
       )}
     </div>
