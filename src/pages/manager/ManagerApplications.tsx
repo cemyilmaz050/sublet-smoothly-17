@@ -33,6 +33,7 @@ interface AppWithDetails {
   listing_headline: string | null;
   listing_address: string | null;
   listing_monthly_rent: number | null;
+  renter_verified?: boolean;
 }
 
 const ManagerApplications = () => {
