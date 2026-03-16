@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, ExternalLink, Copy, Mail, Share2, Clock } from "lucide-react";
+import { CheckCircle, ExternalLink, Copy, Mail, Share2, Clock, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
@@ -10,9 +10,12 @@ interface Props {
   headline: string;
   onDashboard: () => void;
   isPending?: boolean;
+  isVerified?: boolean;
+  onVerifyClick?: () => void;
 }
 
-const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false }: Props) => {
+const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false, isVerified = false, onVerifyClick }: Props) => {
+  const [showVerifyNudge, setShowVerifyNudge] = useState(!isVerified);
   useEffect(() => {
     if (isPending) return;
     const duration = 2000;
@@ -123,7 +126,25 @@ const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false }:
           </Button>
         </div>
 
-        <div className="mt-8 rounded-xl border bg-card p-4">
+        {/* Verification nudge — optional, skippable */}
+        {showVerifyNudge && !isVerified && onVerifyClick && (
+          <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4 relative">
+            <button onClick={() => setShowVerifyNudge(false)} className="absolute top-2 right-2 text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="h-5 w-5 text-primary" />
+              <p className="text-sm font-medium text-foreground">Get a Verified badge & rent 3x faster</p>
+            </div>
+            <p className="text-xs text-muted-foreground mb-3">Verified hosts stand out and get more inquiries. Takes just 30 seconds.</p>
+            <Button size="sm" onClick={onVerifyClick}>
+              <ShieldCheck className="mr-1 h-3.5 w-3.5" />
+              Verify Now
+            </Button>
+          </div>
+        )}
+
+        <div className="mt-6 rounded-xl border bg-card p-4">
           <p className="mb-3 text-sm font-medium text-foreground">Share your listing</p>
           <div className="flex items-center justify-center gap-3">
             <Button variant="outline" size="sm" onClick={copyLink}>
