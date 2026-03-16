@@ -27,7 +27,7 @@ const FinderCompare = ({ listings, answers, onSelect }: Props) => {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-foreground">
-            You saved {listings.length} places — compare them side by side 🏠
+            You saved {listings.length} places — compare them side by side
           </h1>
           <p className="mt-2 text-muted-foreground">Scroll to compare and pick your favorite</p>
         </motion.div>
