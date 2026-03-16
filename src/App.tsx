@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import VerificationPendingBanner from "@/components/VerificationPendingBanner";
 import Footer from "@/components/Footer";
 import LandingPage from "./pages/LandingPage";
+import HomePage from "./pages/HomePage";
 import ListingsPage from "./pages/ListingsPage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
