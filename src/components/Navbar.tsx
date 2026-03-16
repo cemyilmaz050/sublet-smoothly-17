@@ -55,7 +55,10 @@ const Navbar = () => {
         <div className="flex h-16 items-center justify-between px-6 w-full">
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center">
-              <img src={logo} alt="SubIn" className="h-8" />
+              <span className="text-2xl font-extrabold tracking-tight">
+                <span className="text-foreground">Sub</span>
+                <span className="text-primary">In</span>
+              </span>
             </Link>
           </div>
 
