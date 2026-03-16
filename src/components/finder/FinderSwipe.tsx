@@ -64,7 +64,7 @@ const FinderSwipe = ({ listings, onComplete, answers }: Props) => {
         </p>
         {savedListings.length > 0 && (
           <p className="mt-1 text-xs text-primary font-medium">
-            ❤️ {savedListings.length} saved
+            {savedListings.length} saved
           </p>
         )}
       </div>
