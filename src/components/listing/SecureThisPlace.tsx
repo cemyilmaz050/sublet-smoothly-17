@@ -257,7 +257,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       <Button className="w-full justify-start gap-2 h-12 text-sm" onClick={handlePaymentClick}>
         <Lock className="h-4 w-4 shrink-0" />
         <div className="text-left min-w-0">
-          <span className="font-semibold">Lock it in 🔒</span>
+          <span className="font-semibold">Lock it in</span>
           <span className="block text-xs text-primary-foreground/80 truncate">Pay deposit to reserve this place</span>
         </div>
       </Button>
