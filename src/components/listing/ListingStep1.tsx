@@ -14,7 +14,7 @@ interface Props {
 const ListingStep1 = ({ data, onChange, errors }: Props) => {
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-foreground">About your place 🏠</h2>
+      <h2 className="text-xl font-semibold text-foreground">About your place</h2>
 
       {/* Management question */}
       <div>
