@@ -339,13 +339,13 @@ const ListingsPage = () => {
           </div>
         </div>
 
-        {/* Split Screen — sticky map layout */}
-        <div className="relative flex flex-1">
+        {/* Split Screen — map is fixed height, listings scroll */}
+        <div className="relative flex flex-1 overflow-hidden">
           {/* Left: Scrollable listings panel */}
           <div className={cn(
             "w-full lg:w-[45%] overflow-y-auto",
             mobileView === "map" && "hidden lg:block"
-          )} style={{ height: "calc(100dvh - 8rem)" }}>
+          )}>
             <div className="p-3 sm:p-4 lg:p-6">
               <h2 className="text-base font-medium text-foreground mb-1">All available sublets in Boston</h2>
               <p className="mb-4 text-sm text-muted-foreground">
