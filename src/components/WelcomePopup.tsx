@@ -190,7 +190,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-              className="absolute inset-x-0 bottom-0 z-[10000] max-h-[92dvh] overflow-y-auto rounded-t-[20px] bg-card pb-8 shadow-2xl"
+              className="absolute inset-x-0 bottom-0 z-[600] max-h-[92dvh] overflow-y-auto rounded-t-[20px] bg-card pb-8 shadow-2xl"
             >
               <div className="flex justify-center pt-3 pb-2">
                 <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
