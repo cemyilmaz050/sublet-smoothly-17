@@ -429,7 +429,6 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
           <Button
             onClick={startVerification}
-            disabled={state === "loading"}
             className="w-full h-12"
           >
             <ShieldCheck className="mr-1.5 h-4 w-4" /> Start Verification
