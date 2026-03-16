@@ -20,3 +20,15 @@ verify_jwt = false
 
 [functions.send-notification-email]
 verify_jwt = false
+
+[functions.stripe-identity-webhook]
+verify_jwt = false
+
+[functions.send-cosigner-email]
+verify_jwt = false
+
+[functions.create-verification-session]
+verify_jwt = false
+
+[functions.delete-listing]
+verify_jwt = false
