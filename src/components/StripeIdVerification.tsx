@@ -177,14 +177,14 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               >
                 <CheckCircle2 className="h-8 w-8 text-emerald" />
               </motion.div>
-              <motion.span
+              <motion.div
                 initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.3, type: "spring" }}
-                className="absolute -right-2 -top-2 text-2xl"
+                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10"
               >
-                🎉
-              </motion.span>
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+              </motion.div>
             </div>
             <div className="text-center">
               <p className="text-base font-bold text-foreground">Identity Verified ✓</p>
