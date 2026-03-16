@@ -310,9 +310,12 @@ const CreateListingPage = () => {
                 <div className="mt-6">
                   {checklist.ChecklistUI}
                 </div>
-                {/* ID Verification gate — must verify before publishing */}
+                {/* Optional ID Verification — not required to publish */}
                 {idVerified === false && (
-                  <div className="mt-6">
+                  <div className="mt-6 rounded-lg border border-muted bg-muted/30 p-4">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      <span className="font-medium text-foreground">Optional:</span> Verify your ID now to receive payouts faster when you get booked.
+                    </p>
                     <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
                   </div>
                 )}
