@@ -94,7 +94,7 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
 
       await supabase.from("notifications").insert({
         user_id: tenantId,
-        title: "Someone knocked on your listing! 🚪",
+        title: "Someone knocked on your listing!",
         message: `${knockerName} is interested in your place at ${listingAddress || listingHeadline || "your apartment"}`,
         type: "knock", link: "/dashboard/tenant",
       });
