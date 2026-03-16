@@ -184,7 +184,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
 
     setSubmittingSchedule(false);
     setScheduleSent(true);
-    toast.success("Meeting request sent! 🎉");
+    toast.success("Meeting request sent!");
   };
 
   const handleSecureNow = async () => {
