@@ -281,7 +281,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
           {scheduleSent ? (
             <div className="flex flex-col items-center gap-3 py-6">
               <CheckCircle2 className="h-12 w-12 text-emerald" />
-              <p className="text-sm font-semibold text-foreground">Request sent! 🎉</p>
+              <p className="text-sm font-semibold text-foreground">Request sent!</p>
               <p className="text-xs text-muted-foreground text-center">{tenantName} will get back to you soon.</p>
               <Button variant="outline" className="h-12 min-w-[120px]" onClick={() => setShowScheduleModal(false)}>Done</Button>
             </div>
