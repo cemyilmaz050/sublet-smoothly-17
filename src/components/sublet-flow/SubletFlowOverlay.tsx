@@ -469,10 +469,10 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <p className="text-sm text-muted-foreground">Choose the option that best describes your place</p>
       <div className="grid grid-cols-2 gap-4">
         {[
-          { value: "house", emoji: "🏠", label: "House" },
-          { value: "apartment", emoji: "🏢", label: "Apartment" },
-          { value: "condo", emoji: "🏙️", label: "Condo" },
-          { value: "studio", emoji: "🏡", label: "Studio" },
+          { value: "house", icon: <Home className="h-6 w-6" />, label: "House" },
+          { value: "apartment", icon: <Building className="h-6 w-6" />, label: "Apartment" },
+          { value: "condo", icon: <Landmark className="h-6 w-6" />, label: "Condo" },
+          { value: "studio", icon: <Hotel className="h-6 w-6" />, label: "Studio" },
         ].map((opt) => (
           <button
             key={opt.value}
@@ -481,7 +481,9 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
               data.propertyType === opt.value ? "border-primary bg-accent" : "border-border hover:border-primary/40"
             }`}
           >
-            <span className="text-3xl">{opt.emoji}</span>
+            <div className={`flex h-12 w-12 items-center justify-center rounded-full ${data.propertyType === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              {opt.icon}
+            </div>
             <span className="text-sm font-semibold text-foreground">{opt.label}</span>
             {data.propertyType === opt.value && <Check className="h-4 w-4 text-primary" />}
           </button>
