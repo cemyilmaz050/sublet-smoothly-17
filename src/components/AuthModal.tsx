@@ -425,11 +425,11 @@ const AuthModal = () => {
                 <div className="space-y-4">
                   {/* Role selection */}
                   <div>
-                    <Label className="mb-2 block">I am...</Label>
+                    <Label className="mb-2 block">What brings you here?</Label>
                     <div className="grid grid-cols-2 gap-2">
                       {([
-                        { id: "tenant" as const, icon: Home, label: "Listing a sublet", desc: "Sublet my place" },
-                        { id: "subtenant" as const, icon: Search, label: "Looking for a place", desc: "Browse & apply" },
+                        { id: "tenant" as const, icon: Home, label: "I'm leaving my place 🗝️", desc: "Sublet my apartment" },
+                        { id: "subtenant" as const, icon: Search, label: "I need a place 🏠", desc: "Browse & apply" },
                       ]).map((r) => (
                         <button
                           key={r.id}
