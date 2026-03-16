@@ -206,7 +206,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         title: "New Sublet Request",
         message: `${user.user_metadata?.first_name || "A tenant"} submitted a sublet request for Unit ${data.catalogUnitNumber} at ${data.catalogPropertyAddress}`,
         type: "sublet_request",
-        link: "/manager/listings",
+        link: "/portal-mgmt-bbg/listings",
       }).then(() => {});
 
       setSuccessMessage(`Your sublet request has been sent to ${data.managementGroupName}!`);

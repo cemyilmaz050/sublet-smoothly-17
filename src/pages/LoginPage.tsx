@@ -77,30 +77,6 @@ const LoginPage = () => {
     else toast.success("Verification email resent! Check your inbox.");
   };
 
-  const handleDemoLogin = async () => {
-    setEmail("demo@bostonbrokerage.com");
-    setPassword("demo123456");
-    setLoading(true);
-    setLoginError(null);
-    setLoginErrorType(null);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: "demo@bostonbrokerage.com",
-        password: "demo123456",
-      });
-      if (error) {
-        toast.error("Demo account not available. Please contact support.");
-        return;
-      }
-      if (data.session) {
-        navigate("/manager", { replace: true });
-      }
-    } catch {
-      toast.error("Demo login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleForgotPassword = async () => {
     setForgotError(null);
