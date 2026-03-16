@@ -12,7 +12,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Plus, Eye, Heart, Users, Pencil, Pause, Play, Trash2, MoreVertical, Home, Loader2,
+  Plus, Eye, Heart, Users, Pencil, Pause, Play, Trash2, MoreVertical, Home, Loader2, Clock, AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
