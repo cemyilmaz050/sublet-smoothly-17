@@ -182,7 +182,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999]"
+            className="fixed inset-0 z-[500]"
             style={overlayBg}
           >
             <motion.div
