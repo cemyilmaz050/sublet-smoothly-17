@@ -2,11 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
-import { useRenterVerification } from "@/hooks/useRenterVerification";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import RenterVerificationGate from "@/components/RenterVerificationGate";
-import VerificationSuccessScreen from "@/components/VerificationSuccessScreen";
 
 /* ─── Custom SVG Icons ─── */
 const FistIcon = ({ className }: { className?: string }) => (
@@ -44,16 +41,12 @@ interface KnockButtonProps {
 const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, knockCount = 0, compact = false, className }: KnockButtonProps) => {
   const { user } = useAuth();
   const { requireAuth } = useAuthModal();
-  const { isFullyVerified } = useRenterVerification();
   const [knocked, setKnocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState(knockCount);
   const [showRipple, setShowRipple] = useState(false);
   const [shaking, setShaking] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const [showGate, setShowGate] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [pendingAction, setPendingAction] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -136,28 +129,8 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
     if (knocked || loading) return;
     if (user.id === tenantId) return;
 
-    // Check verification gate
-    if (!isFullyVerified) {
-      setPendingAction(true);
-      setShowGate(true);
-      return;
-    }
-
+    // No verification gate for knocking — knock freely
     performKnock();
-  };
-
-  // After verification completes, perform the pending action
-  const handleVerified = () => {
-    setShowGate(false);
-    setShowSuccess(true);
-  };
-
-  const handleSuccessDismiss = () => {
-    setShowSuccess(false);
-    if (pendingAction) {
-      setPendingAction(false);
-      performKnock();
-    }
   };
 
   if (user && user.id === tenantId) return null;
@@ -183,8 +156,6 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
             <span className="ml-0.5 rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-semibold leading-none">{count}</span>
           )}
         </button>
-        <RenterVerificationGate open={showGate} onOpenChange={setShowGate} onVerified={handleVerified} />
-        <VerificationSuccessScreen open={showSuccess} onClose={handleSuccessDismiss} />
       </div>
     );
   }
@@ -209,8 +180,6 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
           <span className="ml-1 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs font-semibold leading-none">{count}</span>
         )}
       </button>
-      <RenterVerificationGate open={showGate} onOpenChange={setShowGate} onVerified={handleVerified} />
-      <VerificationSuccessScreen open={showSuccess} onClose={handleSuccessDismiss} />
     </div>
   );
 };
