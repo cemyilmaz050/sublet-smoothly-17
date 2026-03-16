@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search, CheckCircle2 } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
