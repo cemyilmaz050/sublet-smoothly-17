@@ -59,35 +59,12 @@ const CosignerForm = ({ onComplete }: CosignerFormProps) => {
   // If co-signer submitted but pending
   if (existing && existing.confirmation_status === "pending") {
     return (
-      <div className="flex flex-col items-center gap-3 py-6">
-        <Clock className="h-12 w-12 text-amber" />
-        <p className="text-sm font-semibold text-foreground">Waiting for Co-signer</p>
-        <p className="text-xs text-muted-foreground text-center">
-          We sent {existing.full_name} ({existing.email}) an email to confirm. Once they click confirm, this step will be complete.
-        </p>
-        <Button variant="outline" size="sm" onClick={async () => {
-          // Resend cosigner email
-          await supabase.functions.invoke("send-cosigner-email", {
-            body: { cosignerId: existing.id },
-          });
-          toast.success("Reminder email sent!");
-        }}>
-          Resend Email
-        </Button>
-        <Button variant="ghost" size="sm" onClick={async () => {
-          // Re-check status
-          const { data } = await supabase.from("cosigners").select("confirmation_status").eq("id", existing.id).single();
-          if (data?.confirmation_status === "confirmed") {
-            await supabase.from("profiles").update({ cosigner_confirmed: true } as any).eq("id", user!.id);
-            toast.success("Co-signer confirmed! 🎉");
-            onComplete();
-          } else {
-            toast.info("Still waiting for confirmation.");
-          }
-        }}>
-          Check Status
-        </Button>
-      </div>
+      <CosignerPendingState
+        existing={existing}
+        userId={user!.id}
+        onComplete={onComplete}
+        onUpdated={(updated) => setExisting(updated)}
+      />
     );
   }
 
