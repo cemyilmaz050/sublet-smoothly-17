@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search, CheckCircle2 } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
@@ -306,47 +307,60 @@ const AdminDashboard = () => {
 
 const ManualVerifyTool = () => {
   const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; name?: string } | null>(null);
 
   const handleVerify = async () => {
     if (!email.trim()) return;
     setLoading(true);
+    setResult(null);
     try {
-      // Look up user by email in profiles_public + match
-      const { data: profiles } = await supabase
-        .from("profiles" as any)
-        .select("id, first_name, last_name, id_verified")
-        .limit(100) as any;
-
-      // We can't search by email directly since profiles doesn't have email
-      // Instead use the admin edge function approach
       const { data, error } = await supabase.functions.invoke("admin-verify-user", {
-        body: { email: email.trim() },
+        body: { email: email.trim(), note: note.trim() || undefined },
       });
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
+      setResult({ success: true, name: data?.name || email });
       toast.success(`User ${email} has been marked as verified ✓`);
       setEmail("");
+      setNote("");
     } catch (err: any) {
       toast.error(err.message || "Failed to verify user");
+      setResult(null);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex gap-2">
-      <Input
-        placeholder="User email address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="text-sm"
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <Input
+          placeholder="User email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="text-sm"
+        />
+        <Button size="sm" onClick={handleVerify} disabled={loading || !email.trim()}>
+          {loading ? "Verifying..." : "Verify User"}
+        </Button>
+      </div>
+      <Textarea
+        placeholder="Reason for manual verification (optional) — e.g. 'Demo user', 'Stripe timeout'"
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        rows={2}
+        className="text-sm resize-none"
       />
-      <Button size="sm" onClick={handleVerify} disabled={loading || !email.trim()}>
-        {loading ? "Verifying..." : "Verify User"}
-      </Button>
+      {result?.success && (
+        <div className="flex items-center gap-2 rounded-lg bg-emerald/10 p-3 text-sm text-emerald">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <span>{result.name} has been verified successfully</span>
+        </div>
+      )}
     </div>
   );
 };

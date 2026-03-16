@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useVerificationPolling } from "@/hooks/useVerificationPolling";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail, Sparkles } from "lucide-react";
+import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail, Sparkles, Camera, Sun, CreditCard } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,11 +15,19 @@ interface StripeIdVerificationProps {
   onVerified?: () => void;
 }
 
-type VerificationState = "idle" | "loading" | "pending" | "verified" | "failed" | "max_attempts";
+type VerificationState = "idle" | "loading" | "prep" | "pending" | "verified" | "failed" | "max_attempts";
 
-const POLL_INTERVAL = 2000;
-const POLL_TIMEOUT = 30000;
-const TEN_MINUTES = 10 * 60 * 1000;
+const POLL_INTERVAL = 5000; // 5 seconds as requested
+const TWO_MINUTES = 2 * 60 * 1000;
+const MAX_ATTEMPTS = 3;
+
+const STATUS_MESSAGES = [
+  "Checking your document...",
+  "Verifying your identity...",
+  "Matching your photo...",
+  "Almost done...",
+  "Finalizing your verification...",
+];
 
 const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationProps) => {
   const { user } = useAuth();
@@ -28,15 +36,15 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
   const [state, setState] = useState<VerificationState>(idVerified ? "verified" : "idle");
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [showSlowMessage, setShowSlowMessage] = useState(false);
   const [pendingStart, setPendingStart] = useState<number | null>(null);
+  const [statusMessageIndex, setStatusMessageIndex] = useState(0);
+  const [showSlowMessage, setShowSlowMessage] = useState(false);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
 
@@ -48,9 +56,26 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
     }
   }, [idVerified]);
 
+  // Rotate status messages every 3 seconds while pending
+  useEffect(() => {
+    if (state !== "pending") return;
+    const interval = setInterval(() => {
+      setStatusMessageIndex((prev) => (prev + 1) % STATUS_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [state]);
+
+  // Show slow message after 2 minutes
+  useEffect(() => {
+    if (state !== "pending" || !pendingStart) return;
+    const timeout = setTimeout(() => {
+      setShowSlowMessage(true);
+    }, TWO_MINUTES);
+    return () => clearTimeout(timeout);
+  }, [state, pendingStart]);
+
   const stopPolling = useCallback(() => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
   }, []);
 
   const checkStatus = useCallback(async () => {
@@ -71,32 +96,21 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
   const startPolling = useCallback(() => {
     setShowSlowMessage(false);
+    setStatusMessageIndex(0);
     setPendingStart(Date.now());
     pollRef.current = setInterval(async () => {
       await checkStatus();
     }, POLL_INTERVAL);
-
-    timeoutRef.current = setTimeout(() => {
-      setShowSlowMessage(true);
-    }, POLL_TIMEOUT);
   }, [checkStatus]);
 
-  const handleManualCheck = async () => {
-    setState("loading");
-    const verified = await checkStatus();
-    if (!verified) {
-      setState("pending");
-      toast.info("Still processing — we'll update automatically when it's ready.");
-    }
-  };
-
   const handleContinueBrowsing = () => {
-    // Start background polling via context, then navigate away
     startBgPolling();
-    navigate("/");
+    navigate("/listings");
   };
 
-  const showManualFallback = pendingStart && Date.now() - pendingStart > TEN_MINUTES;
+  const handleStartFlow = () => {
+    setState("prep");
+  };
 
   const startVerification = async () => {
     if (!user) return;
@@ -137,16 +151,27 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
       if (result.error) {
         console.error("Verification error:", result.error);
         const msg = result.error.message || "";
+        const newCount = attemptCount + 1;
+        setAttemptCount(newCount);
+
+        if (newCount >= MAX_ATTEMPTS) {
+          setState("max_attempts");
+          return;
+        }
+
         if (msg.includes("blurry") || msg.includes("blur")) {
-          setError("Your ID image was too blurry — please try again with better lighting.");
+          setError("Your ID image was too blurry. Try again in better lighting with your ID held flat.");
+        } else if (msg.includes("expired")) {
+          setError("Your document appears to be expired. Please use a valid, non-expired government ID.");
+        } else if (msg.includes("face") || msg.includes("match") || msg.includes("selfie")) {
+          setError("Your selfie didn't match your ID photo. Make sure your face is clearly visible and well-lit.");
         } else if (msg.includes("document") || msg.includes("read")) {
-          setError("We could not read your document — please make sure the full ID is visible.");
+          setError("We couldn't read your document. Make sure all four corners of your ID are visible with no glare.");
         } else {
-          setError("We could not verify your ID. Please make sure your document is clear and your face is fully visible, then try again.");
+          setError("We couldn't verify your ID. Please make sure your document is clear and your face is fully visible, then try again.");
         }
         setState("failed");
       } else {
-        // Submitted — start polling
         setState("pending");
         startPolling();
       }
@@ -166,30 +191,30 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="flex flex-col items-center gap-3 py-4"
+            className="flex flex-col items-center gap-3 py-6"
           >
             <div className="relative">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", delay: 0.1 }}
-                className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald/20"
+                className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald/20"
               >
-                <CheckCircle2 className="h-8 w-8 text-emerald" />
+                <CheckCircle2 className="h-10 w-10 text-emerald" />
               </motion.div>
               <motion.div
                 initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.3, type: "spring" }}
-                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10"
+                className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary/10"
               >
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <Sparkles className="h-4 w-4 text-primary" />
               </motion.div>
             </div>
             <div className="text-center">
-              <p className="text-base font-bold text-foreground">Identity Verified ✓</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Your identity has been verified. You are all set!
+              <p className="text-lg font-bold text-foreground">Identity verified — you're all set</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                You can now schedule viewings and make payments on SubIn.
               </p>
             </div>
           </motion.div>
@@ -201,107 +226,129 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
   // ── Max attempts state ──
   if (state === "max_attempts") {
     return (
-      <Card className="border-destructive/30 bg-destructive/5">
-        <CardContent className="space-y-3 p-4">
+      <Card className="border-amber/30 bg-amber/5">
+        <CardContent className="space-y-4 p-5">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <Mail className="mt-0.5 h-5 w-5 shrink-0 text-amber" />
             <div>
-              <p className="text-sm font-semibold text-foreground">Verification Failed</p>
-              <p className="text-xs text-muted-foreground">
-                Please contact support at{" "}
-                <a href="mailto:hello@subinapp.com" className="font-medium text-primary underline">
+              <p className="text-sm font-semibold text-foreground">Having trouble?</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                No worries — email us at{" "}
+                <a href="mailto:hello@subinapp.com" className="font-semibold text-primary underline">
                   hello@subinapp.com
                 </a>{" "}
-                for help with verification.
+                with a photo of your ID and we'll verify you manually within 1 hour.
               </p>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { setAttemptCount(0); setState("idle"); }}
+          >
+            <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try Again Anyway
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
-  // ── Pending state (waiting for webhook) ──
+  // ── Pending state ──
   if (state === "pending") {
     return (
       <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="space-y-4 p-4">
-          <div className="flex flex-col items-center gap-3 py-4">
-            <div className="relative flex h-14 w-14 items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
-              <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin" />
+        <CardContent className="space-y-4 p-5">
+          <div className="flex flex-col items-center gap-4 py-4">
+            {/* Animated progress ring */}
+            <div className="relative flex h-16 w-16 items-center justify-center">
+              <svg className="absolute inset-0 h-16 w-16 -rotate-90" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--primary) / 0.15)" strokeWidth="4" />
+                <motion.circle
+                  cx="32" cy="32" r="28" fill="none"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray="176"
+                  animate={{ strokeDashoffset: [176, 44, 176] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </svg>
               <ShieldCheck className="h-6 w-6 text-primary" />
             </div>
+
             <div className="text-center">
-              <p className="text-sm font-semibold text-foreground">
-                Verification submitted — we're confirming your identity
+              <p className="text-base font-semibold text-foreground">
+                Your ID is being reviewed
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                This usually takes a few minutes. You can continue browsing listings while you wait.
+                This usually takes under 60 seconds
               </p>
             </div>
 
-            {/* Subtle progress dots */}
+            {/* Rotating status messages */}
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={statusMessageIndex}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3 }}
+                className="text-sm text-primary font-medium"
+              >
+                {STATUS_MESSAGES[statusMessageIndex]}
+              </motion.p>
+            </AnimatePresence>
+
+            {/* Animated dots */}
             <div className="flex gap-1.5">
-              {[0, 1, 2].map((i) => (
+              {[0, 1, 2, 3].map((i) => (
                 <motion.div
                   key={i}
                   className="h-1.5 w-1.5 rounded-full bg-primary"
-                  animate={{ opacity: [0.3, 1, 0.3] }}
-                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.4 }}
+                  animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.2, 0.8] }}
+                  transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.3 }}
                 />
               ))}
             </div>
-
-            {/* Continue Browsing button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleContinueBrowsing}
-              className="mt-2"
-            >
-              Continue Browsing <ArrowRight className="ml-1 h-3.5 w-3.5" />
-            </Button>
           </div>
 
+          {/* 2-minute fallback */}
           <AnimatePresence>
             {showSlowMessage && (
               <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0 }}
-                className="rounded-lg bg-muted p-3 text-center"
+                className="rounded-xl bg-muted p-4 text-center space-y-3"
               >
+                <p className="text-sm text-foreground font-medium">
+                  This is taking a little longer than usual
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  This is taking longer than usual —{" "}
-                  <button
-                    onClick={handleManualCheck}
-                    className="font-semibold underline hover:no-underline text-foreground"
-                  >
-                    click here to check your verification status
-                  </button>
+                  You can continue browsing while we finish verifying you. We'll notify you the moment it's done.
                 </p>
                 <Button
-                  variant="outline"
+                  variant="default"
                   size="sm"
-                  className="mt-2"
-                  onClick={handleManualCheck}
+                  onClick={handleContinueBrowsing}
                 >
-                  <RefreshCw className="mr-1 h-3.5 w-3.5" /> Check Status
+                  Continue Browsing <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Manual fallback after 10 minutes */}
-          {showManualFallback && (
-            <div className="rounded-lg bg-muted p-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <Mail className="h-3.5 w-3.5 shrink-0" />
-              <span>
-                Taking longer than expected? Email your ID to{" "}
-                <a href="mailto:verify@subinapp.com" className="font-semibold underline text-foreground">verify@subinapp.com</a>
-                {" "}and our team will verify you within 1 hour.
-              </span>
+          {/* Always show continue browsing option */}
+          {!showSlowMessage && (
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleContinueBrowsing}
+                className="text-xs text-muted-foreground"
+              >
+                Continue Browsing <ArrowRight className="ml-1 h-3 w-3" />
+              </Button>
             </div>
           )}
         </CardContent>
@@ -313,13 +360,16 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
   if (state === "failed") {
     return (
       <Card className="border-destructive/30 bg-destructive/5">
-        <CardContent className="space-y-3 p-4">
+        <CardContent className="space-y-4 p-5">
           <div className="flex items-start gap-3">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
             <div>
-              <p className="text-sm font-semibold text-foreground">Verification Failed</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm font-semibold text-foreground">Verification didn't go through</p>
+              <p className="text-sm text-muted-foreground mt-1">
                 {error || "Something went wrong. Please try again."}
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Attempt {attemptCount} of {MAX_ATTEMPTS}
               </p>
             </div>
           </div>
@@ -328,7 +378,60 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             onClick={startVerification}
             className="w-full sm:w-auto"
           >
-            <RefreshCw className="mr-1 h-3.5 w-3.5" /> Try Again
+            <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ── Prep tips screen ──
+  if (state === "prep") {
+    return (
+      <Card className="border-primary/20 bg-card">
+        <CardContent className="space-y-5 p-5">
+          <div className="text-center">
+            <p className="text-base font-bold text-foreground">Quick tips for fast verification</p>
+            <p className="text-xs text-muted-foreground mt-1">Follow these tips so your ID passes on the first try</p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <CreditCard className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Use a valid, non-expired ID</p>
+                <p className="text-xs text-muted-foreground">Driver's license, passport, or state ID</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Sun className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Good lighting, no glare</p>
+                <p className="text-xs text-muted-foreground">Natural light works best — avoid flash</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Camera className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">All four corners visible</p>
+                <p className="text-xs text-muted-foreground">Hold your ID flat with nothing covering it</p>
+              </div>
+            </div>
+          </div>
+
+          <Button
+            onClick={startVerification}
+            className="w-full h-12"
+          >
+            <ShieldCheck className="mr-1.5 h-4 w-4" /> Start Verification
           </Button>
         </CardContent>
       </Card>
@@ -337,32 +440,38 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
   // ── Idle / default state ──
   return (
-    <Card className="border-amber/30 bg-amber/5">
-      <CardContent className="space-y-3 p-4">
+    <Card className="border-primary/20 bg-primary/5">
+      <CardContent className="space-y-4 p-5">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+          </div>
           <div>
             <p className="text-sm font-semibold text-foreground">Verify Your Identity</p>
-            <p className="text-xs text-muted-foreground">
-              Complete a quick ID verification to get a "Verified" badge. You'll need a
-              government-issued ID and a quick selfie. Takes under 2 minutes.
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Quick ID scan and selfie — takes under 60 seconds. You'll need a government-issued ID.
             </p>
           </div>
         </div>
 
+        <div className="rounded-lg bg-accent/50 p-3">
+          <p className="text-xs text-muted-foreground text-center">
+            💡 Get verified now so you're ready to book instantly when you find your perfect place
+          </p>
+        </div>
+
         <Button
-          size="sm"
-          onClick={startVerification}
+          onClick={handleStartFlow}
           disabled={state === "loading"}
-          className="w-full sm:w-auto"
+          className="w-full h-11"
         >
           {state === "loading" ? (
             <>
-              <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> Starting Verification...
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Starting...
             </>
           ) : (
             <>
-              <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Verify with Government ID
+              <ShieldCheck className="mr-1.5 h-4 w-4" /> Verify with Government ID
             </>
           )}
         </Button>
