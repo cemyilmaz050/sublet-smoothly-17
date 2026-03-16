@@ -355,8 +355,13 @@ const ListingsPage = () => {
           mobileView === "map" && "hidden lg:block"
         )}>
           <div className="p-3 sm:p-4 lg:p-6">
+            {/* Warm headline */}
+            <div className="mb-4">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Summer in Boston sorted 🏠</h1>
+              <p className="text-sm text-muted-foreground mt-1">Find a place from another student — short term, verified, and stress free</p>
+            </div>
             <p className="mb-3 text-sm text-muted-foreground">
-              {filtered.length} listing{filtered.length !== 1 ? "s" : ""} found
+              {filtered.length} place{filtered.length !== 1 ? "s" : ""} available
               {calendarSelectedDate && viewMode === "calendar" && (
                 <span className="ml-2">
                   · Showing availability for{" "}
