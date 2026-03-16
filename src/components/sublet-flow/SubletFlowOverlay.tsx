@@ -209,7 +209,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         link: "/portal-mgmt-bbg/listings",
       }).then(() => {});
 
-      setSuccessMessage(`Your sublet request has been sent to ${data.managementGroupName}!`);
+      setSuccessMessage(`Your listing has been submitted to Boston Brokerage Group for approval — you will be notified by email once it is live on SubIn`);
       setShowSuccess(true);
       fireConfetti();
     } catch (err: any) {
