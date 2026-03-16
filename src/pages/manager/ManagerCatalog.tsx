@@ -137,9 +137,9 @@ const ManagerCatalog = () => {
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Property Catalog</h1>
+         <h1 className="text-2xl font-bold text-foreground">Property Catalog</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage all Boston Brokerage Group properties — add photos, descriptions, and pricing
+            Add and manage your properties here. Subletters will choose from this catalog when listing their apartments.
           </p>
         </div>
         <Button onClick={() => navigate("/portal-mgmt-bbg/catalog/new")} size="lg">
