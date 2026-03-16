@@ -315,44 +315,6 @@ const ManagerCatalogEditor = () => {
     return propId;
   };
 
-  const upsertListing = async (propId: string, status: "draft" | "active") => {
-    const listingPayload: any = {
-      address: form.address.trim(),
-      headline: form.headline.trim() || form.address.trim(),
-      description: form.description || null,
-      property_type: form.property_type as any,
-      bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
-      bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-      sqft: form.sqft ? Number(form.sqft) : null,
-      monthly_rent: form.base_rent ? Number(form.base_rent) : null,
-      security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
-      available_from: form.available_from || null,
-      available_until: form.available_until || null,
-      amenities: form.building_amenities,
-      house_rules: buildHouseRules(),
-      photos: form.photos,
-      space_type: form.space_type,
-      status,
-      management_group_id: BBG_PM_ID,
-      manager_id: user!.id,
-      source: "catalog",
-    };
-
-    if (status === "active") {
-      listingPayload.published_at = new Date().toISOString();
-    }
-
-    if (existingListingId) {
-      const { error } = await supabase.from("listings").update(listingPayload).eq("id", existingListingId);
-      if (error) throw error;
-    } else {
-      // Create new listing - manager is also the tenant for manager-created listings
-      listingPayload.tenant_id = user!.id;
-      const { data: newListing, error } = await supabase.from("listings").insert(listingPayload).select().single();
-      if (error) throw error;
-      if (newListing) setExistingListingId(newListing.id);
-    }
-  };
 
   const handleSaveToCatalog = async () => {
     if (!user) return;
