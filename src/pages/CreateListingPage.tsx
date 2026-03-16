@@ -61,6 +61,7 @@ const CreateListingPage = () => {
           bedrooms: data.bedrooms ?? "",
           bathrooms: data.bathrooms ?? "",
           sqft: data.sqft ?? "",
+          management_type: data.management_group_id ? "bbg" : "self",
           photos: [],
           photoUrls: (data.photos as string[]) || [],
           headline: data.headline || "",
