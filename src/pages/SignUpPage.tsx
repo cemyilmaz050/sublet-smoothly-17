@@ -252,7 +252,7 @@ const SignUpPage = () => {
             {isEduEmail && (
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
                 <GraduationCap className="h-4 w-4" />
-                Nice — you'll get a Student Verified badge 🎓
+                Nice — you'll get a Student Verified badge
               </div>
             )}
             <p className="text-xs text-muted-foreground">Don't see it? Check your <strong>spam or junk folder</strong>.</p>
