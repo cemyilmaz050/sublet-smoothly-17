@@ -4,8 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
+import { toast } from "sonner";
 
 
 // Hardcoded founder user IDs — only these can access
