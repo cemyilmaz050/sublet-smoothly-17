@@ -110,27 +110,12 @@ const ListingsPage = () => {
         }));
 
         setDbListings(enriched as ListingItem[]);
-
-        // Compute stats
-        const verifiedHosts = Object.values(verifiedMap).filter(Boolean).length;
-        setStats({
-          listings: data.length,
-          hosts: verifiedHosts || tenantIds.length,
-          sublets: 0,
-        });
       } else {
         setDbListings([]);
       }
       setLoading(false);
     };
     fetchListings();
-  }, []);
-
-  // Fetch completed sublets count
-  useEffect(() => {
-    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "confirmed").then(({ count }) => {
-      setStats(prev => ({ ...prev, sublets: count || 0 }));
-    });
   }, []);
 
   useEffect(() => {
