@@ -76,6 +76,10 @@ const ManagerApplications = () => {
       const { data: profiles } = await supabase.from("profiles_public" as any).select("id, first_name, last_name").in("id", applicantIds) as { data: { id: string; first_name: string | null; last_name: string | null }[] | null };
       const profileMap = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
+      // Fetch renter verification status
+      const { data: renterApps } = await supabase.from("renter_applications" as any).select("renter_id").in("renter_id", applicantIds) as any;
+      const renterAppSet = new Set((renterApps || []).map((r: any) => r.renter_id));
+
       return apps.map(app => {
         const p = profileMap[app.applicant_id];
         const l = listingMap[app.listing_id];
@@ -85,6 +89,7 @@ const ManagerApplications = () => {
           listing_headline: l?.headline ?? null,
           listing_address: l?.address ?? null,
           listing_monthly_rent: l?.monthly_rent ?? null,
+          renter_verified: renterAppSet.has(app.applicant_id),
         } as AppWithDetails;
       });
     },
