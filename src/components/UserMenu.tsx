@@ -69,6 +69,10 @@ const UserMenu = () => {
       <button onClick={() => { setOpen(false); requireAuth(); }} className={menuItemClass}>
         <LogIn className="h-4 w-4 text-muted-foreground" /> Log In or Sign Up
       </button>
+      <div className="mx-4 border-t" />
+      <button onClick={() => { setOpen(false); navigate("/login"); }} className={menuItemClass}>
+        <User className="h-4 w-4 text-muted-foreground" /> Are you a Property Manager?
+      </button>
     </div>
   );
 

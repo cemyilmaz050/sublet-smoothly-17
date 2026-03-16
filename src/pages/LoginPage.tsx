@@ -266,6 +266,19 @@ const LoginPage = () => {
             </p>
           </div>
 
+          {/* Property Manager Login Info */}
+          <div className="mt-6 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/30 p-4">
+            <div className="flex items-start gap-3">
+              <Building2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Are you a Property Manager?</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Sign in with your official Boston Brokerage Group email to access the staff portal.
+                </p>
+              </div>
+            </div>
+          </div>
+
         </motion.div>
       </div>
     </div>
