@@ -335,7 +335,7 @@ const CreateListingPage = () => {
               ) : (
                 <Button
                   onClick={handlePublish}
-                  disabled={!confirmed || loading || !checklist.allDone || idVerified === false}
+                  disabled={!confirmed || loading || !checklist.allDone}
                   className="bg-primary text-primary-foreground"
                   size="lg"
                 >

@@ -789,7 +789,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <span className="text-sm text-foreground">I confirm all information is accurate and I agree to the platform sublet terms</span>
         </label>
 
-        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy || idVerified === false} className="w-full">
+        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy} className="w-full">
           {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</> : <><Home className="mr-2 h-4 w-4" /> Publish Property</>}
         </Button>
       </div>
