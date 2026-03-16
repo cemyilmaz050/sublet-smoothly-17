@@ -137,6 +137,11 @@ const SignUpPage = () => {
     setLoading(true);
     setSubmitError(null);
 
+    // Auto-assign manager role for BBG staff emails
+    const effectiveRole = email.trim().toLowerCase().endsWith("@realestateboston.com")
+      ? "manager"
+      : selectedRole;
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -145,7 +150,7 @@ const SignUpPage = () => {
           data: {
             first_name: firstName,
             last_name: lastName,
-            role: selectedRole,
+            role: effectiveRole,
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },

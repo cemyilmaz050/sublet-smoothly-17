@@ -73,7 +73,14 @@ const AuthCallbackPage = () => {
         await new Promise((r) => setTimeout(r, 800));
       }
       if (mounted) {
-        navigate("/listings", { replace: true });
+        // Route BBG staff emails to the manager portal
+        const { data: { session } } = await supabase.auth.getSession();
+        const userEmail = session?.user?.email?.toLowerCase() || "";
+        if (userEmail.endsWith("@realestateboston.com") && profile?.role === "manager") {
+          navigate("/portal-mgmt-bbg", { replace: true });
+        } else {
+          navigate("/listings", { replace: true });
+        }
       }
     };
 
