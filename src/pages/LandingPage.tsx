@@ -67,7 +67,7 @@ const LandingPage = () => {
             </Badge>
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Summer in Boston{" "}
-              <span className="text-primary">sorted 🏠</span>
+              <span className="text-primary">sorted</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
               Find a place from another student — short term, verified, and stress free. No brokers, no BS.
