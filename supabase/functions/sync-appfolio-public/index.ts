@@ -138,14 +138,18 @@ serve(async (req) => {
 
     let managerId: string | null = null;
 
-    // Check if called with a specific manager_id (for cron) or via auth
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
 
-    if (body.manager_id) {
+    // Check for cron secret for scheduled syncs
+    const cronSecret = req.headers.get("x-cron-secret");
+    const expectedCronSecret = Deno.env.get("CRON_SECRET");
+
+    if (cronSecret && expectedCronSecret && cronSecret === expectedCronSecret && body.manager_id) {
+      // Cron-authenticated call with verified secret
       managerId = body.manager_id;
-      logStep("Called via cron/manual with manager_id", { managerId });
+      logStep("Called via authenticated cron with manager_id", { managerId });
     } else {
-      // Auth-based call
+      // User-initiated call — always require JWT
       const authHeader = req.headers.get("Authorization");
       if (!authHeader) throw new Error("No authorization header");
       const token = authHeader.replace("Bearer ", "");

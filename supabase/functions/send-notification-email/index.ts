@@ -18,6 +18,28 @@ interface EmailRequest {
   data: Record<string, any>;
 }
 
+const esc = (s: string): string =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const ALLOWED_DOMAINS = ["subinapp.com", "sublet-smoothly-17.lovable.app"];
+
+const sanitizeUrl = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    if (ALLOWED_DOMAINS.some((d) => parsed.hostname === d || parsed.hostname.endsWith(`.${d}`))) {
+      return url;
+    }
+    return "#";
+  } catch {
+    return "#";
+  }
+};
+
 const renderEmail = (type: string, data: Record<string, any>): string => {
   const baseStyle = `
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
