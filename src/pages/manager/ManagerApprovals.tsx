@@ -7,7 +7,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  CheckCircle2, XCircle, MapPin, DollarSign, Calendar, User, Home, Shield, Loader2, Clock,
+  CheckCircle2, XCircle, MapPin, DollarSign, Calendar, User, Home, Shield, Loader2, Clock, Building2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
