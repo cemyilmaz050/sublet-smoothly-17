@@ -271,11 +271,13 @@ const CreateListingPage = () => {
   };
 
   if (published) {
+    const isManaged = form.management_type === "bbg";
     return (
       <PublishSuccess
         listingId={draftId || ""}
         headline={form.headline}
         onDashboard={() => navigate("/tenant/dashboard")}
+        isPending={isManaged}
       />
     );
   }
