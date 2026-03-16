@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Building2, Mail, ArrowRight, Loader2, ShieldCheck, Eye, EyeOff } from "lucide-react";
+import { Building2, Mail, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
