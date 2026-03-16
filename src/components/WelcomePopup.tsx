@@ -315,7 +315,7 @@ function OptionCard({
       onClick={onClick}
     >
       {aiPowered && (
-        <span className="absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-600">
+        <span className="absolute -top-3 right-4 inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-semibold text-primary">
           <Sparkles className="h-3 w-3" /> AI Powered
         </span>
       )}
