@@ -58,12 +58,13 @@ const ManagerHome = () => {
     },
   });
 
+  const P = "/portal-mgmt-bbg";
   const tiles = [
-    { label: "Pending Approvals", value: stats?.pendingApprovals ?? 0, icon: ClipboardCheck, color: "text-destructive", link: "/manager/approvals", badge: true },
-    { label: "Active Listings", value: stats?.activeListings ?? 0, icon: Building2, color: "text-primary", link: "/manager/listings" },
-    { label: "Total Applications", value: stats?.totalApplications ?? 0, icon: Users, color: "text-cyan", link: "/manager/applications" },
-    { label: "Pending Review", value: stats?.pendingApplications ?? 0, icon: Clock, color: "text-amber", link: "/manager/applications", badge: true },
-    { label: "Completed Sublets", value: stats?.completedSublets ?? 0, icon: CheckCircle2, color: "text-emerald", link: "/manager/checks" },
+    { label: "Pending Approvals", value: stats?.pendingApprovals ?? 0, icon: ClipboardCheck, color: "text-destructive", link: `${P}/approvals`, badge: true },
+    { label: "Active Listings", value: stats?.activeListings ?? 0, icon: Building2, color: "text-primary", link: `${P}/listings` },
+    { label: "Total Applications", value: stats?.totalApplications ?? 0, icon: Users, color: "text-cyan", link: `${P}/applications` },
+    { label: "Pending Review", value: stats?.pendingApplications ?? 0, icon: Clock, color: "text-amber", link: `${P}/applications`, badge: true },
+    { label: "Completed Sublets", value: stats?.completedSublets ?? 0, icon: CheckCircle2, color: "text-emerald", link: `${P}/checks` },
   ];
 
   const notifIcon = (type: string) => {
