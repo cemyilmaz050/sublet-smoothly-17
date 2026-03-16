@@ -117,7 +117,7 @@ const App = () => (
                   <Route path="/s-admin-console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
 
                   {/* Manager Dashboard — unified layout */}
-                  <Route path="/manager" element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>
+                  <Route path="/portal-mgmt-bbg" element={<ManagerProtectedRoute><ManagerLayout /></ManagerProtectedRoute>}>
                     <Route index element={<ManagerHome />} />
                     <Route path="catalog" element={<ManagerCatalog />} />
                     <Route path="catalog/:propertyId" element={<ManagerCatalogEditor />} />
@@ -130,6 +130,11 @@ const App = () => (
                     <Route path="payments" element={<ManagerPayments />} />
                     <Route path="settings" element={<ManagerSettings />} />
                   </Route>
+
+                  {/* Legacy /manager routes redirect silently to listings */}
+                  <Route path="/manager/*" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
+                  <Route path="/manager" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
+                  <Route path="/admin" element={<AdminProtectedRoute><Navigate to="/s-admin-console" replace /></AdminProtectedRoute>} />
 
                   {/* Redirects from old manager routes */}
                   <Route path="/dashboard/manager" element={<Navigate to="/manager" replace />} />
