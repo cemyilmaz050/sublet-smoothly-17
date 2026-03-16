@@ -62,10 +62,9 @@ const Navbar = () => {
           <div className="flex items-center gap-1">
             <button
               onClick={navAction.onClick}
-              className="rounded-full px-2.5 py-1.5 text-xs font-semibold text-foreground transition-all duration-150 ease-in-out hover:bg-[#F3F4F6] sm:px-3 sm:text-sm"
+              className="hidden sm:block rounded-full px-3 py-1.5 text-sm font-semibold text-foreground transition-all duration-150 ease-in-out hover:bg-[#F3F4F6]"
             >
-              <span className="hidden sm:inline">{navAction.label}</span>
-              <span className="sm:hidden">{navAction.label === "Sublet Your Apartment" ? "List" : navAction.label === "Go to Your Listings" ? "Listings" : "Browse"}</span>
+              {navAction.label}
             </button>
             <NotificationBell />
             <UserMenu />
