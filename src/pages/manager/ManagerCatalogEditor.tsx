@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
-const BBG_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
+
 
 const BUILDING_AMENITIES = [
   "Elevator", "Laundry", "Gym", "Parking", "Rooftop", "Storage",
