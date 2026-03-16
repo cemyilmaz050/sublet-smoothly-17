@@ -48,11 +48,12 @@ import ManagerSettings from "./pages/manager/ManagerSettings";
 
 const queryClient = new QueryClient();
 
-/** Persistent navbar shown on all routes except the manager portal */
+/** Persistent navbar shown on all routes except the manager portal and AI finder */
 function PersistentNavbar() {
   const location = useLocation();
   const isManagerRoute = location.pathname.startsWith("/manager");
-  if (isManagerRoute) return null;
+  const isFinderRoute = location.pathname === "/find";
+  if (isManagerRoute || isFinderRoute) return null;
   return <Navbar />;
 }
 
