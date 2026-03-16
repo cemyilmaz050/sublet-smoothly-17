@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -6,38 +6,90 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface StripeIdVerificationProps {
   idVerified: boolean;
   onVerified?: () => void;
 }
 
+type VerificationState = "idle" | "loading" | "pending" | "verified" | "failed" | "max_attempts";
+
+const POLL_INTERVAL = 2000;
+const POLL_TIMEOUT = 30000;
+
 const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationProps) => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState<VerificationState>(idVerified ? "verified" : "idle");
   const [error, setError] = useState<string | null>(null);
-  const [maxAttempts, setMaxAttempts] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showSlowMessage, setShowSlowMessage] = useState(false);
 
-  if (idVerified) {
-    return (
-      <Card className="border-emerald/30 bg-emerald/5">
-        <CardContent className="flex items-center gap-3 p-4">
-          <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald" />
-          <div>
-            <p className="text-sm font-semibold text-foreground">Identity Verified</p>
-            <p className="text-xs text-muted-foreground">
-              Your identity has been verified. You are all set!
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
+  // Update state if idVerified prop changes
+  useEffect(() => {
+    if (idVerified && state !== "verified") {
+      setState("verified");
+      stopPolling();
+    }
+  }, [idVerified]);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+  }, []);
+
+  const checkStatus = useCallback(async () => {
+    if (!user) return false;
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id_verified")
+      .eq("id", user.id)
+      .single();
+    if (profile?.id_verified) {
+      stopPolling();
+      setState("verified");
+      onVerified?.();
+      return true;
+    }
+    return false;
+  }, [user, onVerified, stopPolling]);
+
+  const startPolling = useCallback(() => {
+    setShowSlowMessage(false);
+    // Poll every 2 seconds
+    pollRef.current = setInterval(async () => {
+      await checkStatus();
+    }, POLL_INTERVAL);
+
+    // After 30 seconds, show slow message
+    timeoutRef.current = setTimeout(() => {
+      setShowSlowMessage(true);
+    }, POLL_TIMEOUT);
+  }, [checkStatus]);
+
+  const handleManualCheck = async () => {
+    setState("loading");
+    const verified = await checkStatus();
+    if (!verified) {
+      setState("pending");
+      toast.info("Still processing — we'll update automatically when it's ready.");
+    }
+  };
 
   const startVerification = async () => {
     if (!user) return;
-    setLoading(true);
+    setState("loading");
     setError(null);
+    setShowSlowMessage(false);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke(
@@ -47,13 +99,13 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
       if (fnError) throw fnError;
 
       if (data?.already_verified) {
-        toast.success("Your identity is already verified!");
+        setState("verified");
         onVerified?.();
         return;
       }
 
       if (data?.error === "max_attempts") {
-        setMaxAttempts(true);
+        setState("max_attempts");
         return;
       }
 
@@ -62,7 +114,6 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
       const clientSecret = data?.client_secret;
       if (!clientSecret) throw new Error("No client secret returned");
 
-      // Load Stripe and open Identity modal
       const stripe = await loadStripe(
         "pk_live_51TABODCpbA85hge15GgiO276acyyu7ttgB7zKw8Ygsb8KwU2QUagdYnjI5s3bkeLsoMFshURYYq5DLzAqbMU865d00W47B1eMN"
       );
@@ -72,33 +123,70 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
       if (result.error) {
         console.error("Verification error:", result.error);
-        setError(
-          "We could not verify your ID. Please make sure your document is clear and your face is fully visible, then try again."
-        );
+        const msg = result.error.message || "";
+        if (msg.includes("blurry") || msg.includes("blur")) {
+          setError("Your ID image was too blurry — please try again with better lighting.");
+        } else if (msg.includes("document") || msg.includes("read")) {
+          setError("We could not read your document — please make sure the full ID is visible.");
+        } else {
+          setError("We could not verify your ID. Please make sure your document is clear and your face is fully visible, then try again.");
+        }
+        setState("failed");
       } else {
-        // Verification submitted — poll for result
-        toast.success("Verification submitted! We'll update your status shortly.");
-        // Give Stripe a moment to process, then check
-        setTimeout(async () => {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("id_verified")
-            .eq("id", user.id)
-            .single();
-          if (profile?.id_verified) {
-            onVerified?.();
-          }
-        }, 3000);
+        // Submitted — start polling
+        setState("pending");
+        startPolling();
       }
     } catch (err: any) {
       console.error("Verification error:", err);
       setError(err.message || "Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+      setState("failed");
     }
   };
 
-  if (maxAttempts) {
+  // ── Verified state ──
+  if (state === "verified") {
+    return (
+      <Card className="border-emerald/30 bg-emerald/5 overflow-hidden">
+        <CardContent className="p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 15 }}
+            className="flex flex-col items-center gap-3 py-4"
+          >
+            <div className="relative">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", delay: 0.1 }}
+                className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald/20"
+              >
+                <CheckCircle2 className="h-8 w-8 text-emerald" />
+              </motion.div>
+              <motion.span
+                initial={{ scale: 0, rotate: -20 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ delay: 0.3, type: "spring" }}
+                className="absolute -right-2 -top-2 text-2xl"
+              >
+                🎉
+              </motion.span>
+            </div>
+            <div className="text-center">
+              <p className="text-base font-bold text-foreground">Identity Verified ✓</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Your identity has been verified. You are all set!
+              </p>
+            </div>
+          </motion.div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ── Max attempts state ──
+  if (state === "max_attempts") {
     return (
       <Card className="border-destructive/30 bg-destructive/5">
         <CardContent className="space-y-3 p-4">
@@ -120,6 +208,100 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
     );
   }
 
+  // ── Pending state (waiting for webhook) ──
+  if (state === "pending") {
+    return (
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="space-y-4 p-4">
+          <div className="flex flex-col items-center gap-3 py-4">
+            <div className="relative flex h-14 w-14 items-center justify-center">
+              {/* Animated spinner ring */}
+              <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+              <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin" />
+              <ShieldCheck className="h-6 w-6 text-primary" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-foreground">
+                Verification submitted
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                We are confirming your identity. This usually takes under 30 seconds.
+              </p>
+            </div>
+
+            {/* Subtle progress dots */}
+            <div className="flex gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <motion.div
+                  key={i}
+                  className="h-1.5 w-1.5 rounded-full bg-primary"
+                  animate={{ opacity: [0.3, 1, 0.3] }}
+                  transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.4 }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {showSlowMessage && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="rounded-lg bg-amber/10 p-3 text-center"
+              >
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  This is taking longer than usual —{" "}
+                  <button
+                    onClick={handleManualCheck}
+                    className="font-semibold underline hover:no-underline"
+                  >
+                    click here to check your verification status
+                  </button>
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={handleManualCheck}
+                >
+                  <RefreshCw className="mr-1 h-3.5 w-3.5" /> Check Status
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ── Failed / Error state ──
+  if (state === "failed") {
+    return (
+      <Card className="border-destructive/30 bg-destructive/5">
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Verification Failed</p>
+              <p className="text-xs text-muted-foreground">
+                {error || "Something went wrong. Please try again."}
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={startVerification}
+            className="w-full sm:w-auto"
+          >
+            <RefreshCw className="mr-1 h-3.5 w-3.5" /> Try Again
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ── Idle / default state ──
   return (
     <Card className="border-amber/30 bg-amber/5">
       <CardContent className="space-y-3 p-4">
@@ -134,25 +316,15 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
           </div>
         </div>
 
-        {error && (
-          <div className="rounded-lg bg-destructive/10 p-3">
-            <p className="text-xs text-destructive">{error}</p>
-          </div>
-        )}
-
         <Button
           size="sm"
           onClick={startVerification}
-          disabled={loading}
+          disabled={state === "loading"}
           className="w-full sm:w-auto"
         >
-          {loading ? (
+          {state === "loading" ? (
             <>
               <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> Starting Verification...
-            </>
-          ) : error ? (
-            <>
-              <RefreshCw className="mr-1 h-3.5 w-3.5" /> Try Again
             </>
           ) : (
             <>

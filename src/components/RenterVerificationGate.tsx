@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Circle, ShieldCheck, FileText, Users, ArrowRight, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, ShieldCheck, FileText, Users, ArrowRight, Loader2, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRenterVerification } from "@/hooks/useRenterVerification";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,15 +20,16 @@ interface RenterVerificationGateProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onVerified?: () => void;
+  /** What the user is trying to do — shown in the gate message */
+  action?: "schedule" | "payment";
 }
 
-const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerificationGateProps) => {
+const RenterVerificationGate = ({ open, onOpenChange, onVerified, action }: RenterVerificationGateProps) => {
   const { user } = useAuth();
   const { idVerified, applicationComplete, cosignerConfirmed, isFullyVerified, loading, refresh } = useRenterVerification();
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | null>(null);
   const notifiedRef = useRef(false);
 
-  // Auto-determine which step to start on
   const getNextIncompleteStep = (): 1 | 2 | 3 | null => {
     if (!idVerified) return 1;
     if (!applicationComplete) return 2;
@@ -36,13 +37,11 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
     return null;
   };
 
-  // When fully verified, mark profile and send notifications
+  // When fully verified, mark profile and notify
   useEffect(() => {
     if (isFullyVerified && open && !notifiedRef.current && user) {
       notifiedRef.current = true;
-      // Mark profile as renter_verified
       supabase.from("profiles").update({ renter_verified: true } as any).eq("id", user.id).then(() => {});
-      // Notify relevant hosts (via knocks/applications)
       sendVerificationNotifications(user.id);
       onVerified?.();
       onOpenChange(false);
@@ -54,7 +53,6 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
       const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", userId).single();
       const renterName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "A renter";
 
-      // Find all listings this renter has knocked on or applied to
       const [{ data: knocks }, { data: apps }] = await Promise.all([
         supabase.from("knocks" as any).select("listing_id, tenant_id").eq("knocker_id", userId),
         supabase.from("applications").select("listing_id").eq("applicant_id", userId),
@@ -70,7 +68,6 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
       const { data: listings } = await supabase.from("listings").select("id, tenant_id, manager_id, headline, address").in("id", listingIds);
       if (!listings) return;
 
-      // Notify each unique host and manager
       const notifiedUsers = new Set<string>();
       for (const listing of listings) {
         const targets = [listing.tenant_id, listing.manager_id].filter(Boolean);
@@ -138,7 +135,6 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
     setActiveStep(null);
   };
 
-  // If in a sub-step, show that instead
   if (activeStep === 1) {
     return (
       <Dialog open={open} onOpenChange={(o) => { if (!o) { setActiveStep(null); } onOpenChange(o); }}>
@@ -195,15 +191,22 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
     );
   }
 
+  const actionText = action === "schedule"
+    ? "schedule or pay"
+    : action === "payment"
+      ? "schedule or pay"
+      : "continue";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl">
-            Before you connect with this listing
+          <DialogTitle className="text-center text-xl flex items-center justify-center gap-2">
+            <Lock className="h-5 w-5 text-primary" />
+            One quick step
           </DialogTitle>
           <DialogDescription className="text-center text-sm">
-            Complete these 3 quick steps — this keeps SubIn safe and trusted for everyone 🔒
+            One quick step before you can {actionText} — verify your ID to keep SubIn safe for everyone. Takes about 30 seconds 🔒
           </DialogDescription>
         </DialogHeader>
 
@@ -216,27 +219,24 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
             {steps.map((step) => {
               const Icon = step.icon;
               const StatusIcon = step.complete ? CheckCircle2 : Circle;
-              const canStart = true;
 
               return (
                 <button
                   key={step.num}
-                  onClick={() => !step.complete && canStart && setActiveStep(step.num)}
-                  disabled={step.complete || !canStart}
+                  onClick={() => !step.complete && setActiveStep(step.num)}
+                  disabled={step.complete}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all",
                     step.complete
                       ? "border-emerald/30 bg-emerald/5 cursor-default"
-                      : canStart
-                        ? "border-primary/20 bg-primary/5 hover:border-primary/40 hover:shadow-sm cursor-pointer"
-                        : "border-border bg-muted/30 opacity-60 cursor-not-allowed"
+                      : "border-primary/20 bg-primary/5 hover:border-primary/40 hover:shadow-sm cursor-pointer"
                   )}
                 >
                   <div className={cn(
                     "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
-                    step.complete ? "bg-emerald/20" : canStart ? "bg-primary/10" : "bg-muted"
+                    step.complete ? "bg-emerald/20" : "bg-primary/10"
                   )}>
-                    <Icon className={cn("h-5 w-5", step.complete ? "text-emerald" : canStart ? "text-primary" : "text-muted-foreground")} />
+                    <Icon className={cn("h-5 w-5", step.complete ? "text-emerald" : "text-primary")} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -247,7 +247,7 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
                     </div>
                     <p className="text-xs text-muted-foreground">{step.subtitle}</p>
                   </div>
-                  {!step.complete && canStart && (
+                  {!step.complete && (
                     <ArrowRight className="h-4 w-4 shrink-0 text-primary" />
                   )}
                 </button>
