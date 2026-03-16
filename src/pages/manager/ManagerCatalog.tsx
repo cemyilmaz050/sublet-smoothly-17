@@ -22,6 +22,31 @@ const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
 const ManagerCatalog = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleDelete = async (prop: any) => {
+    setDeleting(prop.id);
+    try {
+      // Delete associated catalog units first
+      await supabase.from("catalog_units").delete().eq("property_id", prop.id);
+
+      // Delete associated listings (soft-delete via status change)
+      for (const listing of prop.listings) {
+        await supabase.from("listings").update({ status: "deleted" as any }).eq("id", listing.id);
+      }
+
+      // Delete the catalog property
+      await supabase.from("catalog_properties").delete().eq("id", prop.id);
+
+      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
+      toast.success(`"${prop.address}" removed from catalog`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete property");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["manager-catalog", user?.id],
