@@ -123,7 +123,7 @@ const ManagerCatalogEditor = () => {
         address: prop.address || "",
         name: prop.name || "",
         property_type: prop.property_type || "apartment",
-        headline: listings?.[0]?.headline || unit?.description?.substring(0, 80) || "",
+        headline: unit?.description?.substring(0, 80) || "",
         space_type: (unit as any)?.space_type || "entire_place",
         bedrooms: unit?.bedrooms?.toString() || "",
         bathrooms: unit?.bathrooms?.toString() || "",
