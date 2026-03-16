@@ -248,66 +248,107 @@ const ListingsPage = () => {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <WelcomePopup show={welcomePopup.show} returningMode={welcomePopup.returningMode} dismiss={welcomePopup.dismiss} />
-      {/* Hero choice cards for new visitors */}
+
+      {/* Full-viewport hero section for non-logged-in users */}
       {!user && (
-        <section className="border-b bg-gradient-to-br from-primary/5 via-background to-accent/20 px-4 py-10 sm:py-14">
-          <div className="mx-auto max-w-3xl text-center mb-8">
+        <section className="relative flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center bg-background px-4">
+          <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground"
+            >
+              Boston Summer Sublets
+            </motion.span>
+
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight"
+              transition={{ delay: 0.05 }}
+              className="text-[32px] sm:text-[48px] font-semibold leading-[1.1] tracking-tight text-foreground"
             >
-              What brings you to SubIn? ✨
+              Where are you this summer?
             </motion.h1>
+
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-3 text-muted-foreground text-lg"
+              className="mt-4 text-base sm:text-lg text-muted-foreground"
             >
-              Start your Boston summer journey
+              Find a verified sublet or list your place in minutes
             </motion.p>
-          </div>
-          <div className="mx-auto grid max-w-2xl gap-4 sm:grid-cols-2">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-            >
-              <Link to="/signup?role=tenant" className="block">
-                <div className="group rounded-2xl border-2 border-border bg-card p-8 text-center transition-all hover:border-primary/40 hover:shadow-elevated cursor-pointer">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber/10">
-                    <span className="text-3xl">🗝️</span>
+
+            {/* Two choice cards */}
+            <div className="mt-10 grid w-full max-w-2xl gap-5 sm:grid-cols-2">
+              {/* Card 1 — Sublet your place */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.18 }}
+              >
+                <Link to="/signup?role=tenant" className="block h-full">
+                  <div className="group flex h-full flex-col items-center rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                    <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-foreground">
+                        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">I have a place to sublet</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      List your apartment and find a verified subtenant fast
+                    </p>
+                    <Button className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+                      Start listing
+                    </Button>
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                    I have a place to sublet
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    List your apartment and find a verified subtenant in days
-                  </p>
-                </div>
-              </Link>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
-              <Link to="/find" className="block">
-                <div className="group rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center transition-all hover:border-primary hover:shadow-elevated cursor-pointer ring-2 ring-primary/10">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                    <span className="text-3xl">🏠</span>
+                </Link>
+              </motion.div>
+
+              {/* Card 2 — Find a place */}
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.26 }}
+              >
+                <Link to="/find" className="block h-full">
+                  <div className="group flex h-full flex-col items-center rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                    <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-foreground">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">I need a place this summer</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      Answer a few questions and let AI find your perfect match
+                    </p>
+                    <Button className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+                      Find my place
+                    </Button>
                   </div>
-                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                    I need a place for the summer
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Answer 7 quick questions and let AI find your perfect match
-                  </p>
-                </div>
-              </Link>
-            </motion.div>
+                </Link>
+              </motion.div>
+            </div>
           </div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
+          >
+            <span className="text-xs text-muted-foreground">Browse all listings</span>
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </motion.div>
+          </motion.div>
         </section>
       )}
 
