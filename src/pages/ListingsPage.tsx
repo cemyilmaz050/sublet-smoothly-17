@@ -72,9 +72,6 @@ const ListingsPage = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [calendarSelectedDate, setCalendarSelectedDate] = useState<string | null>(null);
 
-  // Stats for hero
-  const [stats, setStats] = useState({ listings: 0, hosts: 0, sublets: 0 });
-
   useEffect(() => {
     const fetchListings = async () => {
       const { data } = await supabase
