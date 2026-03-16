@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 /** Only @bostonbrokerage.com emails can access the manager portal */
-const BBG_EMAIL_DOMAIN = "@bostonbrokerage.com";
+const BBG_EMAIL_DOMAIN = "@realestateboston.com";
 
 const ManagerProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isReady, role } = useAuth();

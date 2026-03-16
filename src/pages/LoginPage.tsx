@@ -61,7 +61,7 @@ const LoginPage = () => {
       }
       if (data.session) {
         // If BBG staff email, go to manager portal
-        if (data.session.user.email?.toLowerCase().endsWith("@bostonbrokerage.com")) {
+        if (data.session.user.email?.toLowerCase().endsWith("@realestateboston.com")) {
           navigate("/portal-mgmt-bbg", { replace: true });
         } else {
           navigate("/listings", { replace: true });
