@@ -117,6 +117,8 @@ const App = () => (
                   {/* Manager Dashboard — unified layout */}
                   <Route path="/manager" element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>
                     <Route index element={<ManagerHome />} />
+                    <Route path="catalog" element={<ManagerCatalog />} />
+                    <Route path="catalog/:propertyId" element={<ManagerCatalogEditor />} />
                     <Route path="approvals" element={<ManagerApprovals />} />
                     <Route path="listings" element={<ManagerListings />} />
                     <Route path="applications" element={<ManagerApplications />} />
