@@ -33,7 +33,7 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-foreground">Review & publish ✨</h2>
+      <h2 className="text-xl font-semibold text-foreground">Review & publish</h2>
 
       <Section title="About this place" step={0} onEdit={onGoToStep}>
         <p><strong>Address:</strong> {data.address} {data.unit_number && `(Unit ${data.unit_number})`}</p>
