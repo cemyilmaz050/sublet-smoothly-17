@@ -774,9 +774,14 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           </div>
         )}
 
-        {/* ID Verification gate */}
+        {/* Optional ID Verification — not required to publish */}
         {idVerified === false && (
-          <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
+          <div className="rounded-lg border border-muted bg-muted/30 p-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              <span className="font-medium text-foreground">Optional:</span> Verify your ID now to receive payouts faster when you get booked.
+            </p>
+            <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
+          </div>
         )}
 
         <label className="flex items-start gap-2">
