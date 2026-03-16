@@ -54,7 +54,7 @@ const ManagerCatalogEditor = () => {
   const [saving, setSaving] = useState(false);
   
   const [property, setProperty] = useState<any>(null);
-  const [existingListingId, setExistingListingId] = useState<string | null>(null);
+  
   const [existingUnitId, setExistingUnitId] = useState<string | null>(null);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [importUrl, setImportUrl] = useState("");
