@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Bed, Bath, CheckCircle2, MessageCircle, CalendarDays } from "lucide-react";
+import { MapPin, Bed, Bath, CheckCircle2, MessageCircle, CalendarDays, Heart, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScoredListing, FinderAnswers } from "./types";
