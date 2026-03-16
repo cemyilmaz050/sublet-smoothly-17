@@ -39,7 +39,7 @@ const Navbar = () => {
   // Determine button label and action
   const getNavAction = () => {
     if (user && hasListing && isOnTenantDashboard) {
-      return { label: "Browse as Sub-lessee", onClick: () => navigate("/") };
+      return { label: "Browse as Sub-lessee", onClick: () => navigate("/listings") };
     }
     if (user && hasListing) {
       return { label: "Go to Your Listings", onClick: handleSubletClick };
