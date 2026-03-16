@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import VerificationPendingBanner from "@/components/VerificationPendingBanner";
 import Footer from "@/components/Footer";
 import LandingPage from "./pages/LandingPage";
+import HomePage from "./pages/HomePage";
 import ListingsPage from "./pages/ListingsPage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -48,7 +49,7 @@ import ManagerSettings from "./pages/manager/ManagerSettings";
 
 const queryClient = new QueryClient();
 
-/** Persistent navbar shown on all routes except the manager portal and AI finder */
+/** Persistent navbar shown on all routes except the manager portal, AI finder, and home hero */
 function PersistentNavbar() {
   const location = useLocation();
   const isManagerRoute = location.pathname.startsWith("/manager");
@@ -57,12 +58,13 @@ function PersistentNavbar() {
   return <Navbar />;
 }
 
-/** Hide footer on full-screen pages like messages, manager portal, and AI finder */
+/** Hide footer on full-screen pages */
 function PersistentFooter() {
   const location = useLocation();
   if (location.pathname.startsWith("/manager")) return null;
   if (location.pathname.startsWith("/messages")) return null;
   if (location.pathname === "/find") return null;
+  if (location.pathname === "/") return null;
   return <Footer />;
 }
 
@@ -83,7 +85,7 @@ const App = () => (
               <div className="flex-1">
                 <Routes>
                   {/* Public routes */}
-                  <Route path="/" element={<ListingsPage />} />
+                  <Route path="/" element={<HomePage />} />
                   <Route path="/listings" element={<ListingsPage />} />
                   <Route path="/about" element={<LandingPage />} />
                   <Route path="/signup" element={<SignUpPage />} />
