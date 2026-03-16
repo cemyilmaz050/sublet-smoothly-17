@@ -127,10 +127,10 @@ const ManagerCatalog = () => {
   };
 
   const getStatusBadge = (prop: any) => {
-    if (prop.activeCount > 0) return <Badge variant="emerald" className="text-xs"><CheckCircle2 className="mr-1 h-3 w-3" />Active</Badge>;
-    if (prop.draftCount > 0) return <Badge variant="secondary" className="text-xs"><EyeOff className="mr-1 h-3 w-3" />Draft</Badge>;
-    if (prop.pendingCount > 0) return <Badge variant="pending" className="text-xs"><Clock className="mr-1 h-3 w-3" />Pending</Badge>;
-    return <Badge variant="secondary" className="text-xs"><AlertCircle className="mr-1 h-3 w-3" />No listing</Badge>;
+    if (prop.activeCount > 0) return <Badge variant="emerald" className="text-xs"><CheckCircle2 className="mr-1 h-3 w-3" />Live (Subletter Active)</Badge>;
+    if (prop.pendingCount > 0) return <Badge variant="pending" className="text-xs"><Clock className="mr-1 h-3 w-3" />Pending Approval</Badge>;
+    if (prop.totalListings > 0) return <Badge variant="secondary" className="text-xs"><EyeOff className="mr-1 h-3 w-3" />Draft Listing</Badge>;
+    return <Badge variant="outline" className="text-xs"><CheckCircle2 className="mr-1 h-3 w-3" />In Catalog</Badge>;
   };
 
   return (
