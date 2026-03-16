@@ -80,7 +80,7 @@ const PILL_COMMON = `
 
 const BASE_STYLE = `
   ${PILL_COMMON}
-  background: #ffffff;
+  background: #F5F0E8;
   color: #1A1A2E;
   border: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.04);
