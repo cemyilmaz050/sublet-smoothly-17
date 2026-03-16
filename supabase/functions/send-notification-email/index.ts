@@ -93,7 +93,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "application_received":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">New Application 📋</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">New Application</h1>
         <p style="${mutedStyle}">${data.applicant_name} has applied for your listing "${data.listing_title}".</p>
         ${data.message ? `<div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;"><p style="margin: 0; ${mutedStyle}">"${data.message}"</p></div>` : ""}
         <a href="${data.action_url}" style="${btnStyle}">Review Application</a>
