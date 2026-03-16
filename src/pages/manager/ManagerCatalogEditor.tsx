@@ -354,7 +354,7 @@ const ManagerCatalogEditor = () => {
     }
   };
 
-  const handleSaveDraft = async () => {
+  const handleSaveToCatalog = async () => {
     if (!user) return;
     setSaving(true);
     try {
