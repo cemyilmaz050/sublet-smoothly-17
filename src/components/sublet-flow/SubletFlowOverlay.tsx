@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin } from "lucide-react";
+import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin, Wifi, Sofa, Snowflake, Flame, Car, PawPrint, WashingMachine, Tv, CookingPot, Dumbbell, ArrowUpDown, Accessibility, icons } from "lucide-react";
 import TenantIdVerification from "@/components/TenantIdVerification";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
