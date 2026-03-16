@@ -521,7 +521,7 @@ const AuthModal = () => {
                   </div>
 
                   <Button className="w-full h-12" size="lg" onClick={handleSignUp} disabled={signupLoading}>
-                    {signupLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : <>Create Account <ArrowRight className="ml-1 h-4 w-4" /></>}
+                    {signupLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : <>Let's Go! <ArrowRight className="ml-1 h-4 w-4" /></>}
                   </Button>
                 </div>
               </TabsContent>
