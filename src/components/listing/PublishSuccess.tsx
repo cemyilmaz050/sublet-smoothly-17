@@ -58,7 +58,7 @@ const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false }:
             <Clock className="h-14 w-14 text-amber" />
           </motion.div>
 
-          <h1 className="text-3xl font-bold text-foreground">Submitted for review! 📋</h1>
+          <h1 className="text-3xl font-bold text-foreground">Submitted for review!</h1>
           <p className="mt-3 text-muted-foreground">
             Your listing has been sent to Boston Brokerage Group for approval.
           </p>
