@@ -14,7 +14,8 @@ interface Props {
   onVerifyClick?: () => void;
 }
 
-const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false }: Props) => {
+const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false, isVerified = false, onVerifyClick }: Props) => {
+  const [showVerifyNudge, setShowVerifyNudge] = useState(!isVerified);
   useEffect(() => {
     if (isPending) return;
     const duration = 2000;
