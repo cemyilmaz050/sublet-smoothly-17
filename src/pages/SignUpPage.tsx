@@ -94,6 +94,12 @@ const SignUpPage = () => {
       title: "I need a place",
       description: "I want to browse sublets and find the perfect summer spot",
     },
+    {
+      id: "manager" as const,
+      icon: Building2,
+      title: "I am a property manager",
+      description: "Manage your properties and oversee sublet listings on SubIn",
+    },
   ];
 
   const validate = (): boolean => {
