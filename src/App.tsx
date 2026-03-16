@@ -65,7 +65,7 @@ function PersistentNavbar() {
 /** Hide footer on full-screen pages */
 function PersistentFooter() {
   const location = useLocation();
-  if (location.pathname.startsWith("/manager")) return null;
+  if (location.pathname.startsWith("/manager") || location.pathname.startsWith("/portal-mgmt-bbg")) return null;
   if (location.pathname.startsWith("/messages")) return null;
   if (location.pathname === "/find") return null;
   if (location.pathname === "/") return null;
