@@ -64,7 +64,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "booking_confirmed":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">Booking Confirmed! 🎉</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Booking Confirmed!</h1>
         <p style="${mutedStyle}">${data.message}</p>
         <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
           <p style="margin: 0 0 4px;"><strong>Property:</strong> ${data.listing_title}</p>
