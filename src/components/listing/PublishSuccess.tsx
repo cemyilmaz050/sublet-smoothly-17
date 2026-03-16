@@ -10,6 +10,8 @@ interface Props {
   headline: string;
   onDashboard: () => void;
   isPending?: boolean;
+  isVerified?: boolean;
+  onVerifyClick?: () => void;
 }
 
 const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false }: Props) => {
