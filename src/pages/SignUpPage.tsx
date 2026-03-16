@@ -85,7 +85,7 @@ const SignUpPage = () => {
     {
       id: "tenant" as const,
       icon: Home,
-      title: "I'm leaving my place 🗝️",
+      title: "I'm leaving my place",
       description: "I want to sublet my apartment and find a verified guest",
     },
     {
