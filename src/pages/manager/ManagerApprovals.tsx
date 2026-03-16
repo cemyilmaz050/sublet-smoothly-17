@@ -63,7 +63,7 @@ const ManagerApprovals = () => {
       // Notify tenant
       await supabase.from("notifications").insert({
         user_id: listing.tenant_id,
-        title: "Your listing has been approved! 🎉",
+        title: "Your listing has been approved!",
         message: `Your listing at ${listing.address} has been approved and is now live on SubIn!`,
         type: "approval",
         link: `/listings?id=${listing.id}`,
