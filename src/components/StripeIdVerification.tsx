@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useVerificationPolling } from "@/hooks/useVerificationPolling";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail } from "lucide-react";
+import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -177,14 +177,14 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               >
                 <CheckCircle2 className="h-8 w-8 text-emerald" />
               </motion.div>
-              <motion.span
+              <motion.div
                 initial={{ scale: 0, rotate: -20 }}
                 animate={{ scale: 1, rotate: 0 }}
                 transition={{ delay: 0.3, type: "spring" }}
-                className="absolute -right-2 -top-2 text-2xl"
+                className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary/10"
               >
-                🎉
-              </motion.span>
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+              </motion.div>
             </div>
             <div className="text-center">
               <p className="text-base font-bold text-foreground">Identity Verified ✓</p>
@@ -237,7 +237,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
                 Verification submitted — we're confirming your identity
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                This usually takes a few minutes. You can continue browsing listings while you wait 🔒
+                This usually takes a few minutes. You can continue browsing listings while you wait.
               </p>
             </div>
 

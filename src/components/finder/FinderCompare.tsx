@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { MapPin, Bed, Bath, CheckCircle2, MessageCircle, CalendarDays } from "lucide-react";
+import { MapPin, Bed, Bath, CheckCircle2, MessageCircle, CalendarDays, Heart, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScoredListing, FinderAnswers } from "./types";
@@ -27,7 +27,7 @@ const FinderCompare = ({ listings, answers, onSelect }: Props) => {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-foreground">
-            You saved {listings.length} places — compare them side by side 🏠
+            You saved {listings.length} places — compare them side by side
           </h1>
           <p className="mt-2 text-muted-foreground">Scroll to compare and pick your favorite</p>
         </motion.div>
@@ -56,12 +56,12 @@ const FinderCompare = ({ listings, answers, onSelect }: Props) => {
                     </Badge>
                     {isBestValue && (
                       <Badge className="bg-emerald/90 text-emerald-foreground font-semibold">
-                        💚 Best Value
+                        <Heart className="mr-1 h-3 w-3" /> Best Value
                       </Badge>
                     )}
                     {isClosest && (
                       <Badge className="bg-primary text-primary-foreground font-semibold">
-                        📍 Closest to You
+                        <Navigation className="mr-1 h-3 w-3" /> Closest to You
                       </Badge>
                     )}
                   </div>
@@ -92,7 +92,7 @@ const FinderCompare = ({ listings, answers, onSelect }: Props) => {
                   </div>
 
                   {listing.distanceLabel && (
-                    <p className="text-sm text-primary font-medium">📍 {listing.distanceLabel}</p>
+                    <p className="text-sm text-primary font-medium flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {listing.distanceLabel}</p>
                   )}
 
                   {/* Amenities checklist */}

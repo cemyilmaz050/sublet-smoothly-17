@@ -156,7 +156,7 @@ serve(async (req) => {
     // Notify tenant
     await supabaseClient.from("notifications").insert({
       user_id: listing.tenant_id,
-      title: "New Booking Confirmed! 🎉",
+      title: "New Booking Confirmed!",
       message: `${subtenantName} has secured "${listing.headline || listing.address || "your listing"}" with a deposit of $${depositAmount.toLocaleString()}. Please sign the sublet agreement.`,
       type: "booking",
       link: "/dashboard/tenant",
@@ -165,7 +165,7 @@ serve(async (req) => {
     // Notify subtenant
     await supabaseClient.from("notifications").insert({
       user_id: user.id,
-      title: "Booking Confirmed! 🎉",
+      title: "Booking Confirmed!",
       message: `You've secured "${listing.headline || listing.address || "this apartment"}". Please sign the sublet agreement to finalize.`,
       type: "booking",
       link: "/dashboard/subtenant",

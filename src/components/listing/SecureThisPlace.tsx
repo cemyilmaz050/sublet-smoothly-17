@@ -184,7 +184,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
 
     setSubmittingSchedule(false);
     setScheduleSent(true);
-    toast.success("Meeting request sent! 🎉");
+    toast.success("Meeting request sent!");
   };
 
   const handleSecureNow = async () => {
@@ -241,7 +241,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
           <p className="text-2xl font-bold text-primary">${monthlyRent.toLocaleString()}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
           <p className="text-xs text-muted-foreground">~${weeklyRent.toLocaleString()}/week</p>
           {monthlyRent < 2000 && (
-            <p className="mt-1 text-xs text-emerald font-medium">Cheaper than a Boston hotel for the summer 🎉</p>
+            <p className="mt-1 text-xs text-emerald font-medium">Cheaper than a Boston hotel for the summer</p>
           )}
         </div>
       )}
@@ -257,7 +257,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       <Button className="w-full justify-start gap-2 h-12 text-sm" onClick={handlePaymentClick}>
         <Lock className="h-4 w-4 shrink-0" />
         <div className="text-left min-w-0">
-          <span className="font-semibold">Lock it in 🔒</span>
+          <span className="font-semibold">Lock it in</span>
           <span className="block text-xs text-primary-foreground/80 truncate">Pay deposit to reserve this place</span>
         </div>
       </Button>
@@ -281,7 +281,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
           {scheduleSent ? (
             <div className="flex flex-col items-center gap-3 py-6">
               <CheckCircle2 className="h-12 w-12 text-emerald" />
-              <p className="text-sm font-semibold text-foreground">Request sent! 🎉</p>
+              <p className="text-sm font-semibold text-foreground">Request sent!</p>
               <p className="text-xs text-muted-foreground text-center">{tenantName} will get back to you soon.</p>
               <Button variant="outline" className="h-12 min-w-[120px]" onClick={() => setShowScheduleModal(false)}>Done</Button>
             </div>
@@ -327,7 +327,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
         <DialogContent className="sm:max-w-sm max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Lock it in 🔒</DialogTitle>
+            <DialogTitle>Lock it in</DialogTitle>
             <DialogDescription>Reserve {listing.headline || "this place"} with a deposit.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

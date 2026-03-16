@@ -63,7 +63,7 @@ const ManagerApprovals = () => {
       // Notify tenant
       await supabase.from("notifications").insert({
         user_id: listing.tenant_id,
-        title: "Your listing has been approved! 🎉",
+        title: "Your listing has been approved!",
         message: `Your listing at ${listing.address} has been approved and is now live on SubIn!`,
         type: "approval",
         link: `/listings?id=${listing.id}`,
@@ -73,7 +73,7 @@ const ManagerApprovals = () => {
       supabase.functions.invoke("send-notification-email", {
         body: {
           to_user_id: listing.tenant_id,
-          subject: "Your listing has been approved and is now live on SubIn 🎉",
+          subject: "Your listing has been approved and is now live on SubIn",
           type: "listing_approved",
           data: {
             listing_title: listing.headline,
@@ -86,7 +86,7 @@ const ManagerApprovals = () => {
       queryClient.invalidateQueries({ queryKey: ["manager-pending-approvals"] });
       queryClient.invalidateQueries({ queryKey: ["manager-home-stats"] });
       queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
-      toast.success("Listing approved and now live on SubIn ✓");
+      toast.success("Listing approved and now live on SubIn");
     } catch (err: any) {
       toast.error(err.message || "Failed to approve listing");
     } finally {
@@ -159,7 +159,7 @@ const ManagerApprovals = () => {
       ) : pendingListings.length === 0 ? (
         <EmptyState
           icon={CheckCircle2}
-          title="All caught up! 🎉"
+          title="All caught up!"
           description="No listings waiting for approval right now."
         />
       ) : (

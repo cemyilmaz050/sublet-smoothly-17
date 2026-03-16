@@ -64,7 +64,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "booking_confirmed":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">Booking Confirmed! 🎉</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Booking Confirmed!</h1>
         <p style="${mutedStyle}">${data.message}</p>
         <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
           <p style="margin: 0 0 4px;"><strong>Property:</strong> ${data.listing_title}</p>
@@ -76,7 +76,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "new_message":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">New Message 💬</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">New Message</h1>
         <p style="${mutedStyle}"><strong>${data.sender_name}</strong> sent you a message${data.listing_title ? ` about "${data.listing_title}"` : ""}:</p>
         <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
           <p style="margin: 0; ${mutedStyle}">"${data.preview}"</p>
@@ -86,14 +86,14 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "listing_live":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">Your Listing is Live! 🏠</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Your Listing is Live!</h1>
         <p style="${mutedStyle}">Your listing "${data.listing_title}" is now live on SubIn and visible to potential sub-lessees.</p>
         <a href="${data.action_url}" style="${btnStyle}">View Your Listing</a>
         ${footer}</div>`;
 
     case "application_received":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">New Application 📋</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">New Application</h1>
         <p style="${mutedStyle}">${data.applicant_name} has applied for your listing "${data.listing_title}".</p>
         ${data.message ? `<div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;"><p style="margin: 0; ${mutedStyle}">"${data.message}"</p></div>` : ""}
         <a href="${data.action_url}" style="${btnStyle}">Review Application</a>
@@ -101,7 +101,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "knock":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">Someone knocked on your listing 🚪</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Someone knocked on your listing</h1>
         <p style="${mutedStyle}"><strong>${data.knocker_name}</strong> is interested in your place at <strong>${data.listing_address || data.listing_title}</strong>. Send them a message to start the conversation.</p>
         <div style="margin: 24px 0; display: flex; gap: 12px;">
           <a href="${data.message_url}" style="${btnStyle}">Message Them</a>

@@ -534,7 +534,7 @@ const ListingsPage = () => {
                         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" />{listing.address || "Unknown"}</p>
                         <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{formatDates(listing.available_from, listing.available_until)}</p>
                         {listing.monthly_rent && listing.monthly_rent < 2000 && (
-                          <p className="mt-1 text-[11px] text-emerald font-medium">Cheaper than a Boston hotel 🎉</p>
+                          <p className="mt-1 text-[11px] text-emerald font-medium">Cheaper than a Boston hotel</p>
                         )}
                         {(listing.avg_rating ?? 0) > 0 && (
                           <div className="mt-1.5">
@@ -568,7 +568,7 @@ const ListingsPage = () => {
               ))}
               {filtered.length === 0 && !loading && (
                 <div className="flex flex-col items-center py-16 text-center">
-                  <p className="text-4xl mb-3">🏙️</p>
+                  <Building2 className="h-10 w-10 text-muted-foreground mb-3" />
                   <p className="text-base font-semibold text-foreground">No places here yet</p>
                   <p className="mt-1 text-sm text-muted-foreground max-w-xs">Boston is filling up fast though. Check back soon or broaden your search!</p>
                 </div>
@@ -651,7 +651,7 @@ const ListingsPage = () => {
                   ))}
                 </div>
                 {selectedListing.monthly_rent && selectedListing.monthly_rent < 2000 && (
-                  <p className="text-sm text-emerald font-medium text-center">Cheaper than a Boston hotel for the summer 🎉</p>
+                  <p className="text-sm text-emerald font-medium text-center">Cheaper than a Boston hotel for the summer</p>
                 )}
                 <div className="space-y-2">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4" />{selectedListing.address || "Unknown"}</p>

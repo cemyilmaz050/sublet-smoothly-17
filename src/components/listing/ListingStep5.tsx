@@ -33,7 +33,7 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-foreground">Review & publish ✨</h2>
+      <h2 className="text-xl font-semibold text-foreground">Review & publish</h2>
 
       <Section title="About this place" step={0} onEdit={onGoToStep}>
         <p><strong>Address:</strong> {data.address} {data.unit_number && `(Unit ${data.unit_number})`}</p>
@@ -73,7 +73,7 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
       <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4">
         <Checkbox checked={confirmed} onCheckedChange={(v) => onConfirmChange(!!v)} className="mt-0.5" />
         <span className="text-sm text-foreground">
-          I confirm everything looks good and I have approval to sublet this place. Let's go! 🚀
+          I confirm everything looks good and I have approval to sublet this place. Let's go!
         </span>
       </label>
     </div>

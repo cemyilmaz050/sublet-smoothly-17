@@ -63,7 +63,7 @@ const FinderAction = ({ listing, answers }: Props) => {
 
         {/* Action header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground">Great choice — here's how to make it yours ✨</h1>
+          <h1 className="text-3xl font-bold text-foreground">Great choice — here's how to make it yours</h1>
         </div>
 
         {/* Action buttons */}
@@ -79,7 +79,7 @@ const FinderAction = ({ listing, answers }: Props) => {
                 <MessageCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">💬 Message the host</h3>
+                <h3 className="text-lg font-bold text-foreground">Message the host</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Introduce yourself and ask any questions before committing
                 </p>
@@ -116,7 +116,7 @@ const FinderAction = ({ listing, answers }: Props) => {
         >
           <div className="flex items-center justify-center gap-2 text-sm font-medium text-foreground">
             <Flame className="h-4 w-4 text-coral" />
-            Most sublets on SubIn get booked within 3 days of the first message — don't wait too long 🔥
+            Most sublets on SubIn get booked within 3 days of the first message — don't wait too long
           </div>
         </motion.div>
 

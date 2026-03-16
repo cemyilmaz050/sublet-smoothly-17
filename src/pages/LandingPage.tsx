@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Users, FileCheck, ArrowRight, Upload, CheckCircle2, Home, Star, Sparkles } from "lucide-react";
+import { ShieldCheck, Users, FileCheck, ArrowRight, Upload, CheckCircle2, Home, Star, Sparkles, GraduationCap } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import heroImage from "@/assets/hero-apartment.jpg";
 import { useAuth } from "@/hooks/useAuth";
@@ -62,12 +62,12 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm">
-              🎓 Trusted by students across Boston
+            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm inline-flex items-center gap-1.5">
+              <GraduationCap className="h-3.5 w-3.5" /> Trusted by students across Boston
             </Badge>
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Summer in Boston{" "}
-              <span className="text-primary">sorted 🏠</span>
+              <span className="text-primary">sorted</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
               Find a place from another student — short term, verified, and stress free. No brokers, no BS.
@@ -89,13 +89,13 @@ const LandingPage = () => {
             <div className="mt-8 flex flex-wrap gap-4">
               <Link to="/signup?role=tenant">
                 <Button variant="hero" size="xl">
-                  I'm leaving my place 🗝️
+                  I'm leaving my place
                   <ArrowRight className="ml-1 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/signup?role=subtenant">
                 <Button variant="heroOutline" size="xl">
-                  I need a place 🏠
+                  I need a place
                 </Button>
               </Link>
             </div>
@@ -142,7 +142,7 @@ const LandingPage = () => {
                 viewport={{ once: true }}
                 className="flex items-center gap-2 rounded-full border bg-card px-4 py-2 shadow-sm"
               >
-                <span className="text-lg">🎓</span>
+                <GraduationCap className="h-5 w-5 text-primary" />
                 <span className="text-sm font-semibold text-foreground">{uni}</span>
               </motion.div>
             ))}
@@ -159,7 +159,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center"
           >
-            <h2 className="text-3xl font-bold text-foreground">How it works ✨</h2>
+            <h2 className="text-3xl font-bold text-foreground">How it works</h2>
             <p className="mt-3 text-muted-foreground">Three simple steps — takes about 3 minutes</p>
           </motion.div>
 
@@ -183,7 +183,7 @@ const LandingPage = () => {
                 step: "03",
                 icon: Home,
                 title: "Match & move in",
-                description: "Find a verified guest, sign digitally, and hand over the keys. Easy as that 🤝",
+                description: "Find a verified guest, sign digitally, and hand over the keys. Easy as that.",
                 color: "bg-emerald/10 text-emerald",
               },
             ].map((item, index) => (
@@ -257,7 +257,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl font-bold text-foreground">Sublet Stories 💬</h2>
+            <h2 className="text-3xl font-bold text-foreground">Sublet Stories</h2>
             <p className="mt-3 text-muted-foreground">Real students. Real places. Real easy.</p>
           </motion.div>
 
@@ -295,7 +295,7 @@ const LandingPage = () => {
       {/* CTA */}
       <section className="border-t bg-card py-20">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold text-foreground">Ready to find your summer spot? 🌞</h2>
+          <h2 className="text-3xl font-bold text-foreground">Ready to find your summer spot?</h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             Join hundreds of students who trust SubIn for safe, verified sublets in Boston.
           </p>
@@ -318,7 +318,7 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <p className="text-2xl font-bold text-foreground">Be the SubIn rep at your university 🎓</p>
+            <p className="text-2xl font-bold text-foreground">Be the SubIn rep at your university</p>
             <p className="mt-2 text-muted-foreground">
               Earn $50 for every successful sublet you refer. Apply to become a campus ambassador.
             </p>

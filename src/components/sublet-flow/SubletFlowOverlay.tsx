@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin } from "lucide-react";
+import { ArrowLeft, X, Building2, Key, Home, Building, Landmark, Hotel, Lock, BedDouble, Check, CheckCircle, Loader2, Minus, Plus, MapPin, Wifi, Sofa, Snowflake, Flame, Car, PawPrint, WashingMachine, Tv, CookingPot, Dumbbell, ArrowUpDown, Accessibility, icons } from "lucide-react";
 import TenantIdVerification from "@/components/TenantIdVerification";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -230,7 +230,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       const { error } = await supabase.from("listings").insert(payload);
       if (error) throw error;
 
-      setSuccessMessage("Your property is live! 🎉");
+      setSuccessMessage("Your property is live!");
       setShowSuccess(true);
       fireConfetti();
     } catch (err: any) {
@@ -288,8 +288,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
               data.path === card.value ? "border-primary bg-accent shadow-sm" : "border-border hover:border-primary/40 hover:bg-accent/50"
             }`}
           >
-            <div className={`flex h-14 w-14 items-center justify-center rounded-full text-2xl ${data.path === card.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-              {card.value === "management" ? "🏢" : "🔑"}
+            <div className={`flex h-14 w-14 items-center justify-center rounded-full ${data.path === card.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              {card.icon}
             </div>
             <p className="text-base font-semibold text-foreground">{card.title}</p>
             <p className="text-xs text-muted-foreground">{card.subtitle}</p>
@@ -469,10 +469,10 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <p className="text-sm text-muted-foreground">Choose the option that best describes your place</p>
       <div className="grid grid-cols-2 gap-4">
         {[
-          { value: "house", emoji: "🏠", label: "House" },
-          { value: "apartment", emoji: "🏢", label: "Apartment" },
-          { value: "condo", emoji: "🏙️", label: "Condo" },
-          { value: "studio", emoji: "🏡", label: "Studio" },
+          { value: "house", icon: <Home className="h-6 w-6" />, label: "House" },
+          { value: "apartment", icon: <Building className="h-6 w-6" />, label: "Apartment" },
+          { value: "condo", icon: <Landmark className="h-6 w-6" />, label: "Condo" },
+          { value: "studio", icon: <Hotel className="h-6 w-6" />, label: "Studio" },
         ].map((opt) => (
           <button
             key={opt.value}
@@ -481,7 +481,9 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
               data.propertyType === opt.value ? "border-primary bg-accent" : "border-border hover:border-primary/40"
             }`}
           >
-            <span className="text-3xl">{opt.emoji}</span>
+            <div className={`flex h-12 w-12 items-center justify-center rounded-full ${data.propertyType === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+              {opt.icon}
+            </div>
             <span className="text-sm font-semibold text-foreground">{opt.label}</span>
             {data.propertyType === opt.value && <Check className="h-4 w-4 text-primary" />}
           </button>
@@ -611,6 +613,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <div className="flex flex-wrap gap-2">
         {AMENITIES_OPTIONS.map((a) => {
           const selected = data.amenities.includes(a.label);
+          const IconComp = (icons as any)[a.icon];
           return (
             <button
               key={a.label}
@@ -619,7 +622,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                 selected ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-accent"
               }`}
             >
-              <span>{a.icon}</span> {a.label}
+              {IconComp && <IconComp className="h-4 w-4" />} {a.label}
             </button>
           );
         })}
@@ -765,8 +768,9 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         </div>
 
         {!allReady && (
-          <div className="rounded-lg bg-amber/10 px-4 py-3 text-sm text-amber">
-            ⚠️ Some required fields are incomplete. Please review the sections above.
+          <div className="flex items-center gap-2 rounded-lg bg-amber/10 px-4 py-3 text-sm text-amber">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Some required fields are incomplete. Please review the sections above.
           </div>
         )}
 

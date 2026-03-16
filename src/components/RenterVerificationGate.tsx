@@ -206,7 +206,7 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified, action }: Rent
             One quick step
           </DialogTitle>
           <DialogDescription className="text-center text-sm">
-            One quick step before you can {actionText} — verify your ID to keep SubIn safe for everyone. Takes about 30 seconds 🔒
+            One quick step before you can {actionText} — verify your ID to keep SubIn safe for everyone. Takes about 30 seconds.
           </DialogDescription>
         </DialogHeader>
 
@@ -256,7 +256,7 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified, action }: Rent
 
             <div className="rounded-lg bg-accent/50 p-3 text-center">
               <p className="text-xs text-muted-foreground">
-                ⏱️ This takes under 3 minutes • You only do this once on SubIn
+                This takes under 3 minutes · You only do this once on SubIn
               </p>
             </div>
           </div>

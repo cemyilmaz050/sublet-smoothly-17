@@ -85,13 +85,13 @@ const SignUpPage = () => {
     {
       id: "tenant" as const,
       icon: Home,
-      title: "I'm leaving my place 🗝️",
+      title: "I'm leaving my place",
       description: "I want to sublet my apartment and find a verified guest",
     },
     {
       id: "subtenant" as const,
       icon: Search,
-      title: "I need a place 🏠",
+      title: "I need a place",
       description: "I want to browse sublets and find the perfect summer spot",
     },
   ];
@@ -252,7 +252,7 @@ const SignUpPage = () => {
             {isEduEmail && (
               <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
                 <GraduationCap className="h-4 w-4" />
-                Nice — you'll get a Student Verified badge 🎓
+                Nice — you'll get a Student Verified badge
               </div>
             )}
             <p className="text-xs text-muted-foreground">Don't see it? Check your <strong>spam or junk folder</strong>.</p>
@@ -280,7 +280,7 @@ const SignUpPage = () => {
               {step === 1 ? "What brings you to SubIn? 👋" : "Let's get you set up"}
             </h1>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-              {step === 1 ? "Pick one — you can always switch later" : "Takes under 30 seconds ⚡"}
+              {step === 1 ? "Pick one — you can always switch later" : "Takes under 30 seconds"}
             </p>
           </div>
 
@@ -357,7 +357,7 @@ const SignUpPage = () => {
                   {isEduEmail && (
                     <p className="mt-1.5 flex items-center gap-1.5 text-sm text-primary font-medium">
                       <GraduationCap className="h-4 w-4" />
-                      Nice — you get a Student Verified badge 🎓
+                      Nice — you get a Student Verified badge
                     </p>
                   )}
                 </div>

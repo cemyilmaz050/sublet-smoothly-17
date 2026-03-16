@@ -14,7 +14,7 @@ interface Props {
 const ListingStep1 = ({ data, onChange, errors }: Props) => {
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-foreground">About your place 🏠</h2>
+      <h2 className="text-xl font-semibold text-foreground">About your place</h2>
 
       {/* Management question */}
       <div>
@@ -49,12 +49,12 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
         </div>
         {data.management_type === "bbg" && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Your listing will be reviewed by Boston Brokerage Group before going live — usually within 24 hours ⏱️
+            Your listing will be reviewed by Boston Brokerage Group before going live — usually within 24 hours
           </p>
         )}
         {data.management_type === "self" && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Your listing will go live instantly when you publish — no approval needed! 🚀
+            Your listing will go live instantly when you publish — no approval needed!
           </p>
         )}
         {errors.management_type && <p className="mt-1 text-sm text-destructive">{errors.management_type}</p>}

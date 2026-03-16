@@ -1,4 +1,4 @@
-import { CheckCircle2, PartyPopper } from "lucide-react";
+import { CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,19 +32,19 @@ const VerificationSuccessScreen = ({ open, onClose }: VerificationSuccessScreenP
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.3, type: "spring" }}
-              className="absolute -right-2 -top-2"
+              className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary/10"
             >
-              <span className="text-3xl">🎉</span>
+              <Sparkles className="h-4 w-4 text-primary" />
             </motion.div>
           </div>
           <div>
             <h2 className="text-xl font-bold text-foreground">You're fully verified on SubIn!</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              You can now schedule viewings and secure places across the platform. Welcome to the community! 🏠
+              You can now schedule viewings and secure places across the platform. Welcome to the community!
             </p>
           </div>
           <Button onClick={onClose} className="w-full mt-2">
-            Let's go! 🚀
+            Let's go
           </Button>
         </motion.div>
       </DialogContent>

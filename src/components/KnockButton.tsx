@@ -94,7 +94,7 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
 
       await supabase.from("notifications").insert({
         user_id: tenantId,
-        title: "Someone knocked on your listing! 🚪",
+        title: "Someone knocked on your listing!",
         message: `${knockerName} is interested in your place at ${listingAddress || listingHeadline || "your apartment"}`,
         type: "knock", link: "/dashboard/tenant",
       });
@@ -114,7 +114,7 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
         },
       }).catch(() => {});
 
-      toast.success("Knock sent! The host will be notified 🎉");
+      toast.success("Knock sent! The host will be notified.");
     } catch (err) {
       console.error("Knock error:", err);
       toast.error("Couldn't send your knock. Try again!");
@@ -198,7 +198,7 @@ export const KnockActivity = ({ knockCount, className }: { knockCount: number; c
       {knockCount >= 10 && (
         <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-coral to-destructive px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-sm">
           <FlameIcon className="h-3 w-3 animate-flame-flicker" />
-          Hot listing 🔥
+          Hot listing
         </span>
       )}
     </div>
