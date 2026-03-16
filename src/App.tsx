@@ -32,6 +32,7 @@ import AgreementPage from "./pages/AgreementPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import AIFinderPage from "./pages/AIFinderPage";
 
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";
