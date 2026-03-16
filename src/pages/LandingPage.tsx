@@ -95,7 +95,7 @@ const LandingPage = () => {
               </Link>
               <Link to="/signup?role=subtenant">
                 <Button variant="heroOutline" size="xl">
-                  I need a place 🏠
+                  I need a place
                 </Button>
               </Link>
             </div>
