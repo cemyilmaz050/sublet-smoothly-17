@@ -613,6 +613,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <div className="flex flex-wrap gap-2">
         {AMENITIES_OPTIONS.map((a) => {
           const selected = data.amenities.includes(a.label);
+          const IconComp = (icons as any)[a.icon];
           return (
             <button
               key={a.label}
@@ -621,7 +622,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                 selected ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-accent"
               }`}
             >
-              <span>{a.icon}</span> {a.label}
+              {IconComp && <IconComp className="h-4 w-4" />} {a.label}
             </button>
           );
         })}

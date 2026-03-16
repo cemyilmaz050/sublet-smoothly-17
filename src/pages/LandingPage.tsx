@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Users, FileCheck, ArrowRight, Upload, CheckCircle2, Home, Star, Sparkles } from "lucide-react";
+import { ShieldCheck, Users, FileCheck, ArrowRight, Upload, CheckCircle2, Home, Star, Sparkles, GraduationCap } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import heroImage from "@/assets/hero-apartment.jpg";
 import { useAuth } from "@/hooks/useAuth";
