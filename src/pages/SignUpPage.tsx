@@ -288,7 +288,7 @@ const SignUpPage = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg">
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              {step === 1 ? "What brings you to SubIn? 👋" : "Let's get you set up"}
+              {step === 1 ? "What brings you to SubIn?" : "Let's get you set up"}
             </h1>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               {step === 1 ? "Pick one — you can always switch later" : "Takes under 30 seconds"}
