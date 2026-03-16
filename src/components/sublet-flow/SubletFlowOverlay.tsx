@@ -353,55 +353,51 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <Input
           value={mgmtSearch}
           onChange={(e) => setMgmtSearch(e.target.value)}
-          placeholder="Search for your management company..."
+          placeholder="Search Boston Brokerage Group..."
           className="pr-10"
         />
-        {mgmtResults.length > 0 && (
-          <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated max-h-64 overflow-y-auto">
-            {!mgmtSearch.trim() && (
-              <div className="px-4 pt-3 pb-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested — Our verified partner</span>
-              </div>
-            )}
-            {mgmtResults.map((mgr: any) => (
-              <button
-                key={mgr.id}
-                onClick={() => {
-                  update({
-                    managementGroupId: mgr.id,
-                    managementGroupName: mgr.name,
-                    managementGroupLogo: mgr.logo_url || "",
-                  });
-                  setMgmtSearch("");
-                  revealNext();
-                }}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  {mgr.logo_url ? <img src={mgr.logo_url} className="h-8 w-8 rounded" alt="" /> : <span className="text-xs font-bold text-primary">{mgr.name?.split(" ").map((w: string) => w[0]).join("").slice(0, 3).toUpperCase()}</span>}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-semibold text-foreground">{mgr.name}</p>
-                    {mgr.verified && <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600"><CheckCircle className="h-3 w-3" />Verified Partner</span>}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Official SubIn partner — {mgr.city || "Boston"}{mgr.state ? `, ${mgr.state}` : ", MA"}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-        {mgmtSearch.trim() && mgmtResults.length === 0 && (
-          <div className="mt-3 w-full rounded-xl border bg-popover p-4 shadow-elevated">
-            <p className="text-sm text-muted-foreground">No results found.</p>
+
+        <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated">
+          {!mgmtSearch.trim() && (
+            <div className="px-4 pt-3 pb-1">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested — Our verified partner</span>
+            </div>
+          )}
+
+          {mgmtResults.map((mgr: any) => (
             <button
-              onClick={() => { update({ path: "own" }); setActiveStep(1); }}
-              className="mt-2 text-sm font-medium text-primary hover:underline"
+              key={mgr.id}
+              onClick={() => {
+                update({
+                  managementGroupId: mgr.id,
+                  managementGroupName: mgr.name,
+                  managementGroupLogo: mgr.logo_url || "",
+                });
+                setMgmtSearch("");
+                revealNext();
+              }}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors"
             >
-              My management group is not on the platform →
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                {mgr.logo_url ? <img src={mgr.logo_url} className="h-8 w-8 rounded" alt="" /> : <span className="text-xs font-bold text-primary">BBG</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-semibold text-foreground">Boston Brokerage Group</p>
+                  <Badge variant="approved">Verified Partner</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">Official SubIn partner — Boston MA</p>
+              </div>
+              <Check className="h-4 w-4 text-primary" />
             </button>
-          </div>
-        )}
+          ))}
+
+          {showOnlyBbgNote && (
+            <div className="border-t px-4 py-2">
+              <p className="text-xs text-muted-foreground">Only Boston Brokerage Group is currently available on SubIn</p>
+            </div>
+          )}
+        </div>
       </div>
       {data.managementGroupId && (
         <div className="flex items-center gap-3 rounded-xl border-2 border-primary bg-primary/5 p-4">
