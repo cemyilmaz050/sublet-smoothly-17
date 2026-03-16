@@ -558,7 +558,7 @@ const ListingsPage = () => {
                 </div>
                 {selectedListing.description && (
                   <div>
-                    <h4 className="mb-1 text-sm font-semibold text-foreground">About this listing</h4>
+                    <h4 className="mb-1 text-sm font-semibold text-foreground">About this place</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">{selectedListing.description}</p>
                   </div>
                 )}
