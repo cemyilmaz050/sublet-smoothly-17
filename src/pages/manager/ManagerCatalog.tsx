@@ -135,6 +135,10 @@ const ManagerCatalog = () => {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl">
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-2">
+        <p className="text-sm text-foreground font-medium">📋 Property Catalog — these properties are available for subletters to choose from. They will only appear publicly on SubIn when a subletter creates a listing for them.</p>
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
          <h1 className="text-2xl font-bold text-foreground">Property Catalog</h1>
