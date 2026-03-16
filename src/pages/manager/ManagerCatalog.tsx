@@ -3,19 +3,50 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Building2, MapPin, Home, Pencil, Plus, Image as ImageIcon, CheckCircle2, Clock, AlertCircle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Building2, MapPin, Home, Pencil, Plus, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, Trash2, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import EmptyState from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
 
 const ManagerCatalog = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [deleting, setDeleting] = useState<string | null>(null);
+
+  const handleDelete = async (prop: any) => {
+    setDeleting(prop.id);
+    try {
+      // Delete associated catalog units first
+      await supabase.from("catalog_units").delete().eq("property_id", prop.id);
+
+      // Delete associated listings (soft-delete via status change)
+      for (const listing of prop.listings) {
+        await supabase.from("listings").update({ status: "deleted" as any }).eq("id", listing.id);
+      }
+
+      // Delete the catalog property
+      await supabase.from("catalog_properties").delete().eq("id", prop.id);
+
+      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
+      toast.success(`"${prop.address}" removed from catalog`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete property");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["manager-catalog", user?.id],
@@ -133,6 +164,32 @@ const ManagerCatalog = () => {
                       View Live
                     </Button>
                   )}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 px-2">
+                        {deleting === prop.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently remove <strong>{prop.address}</strong> from the catalog
+                          {prop.totalListings > 0 && ` and archive ${prop.totalListings} associated listing${prop.totalListings > 1 ? "s" : ""}`}.
+                          This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          onClick={() => handleDelete(prop)}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>
