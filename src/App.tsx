@@ -129,6 +129,7 @@ const App = () => (
               <PersistentFooter />
             </div>
           </AuthModalProvider>
+          </VerificationPollingProvider>
         </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>

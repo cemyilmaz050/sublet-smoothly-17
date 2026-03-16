@@ -228,17 +228,16 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
         <CardContent className="space-y-4 p-4">
           <div className="flex flex-col items-center gap-3 py-4">
             <div className="relative flex h-14 w-14 items-center justify-center">
-              {/* Animated spinner ring */}
               <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
               <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin" />
               <ShieldCheck className="h-6 w-6 text-primary" />
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-foreground">
-                Verification submitted
+                Verification submitted — we're confirming your identity
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                We are confirming your identity. This usually takes under 30 seconds.
+                This usually takes a few minutes. You can continue browsing listings while you wait 🔒
               </p>
             </div>
 
@@ -253,6 +252,16 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
                 />
               ))}
             </div>
+
+            {/* Continue Browsing button */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleContinueBrowsing}
+              className="mt-2"
+            >
+              Continue Browsing <ArrowRight className="ml-1 h-3.5 w-3.5" />
+            </Button>
           </div>
 
           <AnimatePresence>
@@ -261,13 +270,13 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="rounded-lg bg-amber/10 p-3 text-center"
+                className="rounded-lg bg-muted p-3 text-center"
               >
-                <p className="text-xs text-amber-800 dark:text-amber-200">
+                <p className="text-xs text-muted-foreground">
                   This is taking longer than usual —{" "}
                   <button
                     onClick={handleManualCheck}
-                    className="font-semibold underline hover:no-underline"
+                    className="font-semibold underline hover:no-underline text-foreground"
                   >
                     click here to check your verification status
                   </button>
@@ -283,6 +292,18 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Manual fallback after 10 minutes */}
+          {showManualFallback && (
+            <div className="rounded-lg bg-muted p-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <Mail className="h-3.5 w-3.5 shrink-0" />
+              <span>
+                Taking longer than expected? Email your ID to{" "}
+                <a href="mailto:verify@subinapp.com" className="font-semibold underline text-foreground">verify@subinapp.com</a>
+                {" "}and our team will verify you within 1 hour.
+              </span>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
