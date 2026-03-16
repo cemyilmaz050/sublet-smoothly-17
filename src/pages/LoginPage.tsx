@@ -60,7 +60,12 @@ const LoginPage = () => {
         return;
       }
       if (data.session) {
-        navigate("/listings", { replace: true });
+        // If BBG staff email, go to manager portal
+        if (data.session.user.email?.toLowerCase().endsWith("@bostonbrokerage.com")) {
+          navigate("/portal-mgmt-bbg", { replace: true });
+        } else {
+          navigate("/listings", { replace: true });
+        }
       }
     } catch (err: any) {
       setLoginError(err.message || "An unexpected error occurred. Please try again.");
@@ -264,6 +269,19 @@ const LoginPage = () => {
               Don't have an account?{" "}
               <Link to="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
             </p>
+          </div>
+
+          {/* Property Manager Login Info */}
+          <div className="mt-6 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/30 p-4">
+            <div className="flex items-start gap-3">
+              <Building2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Are you a Property Manager?</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Sign in with your official Boston Brokerage Group email to access the staff portal.
+                </p>
+              </div>
+            </div>
           </div>
 
         </motion.div>
