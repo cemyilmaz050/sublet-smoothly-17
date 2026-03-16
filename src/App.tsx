@@ -5,10 +5,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AuthModalProvider } from "@/hooks/useAuthModal";
+import { VerificationPollingProvider } from "@/hooks/useVerificationPolling";
 import AuthModal from "@/components/AuthModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
+import VerificationPendingBanner from "@/components/VerificationPendingBanner";
 import Footer from "@/components/Footer";
 import LandingPage from "./pages/LandingPage";
 import ListingsPage from "./pages/ListingsPage";
@@ -69,10 +71,12 @@ const App = () => (
       <BrowserRouter>
         <ErrorBoundary>
         <AuthProvider>
+          <VerificationPollingProvider>
           <AuthModalProvider>
             <AuthModal />
             <div className="flex min-h-screen flex-col">
               <PersistentNavbar />
+              <VerificationPendingBanner />
               <div className="flex-1">
                 <Routes>
                   {/* Public routes */}
@@ -125,6 +129,7 @@ const App = () => (
               <PersistentFooter />
             </div>
           </AuthModalProvider>
+          </VerificationPollingProvider>
         </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>

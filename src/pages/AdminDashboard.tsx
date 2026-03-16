@@ -4,8 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
+import { toast } from "sonner";
 
 
 // Hardcoded founder user IDs — only these can access
@@ -281,7 +284,69 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+        {/* Manual Verification Tool */}
+        <Card className="shadow-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ShieldCheck className="h-4 w-4 text-emerald" />
+              Manual Verification (Test Mode)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground mb-3">
+              Manually mark a user as ID-verified for demos or when Stripe is processing slowly.
+            </p>
+            <ManualVerifyTool />
+          </CardContent>
+        </Card>
       </main>
+    </div>
+  );
+};
+
+const ManualVerifyTool = () => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleVerify = async () => {
+    if (!email.trim()) return;
+    setLoading(true);
+    try {
+      // Look up user by email in profiles_public + match
+      const { data: profiles } = await supabase
+        .from("profiles" as any)
+        .select("id, first_name, last_name, id_verified")
+        .limit(100) as any;
+
+      // We can't search by email directly since profiles doesn't have email
+      // Instead use the admin edge function approach
+      const { data, error } = await supabase.functions.invoke("admin-verify-user", {
+        body: { email: email.trim() },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success(`User ${email} has been marked as verified ✓`);
+      setEmail("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to verify user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex gap-2">
+      <Input
+        placeholder="User email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="text-sm"
+      />
+      <Button size="sm" onClick={handleVerify} disabled={loading || !email.trim()}>
+        {loading ? "Verifying..." : "Verify User"}
+      </Button>
     </div>
   );
 };
