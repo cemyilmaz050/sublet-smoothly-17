@@ -130,7 +130,7 @@ const SignUpPage = () => {
     }
 
     if (!selectedRole) {
-      setSubmitError("Pick whether you're leaving or looking for a place first!");
+      setSubmitError("Pick whether you're leaving, looking, or managing first!");
       setStep(1);
       return;
     }
@@ -140,13 +140,19 @@ const SignUpPage = () => {
       return;
     }
 
+    // If manager role selected, check email domain
+    const isBbgEmail = email.trim().toLowerCase().endsWith("@realestateboston.com");
+    if (selectedRole === "manager" && !isBbgEmail) {
+      setSubmitError(null);
+      setNonBbgManagerBlock(true);
+      return;
+    }
+
     setLoading(true);
     setSubmitError(null);
 
-    // Auto-assign manager role for BBG staff emails
-    const effectiveRole = email.trim().toLowerCase().endsWith("@realestateboston.com")
-      ? "manager"
-      : selectedRole;
+    // Use manager role for BBG emails regardless of selection, or if they picked manager
+    const effectiveRole = isBbgEmail ? "manager" : selectedRole;
 
     try {
       const { data, error } = await supabase.auth.signUp({
