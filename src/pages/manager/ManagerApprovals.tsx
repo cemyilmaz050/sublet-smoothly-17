@@ -73,7 +73,7 @@ const ManagerApprovals = () => {
       supabase.functions.invoke("send-notification-email", {
         body: {
           to_user_id: listing.tenant_id,
-          subject: "Your listing has been approved and is now live on SubIn 🎉",
+          subject: "Your listing has been approved and is now live on SubIn",
           type: "listing_approved",
           data: {
             listing_title: listing.headline,
