@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft, Save, Loader2, X, Plus, Upload, MapPin, Rocket, Link as LinkIcon,
+  ArrowLeft, Save, Loader2, X, Plus, Upload, MapPin, Link as LinkIcon,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
-const BBG_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
+
 
 const BUILDING_AMENITIES = [
   "Elevator", "Laundry", "Gym", "Parking", "Rooftop", "Storage",
@@ -52,9 +52,9 @@ const ManagerCatalogEditor = () => {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [publishing, setPublishing] = useState(false);
+  
   const [property, setProperty] = useState<any>(null);
-  const [existingListingId, setExistingListingId] = useState<string | null>(null);
+  
   const [existingUnitId, setExistingUnitId] = useState<string | null>(null);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [importUrl, setImportUrl] = useState("");
@@ -117,22 +117,13 @@ const ManagerCatalogEditor = () => {
       const unit = units?.[0];
       if (unit) setExistingUnitId(unit.id);
 
-      // Find associated listing
-      const { data: listings } = await supabase
-        .from("listings")
-        .select("id, headline, status")
-        .eq("management_group_id", BBG_PM_ID)
-        .eq("address", prop.address)
-        .limit(1);
-
-      if (listings?.[0]) setExistingListingId(listings[0].id);
 
       setProperty(prop);
       setForm({
         address: prop.address || "",
         name: prop.name || "",
         property_type: prop.property_type || "apartment",
-        headline: listings?.[0]?.headline || unit?.description?.substring(0, 80) || "",
+        headline: unit?.description?.substring(0, 80) || "",
         space_type: (unit as any)?.space_type || "entire_place",
         bedrooms: unit?.bedrooms?.toString() || "",
         bathrooms: unit?.bathrooms?.toString() || "",
@@ -315,55 +306,15 @@ const ManagerCatalogEditor = () => {
     return propId;
   };
 
-  const upsertListing = async (propId: string, status: "draft" | "active") => {
-    const listingPayload: any = {
-      address: form.address.trim(),
-      headline: form.headline.trim() || form.address.trim(),
-      description: form.description || null,
-      property_type: form.property_type as any,
-      bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
-      bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-      sqft: form.sqft ? Number(form.sqft) : null,
-      monthly_rent: form.base_rent ? Number(form.base_rent) : null,
-      security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
-      available_from: form.available_from || null,
-      available_until: form.available_until || null,
-      amenities: form.building_amenities,
-      house_rules: buildHouseRules(),
-      photos: form.photos,
-      space_type: form.space_type,
-      status,
-      management_group_id: BBG_PM_ID,
-      manager_id: user!.id,
-      source: "catalog",
-    };
 
-    if (status === "active") {
-      listingPayload.published_at = new Date().toISOString();
-    }
-
-    if (existingListingId) {
-      const { error } = await supabase.from("listings").update(listingPayload).eq("id", existingListingId);
-      if (error) throw error;
-    } else {
-      // Create new listing - manager is also the tenant for manager-created listings
-      listingPayload.tenant_id = user!.id;
-      const { data: newListing, error } = await supabase.from("listings").insert(listingPayload).select().single();
-      if (error) throw error;
-      if (newListing) setExistingListingId(newListing.id);
-    }
-  };
-
-  const handleSaveDraft = async () => {
+  const handleSaveToCatalog = async () => {
     if (!user) return;
     setSaving(true);
     try {
       const propId = await savePropertyAndUnit();
       if (!propId) { setSaving(false); return; }
-      await upsertListing(propId, "draft");
       queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
-      queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
-      toast.success("Saved as draft");
+      toast.success("Saved to catalog");
       if (isNew) navigate(`/portal-mgmt-bbg/catalog/${propId}`, { replace: true });
     } catch (err: any) {
       console.error("Save error:", err);
@@ -373,26 +324,6 @@ const ManagerCatalogEditor = () => {
     }
   };
 
-  const handleSaveAndPublish = async () => {
-    if (!user) return;
-    if (!form.address.trim()) { toast.error("Address is required"); return; }
-    if (!form.base_rent) { toast.error("Monthly rent is required to publish"); return; }
-    setPublishing(true);
-    try {
-      const propId = await savePropertyAndUnit();
-      if (!propId) { setPublishing(false); return; }
-      await upsertListing(propId, "active");
-      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
-      queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
-      toast.success("Your listing is now live on SubIn — everyone can see it!");
-      if (isNew) navigate(`/portal-mgmt-bbg/catalog/${propId}`, { replace: true });
-    } catch (err: any) {
-      console.error("Publish error:", err);
-      toast.error(err.message || "Failed to publish");
-    } finally {
-      setPublishing(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -413,8 +344,8 @@ const ManagerCatalogEditor = () => {
           <h1 className="text-2xl font-bold text-foreground">
             {isNew ? "Add New Property" : (property?.name || property?.address || "Edit Property")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" /> {isNew ? "Create a new listing" : "Property Catalog Editor"}
+           <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1">
+            <MapPin className="h-3.5 w-3.5" /> {isNew ? "Add to catalog — subletters will choose from this" : "Property Catalog Editor"}
           </p>
         </div>
       </div>
@@ -730,35 +661,23 @@ const ManagerCatalogEditor = () => {
         </CardContent>
       </Card>
 
-      {/* Save Buttons */}
+      {/* Save Button */}
       <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm py-4 border-t -mx-6 px-6 lg:-mx-8 lg:px-8">
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={handleSaveDraft}
-            disabled={saving || publishing}
-            size="lg"
-            className="flex-1"
-          >
-            {saving ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
-            ) : (
-              <><Save className="mr-2 h-4 w-4" /> Save as Draft</>
-            )}
-          </Button>
-          <Button
-            onClick={handleSaveAndPublish}
-            disabled={saving || publishing}
-            size="lg"
-            className="flex-1"
-          >
-            {publishing ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</>
-            ) : (
-              <><Rocket className="mr-2 h-4 w-4" /> Save & Publish</>
-            )}
-          </Button>
-        </div>
+        <Button
+          onClick={handleSaveToCatalog}
+          disabled={saving}
+          size="lg"
+          className="w-full"
+        >
+          {saving ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+          ) : (
+            <><Save className="mr-2 h-4 w-4" /> Save to Catalog</>
+          )}
+        </Button>
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          This saves to your internal catalog only. Listings go public when a subletter creates one and you approve it.
+        </p>
       </div>
     </div>
   );

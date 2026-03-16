@@ -209,7 +209,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         link: "/portal-mgmt-bbg/listings",
       }).then(() => {});
 
-      setSuccessMessage(`Your sublet request has been sent to ${data.managementGroupName}!`);
+      setSuccessMessage(`Your listing has been submitted to Boston Brokerage Group for approval — you will be notified by email once it is live on SubIn`);
       setShowSuccess(true);
       fireConfetti();
     } catch (err: any) {
@@ -298,7 +298,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <h1 className="text-3xl font-bold text-foreground">{successMessage}</h1>
           <p className="text-muted-foreground max-w-md">
             {data.path === "management"
-              ? "Your property manager will review your request and get back to you shortly."
+              ? "Boston Brokerage Group will review your listing and notify you by email once it's live on SubIn."
               : "Your listing is now visible to thousands of potential subtenants."}
           </p>
           <div className="flex flex-col gap-2 mt-4 w-full max-w-xs">
@@ -511,8 +511,9 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
             disabled={saving || !data.confirmPermission}
             className="w-full"
           >
-            {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</> : <><Home className="mr-2 h-4 w-4" /> Publish Property</>}
+            {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</> : <><Home className="mr-2 h-4 w-4" /> Submit for Approval</>}
           </Button>
+          <p className="text-xs text-muted-foreground text-center mt-2">Your listing will be submitted to {data.managementGroupName} for approval before going live on SubIn.</p>
         </div>
       )}
     </div>
