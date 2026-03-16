@@ -3,10 +3,120 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, CheckCircle2, Clock, Users } from "lucide-react";
+import { Loader2, CheckCircle2, Clock, Users, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+
+const CosignerPendingState = ({
+  existing,
+  userId,
+  onComplete,
+  onUpdated,
+}: {
+  existing: any;
+  userId: string;
+  onComplete: () => void;
+  onUpdated: (updated: any) => void;
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [newEmail, setNewEmail] = useState(existing.email);
+  const [saving, setSaving] = useState(false);
+
+  const handleSaveEmail = async () => {
+    const trimmed = newEmail.trim();
+    if (!trimmed || trimmed === existing.email) {
+      setEditing(false);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("cosigners")
+        .update({ email: trimmed })
+        .eq("id", existing.id);
+      if (error) throw error;
+
+      await supabase.functions.invoke("send-cosigner-email", {
+        body: { cosignerId: existing.id },
+      });
+
+      toast.success("Email updated and confirmation resent!");
+      onUpdated({ ...existing, email: trimmed });
+      setEditing(false);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update email.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-3 py-6">
+      <Clock className="h-12 w-12 text-amber" />
+      <p className="text-sm font-semibold text-foreground">Waiting for Co-signer</p>
+
+      {editing ? (
+        <div className="w-full max-w-xs space-y-2">
+          <Label className="text-xs">New email for {existing.full_name}</Label>
+          <Input
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            placeholder="cosigner@email.com"
+            autoFocus
+          />
+          <div className="flex gap-2">
+            <Button size="sm" onClick={handleSaveEmail} disabled={saving} className="flex-1">
+              {saving ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : null}
+              Save & Resend
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => { setEditing(false); setNewEmail(existing.email); }}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <p className="text-xs text-muted-foreground text-center">
+            We sent {existing.full_name} ({existing.email}) an email to confirm.
+          </p>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setEditing(true)}>
+            <Pencil className="h-3 w-3" />
+            Change Email
+          </Button>
+        </>
+      )}
+
+      <div className="flex gap-2 mt-1">
+        <Button variant="outline" size="sm" onClick={async () => {
+          await supabase.functions.invoke("send-cosigner-email", {
+            body: { cosignerId: existing.id },
+          });
+          toast.success("Reminder email sent!");
+        }}>
+          Resend Email
+        </Button>
+        <Button variant="ghost" size="sm" onClick={async () => {
+          const { data } = await supabase.from("cosigners").select("confirmation_status").eq("id", existing.id).single();
+          if (data?.confirmation_status === "confirmed") {
+            await supabase.from("profiles").update({ cosigner_confirmed: true } as any).eq("id", userId);
+            toast.success("Co-signer confirmed! 🎉");
+            onComplete();
+          } else {
+            toast.info("Still waiting for confirmation.");
+          }
+        }}>
+          Check Status
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 interface CosignerFormProps {
   onComplete: () => void;
@@ -59,35 +169,12 @@ const CosignerForm = ({ onComplete }: CosignerFormProps) => {
   // If co-signer submitted but pending
   if (existing && existing.confirmation_status === "pending") {
     return (
-      <div className="flex flex-col items-center gap-3 py-6">
-        <Clock className="h-12 w-12 text-amber" />
-        <p className="text-sm font-semibold text-foreground">Waiting for Co-signer</p>
-        <p className="text-xs text-muted-foreground text-center">
-          We sent {existing.full_name} ({existing.email}) an email to confirm. Once they click confirm, this step will be complete.
-        </p>
-        <Button variant="outline" size="sm" onClick={async () => {
-          // Resend cosigner email
-          await supabase.functions.invoke("send-cosigner-email", {
-            body: { cosignerId: existing.id },
-          });
-          toast.success("Reminder email sent!");
-        }}>
-          Resend Email
-        </Button>
-        <Button variant="ghost" size="sm" onClick={async () => {
-          // Re-check status
-          const { data } = await supabase.from("cosigners").select("confirmation_status").eq("id", existing.id).single();
-          if (data?.confirmation_status === "confirmed") {
-            await supabase.from("profiles").update({ cosigner_confirmed: true } as any).eq("id", user!.id);
-            toast.success("Co-signer confirmed! 🎉");
-            onComplete();
-          } else {
-            toast.info("Still waiting for confirmation.");
-          }
-        }}>
-          Check Status
-        </Button>
-      </div>
+      <CosignerPendingState
+        existing={existing}
+        userId={user!.id}
+        onComplete={onComplete}
+        onUpdated={(updated) => setExisting(updated)}
+      />
     );
   }
 
