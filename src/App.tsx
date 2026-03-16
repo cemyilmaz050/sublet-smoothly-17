@@ -57,11 +57,12 @@ function PersistentNavbar() {
   return <Navbar />;
 }
 
-/** Hide footer on full-screen pages like messages and manager portal */
+/** Hide footer on full-screen pages like messages, manager portal, and AI finder */
 function PersistentFooter() {
   const location = useLocation();
   if (location.pathname.startsWith("/manager")) return null;
   if (location.pathname.startsWith("/messages")) return null;
+  if (location.pathname === "/find") return null;
   return <Footer />;
 }
 
