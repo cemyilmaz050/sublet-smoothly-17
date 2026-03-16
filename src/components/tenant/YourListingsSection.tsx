@@ -47,6 +47,15 @@ const statusColor: Record<string, string> = {
   rejected: "bg-destructive text-destructive-foreground",
 };
 
+const statusLabel: Record<string, string> = {
+  active: "Active",
+  pending: "Pending Review",
+  draft: "Draft",
+  paused: "Paused",
+  expired: "Expired",
+  rejected: "Changes Needed",
+};
+
 const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }: Props) => {
   const navigate = useNavigate();
   const [applicantDrawer, setApplicantDrawer] = useState<string | null>(null);
