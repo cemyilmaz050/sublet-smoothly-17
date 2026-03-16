@@ -132,6 +132,7 @@ const CreateListingPage = () => {
 
   const saveDraft = async () => {
     if (!user) return;
+    const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
     const payload = {
       tenant_id: user.id,
       address: form.address || null,
@@ -151,6 +152,7 @@ const CreateListingPage = () => {
       house_rules: form.house_rules || null,
       guest_policy: form.guest_policy || null,
       status: "draft" as const,
+      management_group_id: form.management_type === "bbg" ? BBG_PM_ID : null,
     };
 
     if (draftId) {
