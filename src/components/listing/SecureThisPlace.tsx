@@ -241,7 +241,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
           <p className="text-2xl font-bold text-primary">${monthlyRent.toLocaleString()}<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
           <p className="text-xs text-muted-foreground">~${weeklyRent.toLocaleString()}/week</p>
           {monthlyRent < 2000 && (
-            <p className="mt-1 text-xs text-emerald font-medium">Cheaper than a Boston hotel for the summer 🎉</p>
+            <p className="mt-1 text-xs text-emerald font-medium">Cheaper than a Boston hotel for the summer</p>
           )}
         </div>
       )}
