@@ -141,8 +141,8 @@ function createClusterIcon(count: number, animDelay: number = 0) {
     className: "subin-cluster-marker",
     html: `<div style="${CLUSTER_STYLE} ${delayStyle}"
       onmouseenter="this.style.background='#4845D2';this.style.color='#ffffff';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1.05)';this.querySelector('.notch').style.borderTopColor='#4845D2';"
-      onmouseleave="this.style.background='#ffffff';this.style.color='#4845D2';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';this.querySelector('.notch').style.borderTopColor='#ffffff';"
-    >${count} listings<span class="notch" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #ffffff;"></span></div>`,
+      onmouseleave="this.style.background='#F5F0E8';this.style.color='#4845D2';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';this.querySelector('.notch').style.borderTopColor='#F5F0E8';"
+    >${count} listings<span class="notch" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #F5F0E8;"></span></div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
   });
