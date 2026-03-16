@@ -36,6 +36,7 @@ import ManagerLayout from "./components/manager/ManagerLayout";
 import ManagerHome from "./pages/manager/ManagerHome";
 import ManagerListings from "./pages/manager/ManagerListings";
 import ManagerApplications from "./pages/manager/ManagerApplications";
+import ManagerApprovals from "./pages/manager/ManagerApprovals";
 import ManagerMessages from "./pages/manager/ManagerMessages";
 import ManagerNotifications from "./pages/manager/ManagerNotifications";
 import ManagerBackgroundChecks from "./pages/manager/ManagerBackgroundChecks";
@@ -104,6 +105,7 @@ const App = () => (
                   {/* Manager Dashboard — unified layout */}
                   <Route path="/manager" element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>
                     <Route index element={<ManagerHome />} />
+                    <Route path="approvals" element={<ManagerApprovals />} />
                     <Route path="listings" element={<ManagerListings />} />
                     <Route path="applications" element={<ManagerApplications />} />
                     <Route path="messages" element={<ManagerMessages />} />

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Users, Clock, CheckCircle2, ArrowRight, AlertTriangle, FileText } from "lucide-react";
+import { Building2, Users, Clock, CheckCircle2, ArrowRight, AlertTriangle, FileText, ClipboardCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +35,7 @@ const ManagerHome = () => {
       }
 
       return {
+        pendingApprovals: listings.filter(l => l.status === "pending").length,
         activeListings: listings.filter(l => l.status === "active").length,
         totalApplications: totalApps,
         pendingApplications: pendingApps,
@@ -58,6 +59,7 @@ const ManagerHome = () => {
   });
 
   const tiles = [
+    { label: "Pending Approvals", value: stats?.pendingApprovals ?? 0, icon: ClipboardCheck, color: "text-destructive", link: "/manager/approvals", badge: true },
     { label: "Active Listings", value: stats?.activeListings ?? 0, icon: Building2, color: "text-primary", link: "/manager/listings" },
     { label: "Total Applications", value: stats?.totalApplications ?? 0, icon: Users, color: "text-cyan", link: "/manager/applications" },
     { label: "Pending Review", value: stats?.pendingApplications ?? 0, icon: Clock, color: "text-amber", link: "/manager/applications", badge: true },

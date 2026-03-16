@@ -12,7 +12,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
-  Plus, Eye, Heart, Users, Pencil, Pause, Play, Trash2, MoreVertical, Home, Loader2,
+  Plus, Eye, Heart, Users, Pencil, Pause, Play, Trash2, MoreVertical, Home, Loader2, Clock, AlertTriangle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +45,15 @@ const statusColor: Record<string, string> = {
   paused: "bg-amber/60 text-amber-foreground",
   expired: "bg-destructive text-destructive-foreground",
   rejected: "bg-destructive text-destructive-foreground",
+};
+
+const statusLabel: Record<string, string> = {
+  active: "Active",
+  pending: "Pending Review",
+  draft: "Draft",
+  paused: "Paused",
+  expired: "Expired",
+  rejected: "Changes Needed",
 };
 
 const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }: Props) => {
@@ -167,8 +176,8 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
 
                   {/* Status badge */}
                   <div className="absolute left-2 top-2">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusColor[listing.status] || "bg-muted text-muted-foreground"}`}>
-                      {listing.status}
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor[listing.status] || "bg-muted text-muted-foreground"}`}>
+                      {statusLabel[listing.status] || listing.status}
                     </span>
                   </div>
 
@@ -235,6 +244,30 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
                       <Users className="h-3.5 w-3.5" /> {(listing as any).knock_count || 0} knocks
                     </span>
                   </div>
+
+                  {/* Status banner for pending/rejected */}
+                  {listing.status === "pending" && (
+                    <div className="mt-2 flex items-center gap-1.5 rounded-md bg-amber/10 px-2.5 py-1.5">
+                      <Clock className="h-3 w-3 text-amber shrink-0" />
+                      <p className="text-[11px] text-amber-foreground">Under review by Boston Brokerage Group — usually approved within 24 hours</p>
+                    </div>
+                  )}
+                  {listing.status === "rejected" && (
+                    <div className="mt-2 space-y-1.5">
+                      <div className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1.5">
+                        <AlertTriangle className="h-3 w-3 text-destructive shrink-0" />
+                        <p className="text-[11px] text-destructive">Changes needed — check your notifications for details</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full text-xs"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/listings/edit/${listing.id}`); }}
+                      >
+                        <Pencil className="mr-1 h-3 w-3" /> Edit & Resubmit
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}

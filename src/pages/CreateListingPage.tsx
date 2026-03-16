@@ -61,6 +61,7 @@ const CreateListingPage = () => {
           bedrooms: data.bedrooms ?? "",
           bathrooms: data.bathrooms ?? "",
           sqft: data.sqft ?? "",
+          management_type: data.management_group_id ? "bbg" : "self",
           photos: [],
           photoUrls: (data.photos as string[]) || [],
           headline: data.headline || "",
@@ -92,6 +93,7 @@ const CreateListingPage = () => {
   const validateStep = (s: number): boolean => {
     const e: Record<string, string> = {};
     if (s === 0) {
+      if (!form.management_type) e.management_type = "Please select one";
       if (!form.address.trim()) e.address = "Address is required";
       if (!form.property_type) e.property_type = "Property type is required";
       if (form.bedrooms === "") e.bedrooms = "Required";
@@ -130,6 +132,7 @@ const CreateListingPage = () => {
 
   const saveDraft = async () => {
     if (!user) return;
+    const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
     const payload = {
       tenant_id: user.id,
       address: form.address || null,
@@ -149,6 +152,7 @@ const CreateListingPage = () => {
       house_rules: form.house_rules || null,
       guest_policy: form.guest_policy || null,
       status: "draft" as const,
+      management_group_id: form.management_type === "bbg" ? BBG_PM_ID : null,
     };
 
     if (draftId) {
@@ -184,6 +188,11 @@ const CreateListingPage = () => {
       let photos = form.photoUrls;
       if (form.photos.length > 0) photos = await uploadPhotos(id);
 
+      const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
+      const BBG_MANAGER_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
+      const isManaged = form.management_type === "bbg";
+      const newStatus = isManaged ? "pending" : "active";
+
       const payload = {
         tenant_id: user.id,
         address: form.address,
@@ -203,8 +212,9 @@ const CreateListingPage = () => {
         house_rules: form.house_rules || null,
         guest_policy: form.guest_policy || null,
         photos,
-        status: "active" as const,
-        published_at: new Date().toISOString(),
+        status: newStatus as any,
+        published_at: isManaged ? null : new Date().toISOString(),
+        management_group_id: isManaged ? BBG_PM_ID : null,
       };
 
       if (draftId) {
@@ -218,29 +228,42 @@ const CreateListingPage = () => {
 
       setPublished(true);
 
-      // Send listing-live email notification
-      const publishedId = draftId || id;
-      supabase.functions.invoke("send-notification-email", {
-        body: {
-          to: user.email,
-          subject: `Your listing "${form.headline}" is live on SubIn!`,
-          type: "listing_live",
-          data: {
-            listing_title: form.headline,
-            action_url: `${window.location.origin}/listings`,
-          },
-        },
-      }).catch(() => {});
+      if (isManaged) {
+        // Notify BBG manager: new listing needs approval
+        supabase.from("notifications").insert({
+          user_id: BBG_MANAGER_USER_ID,
+          title: "New listing submitted for approval",
+          message: `New listing submitted for approval — ${form.address}`,
+          type: "listing",
+          link: "/manager/approvals",
+        }).then(() => {});
 
-      // Notify BBG manager portal
-      const BBG_MANAGER_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
-      supabase.from("notifications").insert({
-        user_id: BBG_MANAGER_USER_ID,
-        title: "New Listing Published",
-        message: `A new listing "${form.headline}" at ${form.address} has been published and needs review.`,
-        type: "listing",
-        link: "/manager",
-      }).then(() => {});
+        supabase.functions.invoke("send-notification-email", {
+          body: {
+            to: "demo@bostonbrokerage.com",
+            subject: `New listing submitted for approval — ${form.address}`,
+            type: "listing_approval_needed",
+            data: {
+              listing_title: form.headline,
+              address: form.address,
+              action_url: `${window.location.origin}/manager/approvals`,
+            },
+          },
+        }).catch(() => {});
+      } else {
+        // Independent listing — live immediately
+        supabase.functions.invoke("send-notification-email", {
+          body: {
+            to: user.email,
+            subject: `Your listing "${form.headline}" is live on SubIn!`,
+            type: "listing_live",
+            data: {
+              listing_title: form.headline,
+              action_url: `${window.location.origin}/listings?id=${draftId || id}`,
+            },
+          },
+        }).catch(() => {});
+      }
 
     } catch (err: any) {
       console.error("Publish error:", err);
@@ -251,11 +274,13 @@ const CreateListingPage = () => {
   };
 
   if (published) {
+    const isManaged = form.management_type === "bbg";
     return (
       <PublishSuccess
         listingId={draftId || ""}
         headline={form.headline}
         onDashboard={() => navigate("/tenant/dashboard")}
+        isPending={isManaged}
       />
     );
   }
