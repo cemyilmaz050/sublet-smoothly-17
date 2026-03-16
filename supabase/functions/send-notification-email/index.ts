@@ -76,7 +76,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "new_message":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">New Message 💬</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">New Message</h1>
         <p style="${mutedStyle}"><strong>${data.sender_name}</strong> sent you a message${data.listing_title ? ` about "${data.listing_title}"` : ""}:</p>
         <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
           <p style="margin: 0; ${mutedStyle}">"${data.preview}"</p>
