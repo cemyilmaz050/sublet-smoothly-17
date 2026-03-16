@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useVerificationPolling } from "@/hooks/useVerificationPolling";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail } from "lucide-react";
+import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 import { motion, AnimatePresence } from "framer-motion";
