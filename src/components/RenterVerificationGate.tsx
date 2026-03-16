@@ -23,7 +23,10 @@ interface RenterVerificationGateProps {
 }
 
 const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerificationGateProps) => {
+  const { user } = useAuth();
   const { idVerified, applicationComplete, cosignerConfirmed, isFullyVerified, loading, refresh } = useRenterVerification();
+  const [activeStep, setActiveStep] = useState<1 | 2 | 3 | null>(null);
+  const notifiedRef = useRef(false);
   const [activeStep, setActiveStep] = useState<1 | 2 | 3 | null>(null);
 
   // Auto-determine which step to start on
