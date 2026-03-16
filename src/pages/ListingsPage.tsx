@@ -422,13 +422,19 @@ const ListingsPage = () => {
                         <div className="flex items-start justify-between">
                           <h3 className="font-semibold text-foreground group-hover:text-primary line-clamp-1 text-[15px]">{listing.headline || "Untitled"}</h3>
                           {listing.monthly_rent && (
-                            <p className="ml-2 whitespace-nowrap text-lg font-bold text-primary">
-                              ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
-                            </p>
+                            <div className="ml-2 text-right shrink-0">
+                              <p className="whitespace-nowrap text-lg font-bold text-primary">
+                                ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
+                              </p>
+                              <p className="text-[11px] text-muted-foreground">~${Math.round(listing.monthly_rent / 4).toLocaleString()}/week</p>
+                            </div>
                           )}
                         </div>
                         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" />{listing.address || "Unknown"}</p>
                         <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{formatDates(listing.available_from, listing.available_until)}</p>
+                        {listing.monthly_rent && listing.monthly_rent < 2000 && (
+                          <p className="mt-1 text-[11px] text-emerald font-medium">Cheaper than a Boston hotel 🎉</p>
+                        )}
                         {(listing.avg_rating ?? 0) > 0 && (
                           <div className="mt-1.5">
                             <StarRating rating={listing.avg_rating || 0} size="sm" showCount count={listing.review_count} />
