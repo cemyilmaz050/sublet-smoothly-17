@@ -89,7 +89,7 @@ const ManagerCatalogEditor = () => {
 
       if (!prop) {
         toast.error("Property not found");
-        navigate("/manager/catalog");
+        navigate("/portal-mgmt-bbg/catalog");
         return;
       }
 
@@ -263,7 +263,7 @@ const ManagerCatalogEditor = () => {
     <div className="p-6 lg:p-8 space-y-6 max-w-4xl">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/manager/catalog")}>
+        <Button variant="ghost" size="icon" onClick={() => navigate("/portal-mgmt-bbg/catalog")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">

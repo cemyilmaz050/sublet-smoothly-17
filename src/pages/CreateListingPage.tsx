@@ -235,7 +235,7 @@ const CreateListingPage = () => {
           title: "New listing submitted for approval",
           message: `New listing submitted for approval — ${form.address}`,
           type: "listing",
-          link: "/manager/approvals",
+          link: "/portal-mgmt-bbg/approvals",
         }).then(() => {});
 
         supabase.functions.invoke("send-notification-email", {

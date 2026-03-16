@@ -58,12 +58,13 @@ const ManagerHome = () => {
     },
   });
 
+  const P = "/portal-mgmt-bbg";
   const tiles = [
-    { label: "Pending Approvals", value: stats?.pendingApprovals ?? 0, icon: ClipboardCheck, color: "text-destructive", link: "/manager/approvals", badge: true },
-    { label: "Active Listings", value: stats?.activeListings ?? 0, icon: Building2, color: "text-primary", link: "/manager/listings" },
-    { label: "Total Applications", value: stats?.totalApplications ?? 0, icon: Users, color: "text-cyan", link: "/manager/applications" },
-    { label: "Pending Review", value: stats?.pendingApplications ?? 0, icon: Clock, color: "text-amber", link: "/manager/applications", badge: true },
-    { label: "Completed Sublets", value: stats?.completedSublets ?? 0, icon: CheckCircle2, color: "text-emerald", link: "/manager/checks" },
+    { label: "Pending Approvals", value: stats?.pendingApprovals ?? 0, icon: ClipboardCheck, color: "text-destructive", link: `${P}/approvals`, badge: true },
+    { label: "Active Listings", value: stats?.activeListings ?? 0, icon: Building2, color: "text-primary", link: `${P}/listings` },
+    { label: "Total Applications", value: stats?.totalApplications ?? 0, icon: Users, color: "text-cyan", link: `${P}/applications` },
+    { label: "Pending Review", value: stats?.pendingApplications ?? 0, icon: Clock, color: "text-amber", link: `${P}/applications`, badge: true },
+    { label: "Completed Sublets", value: stats?.completedSublets ?? 0, icon: CheckCircle2, color: "text-emerald", link: `${P}/checks` },
   ];
 
   const notifIcon = (type: string) => {
@@ -114,7 +115,7 @@ const ManagerHome = () => {
       <Card className="shadow-card">
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <h2 className="text-base font-semibold text-foreground">Recent Activity</h2>
-          <Link to="/manager/notifications">
+          <Link to={`${P}/notifications`}>
             <Button variant="ghost" size="sm" className="text-xs">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
           </Link>
         </div>
@@ -123,7 +124,7 @@ const ManagerHome = () => {
             <p className="text-sm text-muted-foreground py-6 text-center">No recent activity yet.</p>
           ) : (
             recentNotifications.map((n: any) => (
-              <Link key={n.id} to={n.link || "/manager/notifications"}>
+              <Link key={n.id} to={n.link || `${P}/notifications`}>
                 <div className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent/50">
                   <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">
                     {notifIcon(n.type)}

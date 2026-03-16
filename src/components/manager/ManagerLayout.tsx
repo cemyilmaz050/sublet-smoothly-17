@@ -24,17 +24,19 @@ import bbgLogo from "@/assets/bbg-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
+const PORTAL_BASE = "/portal-mgmt-bbg";
+
 const navItems = [
-  { title: "Dashboard", url: "/manager", icon: LayoutDashboard },
-  { title: "Property Catalog", url: "/manager/catalog", icon: Building2 },
-  { title: "Pending Approvals", url: "/manager/approvals", icon: ClipboardCheck, badgeKey: "pendingApprovals" as const },
-  { title: "Active Sublet Listings", url: "/manager/listings", icon: Building2 },
-  { title: "Applications", url: "/manager/applications", icon: Users },
-  { title: "Background Checks", url: "/manager/checks", icon: ShieldCheck },
-  { title: "Messages", url: "/manager/messages", icon: MessageSquare },
-  { title: "Notifications", url: "/manager/notifications", icon: Bell },
-  { title: "Payments & Earnings", url: "/manager/payments", icon: DollarSign },
-  { title: "Settings", url: "/manager/settings", icon: Settings },
+  { title: "Dashboard", url: PORTAL_BASE, icon: LayoutDashboard },
+  { title: "Property Catalog", url: `${PORTAL_BASE}/catalog`, icon: Building2 },
+  { title: "Pending Approvals", url: `${PORTAL_BASE}/approvals`, icon: ClipboardCheck, badgeKey: "pendingApprovals" as const },
+  { title: "Active Sublet Listings", url: `${PORTAL_BASE}/listings`, icon: Building2 },
+  { title: "Applications", url: `${PORTAL_BASE}/applications`, icon: Users },
+  { title: "Background Checks", url: `${PORTAL_BASE}/checks`, icon: ShieldCheck },
+  { title: "Messages", url: `${PORTAL_BASE}/messages`, icon: MessageSquare },
+  { title: "Notifications", url: `${PORTAL_BASE}/notifications`, icon: Bell },
+  { title: "Payments & Earnings", url: `${PORTAL_BASE}/payments`, icon: DollarSign },
+  { title: "Settings", url: `${PORTAL_BASE}/settings`, icon: Settings },
 ];
 
 function SidebarNav() {
@@ -87,7 +89,7 @@ function SidebarNav() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      end={item.url === "/manager"}
+                      end={item.url === PORTAL_BASE}
                       className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
                     >

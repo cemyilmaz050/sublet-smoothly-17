@@ -9,6 +9,8 @@ import { VerificationPollingProvider } from "@/hooks/useVerificationPolling";
 import AuthModal from "@/components/AuthModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ManagerProtectedRoute from "@/components/ManagerProtectedRoute";
+import AdminProtectedRoute from "@/components/AdminProtectedRoute";
 import Navbar from "@/components/Navbar";
 import VerificationPendingBanner from "@/components/VerificationPendingBanner";
 import Footer from "@/components/Footer";
@@ -54,7 +56,7 @@ const queryClient = new QueryClient();
 /** Persistent navbar shown on all routes except the manager portal, AI finder, and home hero */
 function PersistentNavbar() {
   const location = useLocation();
-  const isManagerRoute = location.pathname.startsWith("/manager");
+  const isManagerRoute = location.pathname.startsWith("/manager") || location.pathname.startsWith("/portal-mgmt-bbg");
   const isFinderRoute = location.pathname === "/find";
   if (isManagerRoute || isFinderRoute) return null;
   return <Navbar />;
@@ -63,7 +65,7 @@ function PersistentNavbar() {
 /** Hide footer on full-screen pages */
 function PersistentFooter() {
   const location = useLocation();
-  if (location.pathname.startsWith("/manager")) return null;
+  if (location.pathname.startsWith("/manager") || location.pathname.startsWith("/portal-mgmt-bbg")) return null;
   if (location.pathname.startsWith("/messages")) return null;
   if (location.pathname === "/find") return null;
   if (location.pathname === "/") return null;
@@ -112,10 +114,10 @@ const App = () => (
                   <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
                   <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
                   <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
-                  <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+                  <Route path="/s-admin-console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
 
                   {/* Manager Dashboard — unified layout */}
-                  <Route path="/manager" element={<ProtectedRoute><ManagerLayout /></ProtectedRoute>}>
+                  <Route path="/portal-mgmt-bbg" element={<ManagerProtectedRoute><ManagerLayout /></ManagerProtectedRoute>}>
                     <Route index element={<ManagerHome />} />
                     <Route path="catalog" element={<ManagerCatalog />} />
                     <Route path="catalog/:propertyId" element={<ManagerCatalogEditor />} />
@@ -128,6 +130,11 @@ const App = () => (
                     <Route path="payments" element={<ManagerPayments />} />
                     <Route path="settings" element={<ManagerSettings />} />
                   </Route>
+
+                  {/* Legacy /manager routes redirect silently to listings */}
+                  <Route path="/manager/*" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
+                  <Route path="/manager" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
+                  <Route path="/admin" element={<AdminProtectedRoute><Navigate to="/s-admin-console" replace /></AdminProtectedRoute>} />
 
                   {/* Redirects from old manager routes */}
                   <Route path="/dashboard/manager" element={<Navigate to="/manager" replace />} />
