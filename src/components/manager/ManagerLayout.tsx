@@ -91,7 +91,12 @@ function SidebarNav() {
                       activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!collapsed && <span className="flex-1">{item.title}</span>}
+                      {!collapsed && item.badgeKey && badges[item.badgeKey] > 0 && (
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
+                          {badges[item.badgeKey]}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

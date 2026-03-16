@@ -93,6 +93,7 @@ const CreateListingPage = () => {
   const validateStep = (s: number): boolean => {
     const e: Record<string, string> = {};
     if (s === 0) {
+      if (!form.management_type) e.management_type = "Please select one";
       if (!form.address.trim()) e.address = "Address is required";
       if (!form.property_type) e.property_type = "Property type is required";
       if (form.bedrooms === "") e.bedrooms = "Required";
