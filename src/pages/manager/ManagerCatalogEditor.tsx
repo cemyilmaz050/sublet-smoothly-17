@@ -117,15 +117,6 @@ const ManagerCatalogEditor = () => {
       const unit = units?.[0];
       if (unit) setExistingUnitId(unit.id);
 
-      // Find associated listing
-      const { data: listings } = await supabase
-        .from("listings")
-        .select("id, headline, status")
-        .eq("management_group_id", BBG_PM_ID)
-        .eq("address", prop.address)
-        .limit(1);
-
-      if (listings?.[0]) setExistingListingId(listings[0].id);
 
       setProperty(prop);
       setForm({
