@@ -373,26 +373,6 @@ const ManagerCatalogEditor = () => {
     }
   };
 
-  const handleSaveAndPublish = async () => {
-    if (!user) return;
-    if (!form.address.trim()) { toast.error("Address is required"); return; }
-    if (!form.base_rent) { toast.error("Monthly rent is required to publish"); return; }
-    setPublishing(true);
-    try {
-      const propId = await savePropertyAndUnit();
-      if (!propId) { setPublishing(false); return; }
-      await upsertListing(propId, "active");
-      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
-      queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
-      toast.success("Your listing is now live on SubIn — everyone can see it!");
-      if (isNew) navigate(`/portal-mgmt-bbg/catalog/${propId}`, { replace: true });
-    } catch (err: any) {
-      console.error("Publish error:", err);
-      toast.error(err.message || "Failed to publish");
-    } finally {
-      setPublishing(false);
-    }
-  };
 
   if (loading) {
     return (
