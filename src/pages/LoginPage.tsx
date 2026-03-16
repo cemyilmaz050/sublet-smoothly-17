@@ -60,7 +60,12 @@ const LoginPage = () => {
         return;
       }
       if (data.session) {
-        navigate("/listings", { replace: true });
+        // If BBG staff email, go to manager portal
+        if (data.session.user.email?.toLowerCase().endsWith("@bostonbrokerage.com")) {
+          navigate("/portal-mgmt-bbg", { replace: true });
+        } else {
+          navigate("/listings", { replace: true });
+        }
       }
     } catch (err: any) {
       setLoginError(err.message || "An unexpected error occurred. Please try again.");
