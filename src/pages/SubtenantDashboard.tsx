@@ -152,7 +152,7 @@ const SubtenantDashboard = () => {
               My Applications{applications.length > 0 && ` (${applications.length})`}
             </TabsTrigger>
             <TabsTrigger value="knocks">
-              🚪 Knocks{knockedListings.length > 0 && ` (${knockedListings.length})`}
+              Knocks{knockedListings.length > 0 && ` (${knockedListings.length})`}
             </TabsTrigger>
             <TabsTrigger value="saved">
               Saved{savedListings.length > 0 && ` (${savedListings.length})`}

@@ -203,7 +203,7 @@ const FinderSwipe = ({ listings, onComplete, answers }: Props) => {
             size="lg"
             onClick={() => onComplete(savedListings)}
           >
-            Compare {savedListings.length} saved places ✨
+            Compare {savedListings.length} saved places
           </Button>
         </motion.div>
       )}

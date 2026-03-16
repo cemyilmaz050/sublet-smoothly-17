@@ -137,7 +137,7 @@ const ManagerApplicationsPage = () => {
     // Notify the applicant
     await supabase.from("notifications").insert({
       user_id: app.applicant_id,
-      title: decision === "approved" ? "Application Approved! 🎉" : "Application Update",
+      title: decision === "approved" ? "Application Approved!" : "Application Update",
       message: decision === "approved"
         ? `Your application for ${app.listing_headline || app.listing_address || "a listing"} has been approved!`
         : `Your application for ${app.listing_headline || app.listing_address || "a listing"} was not approved at this time.`,

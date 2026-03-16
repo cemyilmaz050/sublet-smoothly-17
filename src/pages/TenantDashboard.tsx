@@ -219,7 +219,7 @@ const TenantDashboard = () => {
               <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
                 <Home className="h-7 w-7 text-primary" />
               </div>
-              <p className="font-medium text-foreground">Your place could be earning money right now 💰</p>
+              <p className="font-medium text-foreground">Your place could be earning money right now</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 List it in 3 minutes and find the perfect guest
               </p>

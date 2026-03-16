@@ -105,7 +105,7 @@ const CosignerPendingState = ({
           const { data } = await supabase.from("cosigners").select("confirmation_status").eq("id", existing.id).single();
           if (data?.confirmation_status === "confirmed") {
             await supabase.from("profiles").update({ cosigner_confirmed: true } as any).eq("id", userId);
-            toast.success("Co-signer confirmed! 🎉");
+            toast.success("Co-signer confirmed!");
             onComplete();
           } else {
             toast.info("Still waiting for confirmation.");

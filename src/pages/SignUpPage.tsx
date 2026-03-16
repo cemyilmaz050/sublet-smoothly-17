@@ -357,7 +357,7 @@ const SignUpPage = () => {
                   {isEduEmail && (
                     <p className="mt-1.5 flex items-center gap-1.5 text-sm text-primary font-medium">
                       <GraduationCap className="h-4 w-4" />
-                      Nice — you get a Student Verified badge 🎓
+                      Nice — you get a Student Verified badge
                     </p>
                   )}
                 </div>

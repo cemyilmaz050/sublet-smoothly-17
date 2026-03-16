@@ -116,7 +116,7 @@ const FinderAction = ({ listing, answers }: Props) => {
         >
           <div className="flex items-center justify-center gap-2 text-sm font-medium text-foreground">
             <Flame className="h-4 w-4 text-coral" />
-            Most sublets on SubIn get booked within 3 days of the first message — don't wait too long 🔥
+            Most sublets on SubIn get booked within 3 days of the first message — don't wait too long
           </div>
         </motion.div>
 
