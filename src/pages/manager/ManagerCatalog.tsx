@@ -8,7 +8,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  Building2, MapPin, Home, Pencil, Plus, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, Trash2, Loader2,
+  Building2, MapPin, Home, Pencil, Plus, CheckCircle2, Clock, AlertCircle, Trash2, Loader2, Eye, EyeOff,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -24,35 +24,12 @@ const ManagerCatalog = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<string | null>(null);
-
-  const handleDelete = async (prop: any) => {
-    setDeleting(prop.id);
-    try {
-      // Delete associated catalog units first
-      await supabase.from("catalog_units").delete().eq("property_id", prop.id);
-
-      // Delete associated listings (soft-delete via status change)
-      for (const listing of prop.listings) {
-        await supabase.from("listings").update({ status: "deleted" as any }).eq("id", listing.id);
-      }
-
-      // Delete the catalog property
-      await supabase.from("catalog_properties").delete().eq("id", prop.id);
-
-      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
-      toast.success(`"${prop.address}" removed from catalog`);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete property");
-    } finally {
-      setDeleting(null);
-    }
-  };
+  const [toggling, setToggling] = useState<string | null>(null);
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["manager-catalog", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      // Get all BBG catalog properties
       const { data: props } = await supabase
         .from("catalog_properties")
         .select("*")
@@ -60,10 +37,9 @@ const ManagerCatalog = () => {
         .order("address", { ascending: true });
       if (!props?.length) return [];
 
-      // Get listings linked to these addresses to determine status
       const { data: listings } = await supabase
         .from("listings")
-        .select("id, address, status, headline, management_group_id")
+        .select("id, address, status, headline, management_group_id, monthly_rent, photos")
         .eq("management_group_id", BBG_PM_ID);
 
       const listingsByAddress = new Map<string, any[]>();
@@ -76,11 +52,13 @@ const ManagerCatalog = () => {
       return props.map((p) => {
         const relatedListings = listingsByAddress.get(p.address) || [];
         const activeListings = relatedListings.filter((l) => l.status === "active");
+        const draftListings = relatedListings.filter((l) => l.status === "draft");
         const pendingListings = relatedListings.filter((l) => l.status === "pending");
         return {
           ...p,
           listings: relatedListings,
           activeCount: activeListings.length,
+          draftCount: draftListings.length,
           pendingCount: pendingListings.length,
           totalListings: relatedListings.length,
         };
@@ -88,19 +66,86 @@ const ManagerCatalog = () => {
     },
   });
 
+  const handleDelete = async (prop: any) => {
+    setDeleting(prop.id);
+    try {
+      // Delete associated catalog units first
+      const { error: unitsError } = await supabase.from("catalog_units").delete().eq("property_id", prop.id);
+      if (unitsError) throw unitsError;
+
+      // Hard-delete associated listings managed by this user
+      for (const listing of prop.listings) {
+        const { error: listingError } = await supabase.from("listings").delete().eq("id", listing.id);
+        if (listingError) {
+          // Fallback to soft-delete if hard delete fails
+          await supabase.from("listings").update({ status: "deleted" as any }).eq("id", listing.id);
+        }
+      }
+
+      // Delete the catalog property
+      const { error: propError } = await supabase.from("catalog_properties").delete().eq("id", prop.id);
+      if (propError) throw propError;
+
+      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
+      toast.success("Listing deleted successfully");
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast.error(err.message || "Failed to delete property. Please try again.");
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const handleToggleStatus = async (prop: any) => {
+    const activeListing = prop.listings.find((l: any) => l.status === "active");
+    const draftListing = prop.listings.find((l: any) => l.status === "draft");
+    const targetListing = activeListing || draftListing || prop.listings[0];
+
+    if (!targetListing) {
+      toast.error("No listing exists for this property. Use Edit to create one.");
+      return;
+    }
+
+    setToggling(prop.id);
+    const newStatus = targetListing.status === "active" ? "draft" : "active";
+    try {
+      const updateData: any = { status: newStatus };
+      if (newStatus === "active") {
+        updateData.published_at = new Date().toISOString();
+      }
+      const { error } = await supabase.from("listings").update(updateData).eq("id", targetListing.id);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
+      queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
+      toast.success(newStatus === "active" ? "Listing is now live — everyone can see it" : "Listing moved to draft — hidden from public");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update status");
+    } finally {
+      setToggling(null);
+    }
+  };
+
   const getStatusBadge = (prop: any) => {
     if (prop.activeCount > 0) return <Badge variant="emerald" className="text-xs"><CheckCircle2 className="mr-1 h-3 w-3" />Active</Badge>;
+    if (prop.draftCount > 0) return <Badge variant="secondary" className="text-xs"><EyeOff className="mr-1 h-3 w-3" />Draft</Badge>;
     if (prop.pendingCount > 0) return <Badge variant="pending" className="text-xs"><Clock className="mr-1 h-3 w-3" />Pending</Badge>;
     return <Badge variant="secondary" className="text-xs"><AlertCircle className="mr-1 h-3 w-3" />No listing</Badge>;
   };
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Property Catalog</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage all Boston Brokerage Group properties — add photos, descriptions, and pricing
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Property Catalog</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage all Boston Brokerage Group properties — add photos, descriptions, and pricing
+          </p>
+        </div>
+        <Button onClick={() => navigate("/portal-mgmt-bbg/catalog/new")} size="lg">
+          <Plus className="mr-2 h-4 w-4" />
+          Add New Property
+        </Button>
       </div>
 
       {isLoading ? (
@@ -109,7 +154,7 @@ const ManagerCatalog = () => {
         <EmptyState
           icon={Building2}
           title="No properties in catalog"
-          description="Properties will appear here once added to the BBG catalog."
+          description="Click 'Add New Property' to get started."
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -128,8 +173,12 @@ const ManagerCatalog = () => {
               </div>
               <CardContent className="p-4 space-y-3">
                 <div>
-                  <h3 className="font-semibold text-foreground">{prop.address}</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5 capitalize">{prop.property_type || "Apartment"}</p>
+                  <h3 className="font-semibold text-foreground">{prop.name || prop.address}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {prop.address}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">{prop.property_type || "Apartment"}</p>
                 </div>
 
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -137,33 +186,36 @@ const ManagerCatalog = () => {
                   {prop.units_count > 0 && <span>• {prop.units_count} unit{prop.units_count !== 1 ? "s" : ""}</span>}
                 </div>
 
-                {prop.totalListings === 0 && (
-                  <p className="text-xs text-amber flex items-center gap-1">
-                    <AlertCircle className="h-3 w-3" />
-                    No active listing — create one now
-                  </p>
-                )}
-
                 <div className="flex gap-2 pt-1">
                   <Button
                     size="sm"
                     variant="outline"
                     className="flex-1"
-                    onClick={() => navigate(`/manager/catalog/${prop.id}`)}
+                    onClick={() => navigate(`/portal-mgmt-bbg/catalog/${prop.id}`)}
                   >
                     <Pencil className="mr-1 h-3.5 w-3.5" />
                     Edit
                   </Button>
-                  {prop.activeCount > 0 && prop.listings[0] && (
+
+                  {/* Status toggle */}
+                  {prop.totalListings > 0 && (
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant={prop.activeCount > 0 ? "outline" : "default"}
                       className="text-xs"
-                      onClick={() => window.open(`/listings?id=${prop.listings.find((l: any) => l.status === "active")?.id}`, "_blank")}
+                      disabled={toggling === prop.id}
+                      onClick={() => handleToggleStatus(prop)}
                     >
-                      View Live
+                      {toggling === prop.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : prop.activeCount > 0 ? (
+                        <><EyeOff className="mr-1 h-3.5 w-3.5" />Unpublish</>
+                      ) : (
+                        <><Eye className="mr-1 h-3.5 w-3.5" />Publish</>
+                      )}
                     </Button>
                   )}
+
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 px-2">
@@ -172,11 +224,11 @@ const ManagerCatalog = () => {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Property</AlertDialogTitle>
+                        <AlertDialogTitle>Are you sure you want to delete this listing?</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will permanently remove <strong>{prop.address}</strong> from the catalog
-                          {prop.totalListings > 0 && ` and archive ${prop.totalListings} associated listing${prop.totalListings > 1 ? "s" : ""}`}.
-                          This action cannot be undone.
+                          This cannot be undone. The property <strong>{prop.address}</strong> will be permanently removed from the catalog
+                          {prop.totalListings > 0 && ` along with ${prop.totalListings} associated listing${prop.totalListings > 1 ? "s" : ""}`}.
+                          It will no longer appear on the public listings page or map.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
