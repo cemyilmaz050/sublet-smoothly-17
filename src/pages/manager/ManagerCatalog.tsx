@@ -3,13 +3,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Building2, MapPin, Home, Pencil, Plus, Image as ImageIcon, CheckCircle2, Clock, AlertCircle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Building2, MapPin, Home, Pencil, Plus, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, Trash2, Loader2,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import EmptyState from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
 
