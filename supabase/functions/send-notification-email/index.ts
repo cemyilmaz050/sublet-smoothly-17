@@ -101,7 +101,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "knock":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">Someone knocked on your listing 🚪</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Someone knocked on your listing</h1>
         <p style="${mutedStyle}"><strong>${data.knocker_name}</strong> is interested in your place at <strong>${data.listing_address || data.listing_title}</strong>. Send them a message to start the conversation.</p>
         <div style="margin: 24px 0; display: flex; gap: 12px;">
           <a href="${data.message_url}" style="${btnStyle}">Message Them</a>

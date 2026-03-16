@@ -165,7 +165,7 @@ serve(async (req) => {
     // Notify subtenant
     await supabaseClient.from("notifications").insert({
       user_id: user.id,
-      title: "Booking Confirmed! 🎉",
+      title: "Booking Confirmed!",
       message: `You've secured "${listing.headline || listing.address || "this apartment"}". Please sign the sublet agreement to finalize.`,
       type: "booking",
       link: "/dashboard/subtenant",

@@ -237,7 +237,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
                 Verification submitted — we're confirming your identity
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                This usually takes a few minutes. You can continue browsing listings while you wait 🔒
+                This usually takes a few minutes. You can continue browsing listings while you wait.
               </p>
             </div>
 
