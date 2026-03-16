@@ -247,7 +247,7 @@ const ListingsPage = () => {
 
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
-      
+      <WelcomePopup show={welcomePopup.show} returningMode={welcomePopup.returningMode} dismiss={welcomePopup.dismiss} />
       {/* Hero choice cards for new visitors */}
       {!user && (
         <section className="border-b bg-gradient-to-br from-primary/5 via-background to-accent/20 px-4 py-10 sm:py-14">
