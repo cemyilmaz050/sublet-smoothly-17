@@ -51,7 +51,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-lg w-full">
+      <nav className="sticky top-0 z-[100] border-b bg-card/80 backdrop-blur-lg w-full">
         <div className="flex h-16 items-center justify-between px-6 w-full">
           <div className="flex items-center gap-3">
             <Link to={user ? "/listings" : "/"} className="flex items-center">

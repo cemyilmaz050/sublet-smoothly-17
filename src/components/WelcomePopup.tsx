@@ -58,7 +58,7 @@ interface WelcomePopupProps {
   dismiss: (choice: WelcomeChoice) => void;
 }
 
-const overlayClass = "fixed inset-0 z-[9999] flex items-center justify-center";
+const overlayClass = "fixed inset-0 z-[500] flex items-center justify-center";
 const overlayBg = { backgroundColor: "rgba(0,0,0,0.5)" };
 
 function SubInWordmark() {
@@ -108,7 +108,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="z-[10000] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
+              className="z-[600] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
             >
               <div className="mb-4"><SubInWordmark /></div>
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
@@ -149,7 +149,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="z-[10000] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
+              className="z-[600] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
             >
               <div className="mb-4"><SubInWordmark /></div>
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
@@ -182,7 +182,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999]"
+            className="fixed inset-0 z-[500]"
             style={overlayBg}
           >
             <motion.div
@@ -190,7 +190,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-              className="absolute inset-x-0 bottom-0 z-[10000] max-h-[92dvh] overflow-y-auto rounded-t-[20px] bg-card pb-8 shadow-2xl"
+              className="absolute inset-x-0 bottom-0 z-[600] max-h-[92dvh] overflow-y-auto rounded-t-[20px] bg-card pb-8 shadow-2xl"
             >
               <div className="flex justify-center pt-3 pb-2">
                 <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
@@ -249,7 +249,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.92, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="z-[10000] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-10 shadow-2xl"
+            className="z-[600] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-10 shadow-2xl"
           >
             <div className="text-center mb-8">
               <div className="mb-4"><SubInWordmark /></div>
