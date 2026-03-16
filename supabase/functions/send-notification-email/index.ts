@@ -173,6 +173,17 @@ serve(async (req) => {
   }
 
   try {
+    // Require authentication
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("Unauthorized: missing authorization header");
+    const token = authHeader.replace("Bearer ", "");
+    const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "", {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    const { data: userData, error: authError } = await supabaseAuth.auth.getUser(token);
+    if (authError || !userData.user) throw new Error("Unauthorized: invalid token");
+
     const { to, subject, type, data } = (await req.json()) as EmailRequest;
     if (!to || !subject || !type) {
       throw new Error("Missing required fields: to, subject, type");
