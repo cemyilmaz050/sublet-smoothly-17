@@ -35,6 +35,7 @@ const ManagerHome = () => {
       }
 
       return {
+        pendingApprovals: listings.filter(l => l.status === "pending").length,
         activeListings: listings.filter(l => l.status === "active").length,
         totalApplications: totalApps,
         pendingApplications: pendingApps,
