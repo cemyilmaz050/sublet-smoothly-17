@@ -86,7 +86,7 @@ const ManagerApprovals = () => {
       queryClient.invalidateQueries({ queryKey: ["manager-pending-approvals"] });
       queryClient.invalidateQueries({ queryKey: ["manager-home-stats"] });
       queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
-      toast.success("Listing approved and now live on SubIn ✓");
+      toast.success("Listing approved and now live on SubIn");
     } catch (err: any) {
       toast.error(err.message || "Failed to approve listing");
     } finally {
