@@ -246,6 +246,68 @@ const ListingsPage = () => {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
       
+      {/* Hero choice cards for new visitors */}
+      {!user && (
+        <section className="border-b bg-gradient-to-br from-primary/5 via-background to-accent/20 px-4 py-10 sm:py-14">
+          <div className="mx-auto max-w-3xl text-center mb-8">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight"
+            >
+              What brings you to SubIn? ✨
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mt-3 text-muted-foreground text-lg"
+            >
+              Start your Boston summer journey
+            </motion.p>
+          </div>
+          <div className="mx-auto grid max-w-2xl gap-4 sm:grid-cols-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <Link to="/signup?role=tenant" className="block">
+                <div className="group rounded-2xl border-2 border-border bg-card p-8 text-center transition-all hover:border-primary/40 hover:shadow-elevated cursor-pointer">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber/10">
+                    <span className="text-3xl">🗝️</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                    I have a place to sublet
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    List your apartment and find a verified subtenant in days
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <Link to="/find" className="block">
+                <div className="group rounded-2xl border-2 border-primary/30 bg-primary/5 p-8 text-center transition-all hover:border-primary hover:shadow-elevated cursor-pointer ring-2 ring-primary/10">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                    <span className="text-3xl">🏠</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
+                    I need a place for the summer
+                  </h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Answer 7 quick questions and let AI find your perfect match
+                  </p>
+                </div>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* Search & Filter Bar — scrollable on mobile */}
       <div className="border-b bg-card/80 backdrop-blur-sm">
