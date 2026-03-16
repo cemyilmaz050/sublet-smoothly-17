@@ -143,7 +143,7 @@ const FinderSwipe = ({ listings, onComplete, answers }: Props) => {
                 )}
                 {currentListing.distanceLabel && (
                   <span className="flex items-center gap-1">
-                    📍 {currentListing.distanceLabel}
+                    <MapPin className="h-3.5 w-3.5" /> {currentListing.distanceLabel}
                   </span>
                 )}
               </div>
