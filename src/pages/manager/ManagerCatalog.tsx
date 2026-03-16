@@ -97,34 +97,6 @@ const ManagerCatalog = () => {
     }
   };
 
-  const handleToggleStatus = async (prop: any) => {
-    const activeListing = prop.listings.find((l: any) => l.status === "active");
-    const draftListing = prop.listings.find((l: any) => l.status === "draft");
-    const targetListing = activeListing || draftListing || prop.listings[0];
-
-    if (!targetListing) {
-      toast.error("No listing exists for this property. Use Edit to create one.");
-      return;
-    }
-
-    setToggling(prop.id);
-    const newStatus = targetListing.status === "active" ? "draft" : "active";
-    try {
-      const updateData: any = { status: newStatus };
-      if (newStatus === "active") {
-        updateData.published_at = new Date().toISOString();
-      }
-      const { error } = await supabase.from("listings").update(updateData).eq("id", targetListing.id);
-      if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
-      queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
-      toast.success(newStatus === "active" ? "Listing is now live — everyone can see it" : "Listing moved to draft — hidden from public");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update status");
-    } finally {
-      setToggling(null);
-    }
-  };
 
   const getStatusBadge = (prop: any) => {
     if (prop.activeCount > 0) return <Badge variant="emerald" className="text-xs"><CheckCircle2 className="mr-1 h-3 w-3" />Live (Subletter Active)</Badge>;
