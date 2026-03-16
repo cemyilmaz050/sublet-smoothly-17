@@ -91,7 +91,7 @@ const SignUpPage = () => {
     {
       id: "subtenant" as const,
       icon: Search,
-      title: "I need a place 🏠",
+      title: "I need a place",
       description: "I want to browse sublets and find the perfect summer spot",
     },
   ];
