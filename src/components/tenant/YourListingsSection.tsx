@@ -176,8 +176,8 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
 
                   {/* Status badge */}
                   <div className="absolute left-2 top-2">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${statusColor[listing.status] || "bg-muted text-muted-foreground"}`}>
-                      {listing.status}
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${statusColor[listing.status] || "bg-muted text-muted-foreground"}`}>
+                      {statusLabel[listing.status] || listing.status}
                     </span>
                   </div>
 
