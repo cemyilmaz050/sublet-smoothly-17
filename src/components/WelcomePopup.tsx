@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Check, ShieldCheck, CreditCard, Users, Sparkles, MessageSquare, GitCompare, Home, KeyRound } from "lucide-react";
+import { Check, Sparkles, Home, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const LS_KEY = "subin_welcome_choice";
@@ -58,138 +58,213 @@ interface WelcomePopupProps {
   dismiss: (choice: WelcomeChoice) => void;
 }
 
+const overlayClass = "fixed inset-0 z-[9999] flex items-center justify-center";
+const overlayBg = { backgroundColor: "rgba(0,0,0,0.5)" };
+
+function SubInWordmark() {
+  return (
+    <span className="text-2xl font-bold tracking-tight text-foreground">
+      Sub<span className="text-primary">In</span>
+    </span>
+  );
+}
+
 export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePopupProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [exiting, setExiting] = useState(false);
 
-  if (!show) return null;
+  if (!show && !exiting) return null;
 
-  const handleSublet = () => {
-    dismiss("sublet");
-    navigate("/signup?role=tenant");
+  const fadeOut = (cb: () => void) => {
+    setExiting(true);
+    setTimeout(() => {
+      setExiting(false);
+      cb();
+    }, 200);
   };
 
-  const handleFind = () => {
-    dismiss("find");
-    navigate("/find");
-  };
+  const handleSublet = () => fadeOut(() => { dismiss("sublet"); navigate("/signup?role=tenant"); });
+  const handleFind = () => fadeOut(() => { dismiss("find"); navigate("/find"); });
+  const handleSkip = () => fadeOut(() => dismiss("skip"));
+  const handleContinueSearch = () => fadeOut(() => { dismiss("find"); navigate("/find"); });
+  const handleGoToDashboard = () => fadeOut(() => { dismiss("sublet"); navigate("/tenant/dashboard"); });
 
-  const handleSkip = () => {
-    dismiss("skip");
-  };
-
-  const handleContinueSearch = () => {
-    dismiss("find");
-    navigate("/find");
-  };
-
-  const handleGoToDashboard = () => {
-    dismiss("sublet");
-    navigate("/tenant/dashboard");
-  };
-
-  // Returning user variants
+  // Returning user — finder
   if (returningMode === "finder") {
     return (
       <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/40 backdrop-blur-sm"
-        >
+        {!exiting && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="mx-4 w-full max-w-md rounded-3xl bg-card p-8 text-center shadow-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className={overlayClass}
+            style={overlayBg}
           >
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-              <Home className="h-8 w-8 text-primary" />
-            </div>
-            <h2 className="text-2xl font-bold text-foreground">Welcome back!</h2>
-            <p className="mt-2 text-muted-foreground">
-              Ready to find your Boston summer home? Your preferences are saved.
-            </p>
-            <Button onClick={handleContinueSearch} className="mt-6 w-full rounded-xl py-6 text-base font-semibold">
-              Continue my search
-            </Button>
-            <button onClick={handleSkip} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Skip for now — just browse
-            </button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="z-[10000] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
+            >
+              <div className="mb-4"><SubInWordmark /></div>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                <Home className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">Welcome back!</h2>
+              <p className="mt-2 text-muted-foreground">
+                Ready to find your Boston summer home? Your preferences are saved.
+              </p>
+              <Button onClick={handleContinueSearch} className="mt-6 w-full rounded-xl py-6 text-base font-semibold">
+                Continue my search
+              </Button>
+              <button onClick={handleSkip} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Skip for now — just browse
+              </button>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        )}
       </AnimatePresence>
     );
   }
 
+  // Returning user — subletter
   if (returningMode === "subletter") {
     return (
       <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/40 backdrop-blur-sm"
-        >
+        {!exiting && (
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="mx-4 w-full max-w-md rounded-3xl bg-card p-8 text-center shadow-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className={overlayClass}
+            style={overlayBg}
           >
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
-              <KeyRound className="h-8 w-8 text-foreground" />
-            </div>
-            <h2 className="text-2xl font-bold text-foreground">Welcome back!</h2>
-            <p className="mt-2 text-muted-foreground">
-              Manage your listing or check your messages.
-            </p>
-            <Button onClick={handleGoToDashboard} className="mt-6 w-full rounded-xl py-6 text-base font-semibold">
-              Go to my dashboard
-            </Button>
-            <button onClick={handleSkip} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Skip for now — just browse
-            </button>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="z-[10000] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-8 text-center shadow-2xl"
+            >
+              <div className="mb-4"><SubInWordmark /></div>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent">
+                <KeyRound className="h-8 w-8 text-foreground" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground">Welcome back!</h2>
+              <p className="mt-2 text-muted-foreground">
+                Manage your listing or check your messages.
+              </p>
+              <Button onClick={handleGoToDashboard} className="mt-6 w-full rounded-xl py-6 text-base font-semibold">
+                Go to my dashboard
+              </Button>
+              <button onClick={handleSkip} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Skip for now — just browse
+              </button>
+            </motion.div>
           </motion.div>
-        </motion.div>
+        )}
       </AnimatePresence>
     );
   }
 
-  // First-time popup — mobile bottom sheet vs desktop centered modal
+  // First-time — mobile bottom sheet
   if (isMobile) {
     return (
       <AnimatePresence>
+        {!exiting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[9999]"
+            style={overlayBg}
+          >
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+              className="absolute inset-x-0 bottom-0 z-[10000] max-h-[92dvh] overflow-y-auto rounded-t-[20px] bg-card pb-8 shadow-2xl"
+            >
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
+              </div>
+              <div className="px-6 pt-2">
+                <div className="text-center mb-6">
+                  <div className="mb-3"><SubInWordmark /></div>
+                  <h2 className="text-2xl font-bold text-foreground">Welcome to SubIn</h2>
+                  <p className="mt-1.5 text-muted-foreground">What brings you here today?</p>
+                </div>
+                <OptionCard
+                  icon={<Home className="h-6 w-6" />}
+                  title="I need a place this summer"
+                  description="Answer 7 quick questions and our AI finds your perfect match"
+                  bullets={["Personalized matches", "Compare side by side", "Message hosts instantly"]}
+                  buttonText="Find my place"
+                  onClick={handleFind}
+                  highlighted
+                  aiPowered
+                />
+                <div className="mt-4">
+                  <OptionCard
+                    icon={<KeyRound className="h-6 w-6" />}
+                    title="I have a place to sublet"
+                    description="List your apartment and find a verified subtenant fast"
+                    bullets={["Verified renters only", "Managed by Boston Brokerage Group", "Get paid securely"]}
+                    buttonText="Start listing"
+                    onClick={handleSublet}
+                  />
+                </div>
+                <button onClick={handleSkip} className="mt-6 block w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Skip for now — just browse
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // Desktop centered modal
+  return (
+    <AnimatePresence>
+      {!exiting && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[200] bg-foreground/40 backdrop-blur-sm"
+          transition={{ duration: 0.2 }}
+          className={overlayClass}
+          style={overlayBg}
         >
           <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-            className="absolute inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card pb-8 shadow-2xl"
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.92, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="z-[10000] mx-4 w-full max-w-[560px] rounded-[20px] bg-card p-10 shadow-2xl"
           >
-            <div className="flex justify-center pt-3 pb-2">
-              <div className="h-1.5 w-12 rounded-full bg-muted-foreground/20" />
+            <div className="text-center mb-8">
+              <div className="mb-4"><SubInWordmark /></div>
+              <h2 className="text-3xl font-bold text-foreground">Welcome to SubIn</h2>
+              <p className="mt-2 text-lg text-muted-foreground">What brings you here today?</p>
             </div>
-
-            <div className="px-6 pt-2">
-              <div className="text-center mb-6">
-                <img src="/favicon.png" alt="SubIn" className="mx-auto mb-3 h-12 w-12 rounded-xl" />
-                <h2 className="text-2xl font-bold text-foreground">Welcome to SubIn</h2>
-                <p className="mt-1.5 text-muted-foreground">What brings you here today?</p>
-              </div>
-
+            <div className="grid grid-cols-2 gap-5">
+              <OptionCard
+                icon={<KeyRound className="h-6 w-6" />}
+                title="I have a place to sublet"
+                description="List your apartment and find a verified subtenant fast"
+                bullets={["Verified renters only", "Managed by Boston Brokerage Group", "Get paid securely"]}
+                buttonText="Start listing"
+                onClick={handleSublet}
+              />
               <OptionCard
                 icon={<Home className="h-6 w-6" />}
                 title="I need a place this summer"
@@ -200,77 +275,13 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
                 highlighted
                 aiPowered
               />
-
-              <div className="mt-4">
-                <OptionCard
-                  icon={<KeyRound className="h-6 w-6" />}
-                  title="I have a place to sublet"
-                  description="List your apartment and find a verified subtenant fast"
-                  bullets={["Verified renters only", "Managed by Boston Brokerage Group", "Get paid securely"]}
-                  buttonText="Start listing"
-                  onClick={handleSublet}
-                />
-              </div>
-
-              <button onClick={handleSkip} className="mt-6 block w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Skip for now — just browse
-              </button>
             </div>
+            <button onClick={handleSkip} className="mt-6 block w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Skip for now — just browse
+            </button>
           </motion.div>
         </motion.div>
-      </AnimatePresence>
-    );
-  }
-
-  // Desktop centered modal
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
-        className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/40 backdrop-blur-sm"
-      >
-        <motion.div
-          initial={{ scale: 0.92, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.92, opacity: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="mx-4 w-full max-w-2xl rounded-3xl bg-card p-10 shadow-2xl"
-        >
-          <div className="text-center mb-8">
-            <img src="/favicon.png" alt="SubIn" className="mx-auto mb-4 h-14 w-14 rounded-xl" />
-            <h2 className="text-3xl font-bold text-foreground">Welcome to SubIn</h2>
-            <p className="mt-2 text-lg text-muted-foreground">What brings you here today?</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-5">
-            <OptionCard
-              icon={<KeyRound className="h-6 w-6" />}
-              title="I have a place to sublet"
-              description="List your apartment and find a verified subtenant fast"
-              bullets={["Verified renters only", "Managed by Boston Brokerage Group", "Get paid securely"]}
-              buttonText="Start listing"
-              onClick={handleSublet}
-            />
-            <OptionCard
-              icon={<Home className="h-6 w-6" />}
-              title="I need a place this summer"
-              description="Answer 7 quick questions and our AI finds your perfect match"
-              bullets={["Personalized matches", "Compare side by side", "Message hosts instantly"]}
-              buttonText="Find my place"
-              onClick={handleFind}
-              highlighted
-              aiPowered
-            />
-          </div>
-
-          <button onClick={handleSkip} className="mt-6 block w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Skip for now — just browse
-          </button>
-        </motion.div>
-      </motion.div>
+      )}
     </AnimatePresence>
   );
 }
