@@ -86,7 +86,7 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
 
     case "listing_live":
       return `<div style="${baseStyle}">${logo}
-        <h1 style="font-size: 22px; margin-bottom: 8px;">Your Listing is Live! 🏠</h1>
+        <h1 style="font-size: 22px; margin-bottom: 8px;">Your Listing is Live!</h1>
         <p style="${mutedStyle}">Your listing "${data.listing_title}" is now live on SubIn and visible to potential sub-lessees.</p>
         <a href="${data.action_url}" style="${btnStyle}">View Your Listing</a>
         ${footer}</div>`;
