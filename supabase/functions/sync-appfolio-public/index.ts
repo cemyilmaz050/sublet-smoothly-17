@@ -172,9 +172,17 @@ serve(async (req) => {
 
     logStep("Found integration", { url: integration.appfolio_url });
 
-    // Validate URL format
+    // Validate URL format with proper hostname parsing to prevent SSRF
     const url = integration.appfolio_url;
-    if (!url.includes("appfolio.com")) {
+    let isValidAppfolioUrl = false;
+    try {
+      const parsed = new URL(url);
+      isValidAppfolioUrl = parsed.protocol === "https:" &&
+        (parsed.hostname === "appfolio.com" || parsed.hostname.endsWith(".appfolio.com"));
+    } catch {
+      isValidAppfolioUrl = false;
+    }
+    if (!isValidAppfolioUrl) {
       await supabaseAdmin.from("manager_integrations").update({
         status: "error",
         sync_error: "Invalid AppFolio URL. Must be a valid appfolio.com URL.",
