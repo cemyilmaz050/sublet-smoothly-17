@@ -67,19 +67,63 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     }
   }, [activeStep, steps]);
 
+  // BBG aliases for fuzzy matching
+  const BBG_ALIASES = ["boston", "brokerage", "bbg", "management", "boston brokerage"];
+  const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
+
+  // Load default suggestion (BBG) when entering management path
+  useEffect(() => {
+    if (data.path !== "management") return;
+    if (data.managementGroupId) return; // already selected
+    supabase
+      .from("property_managers_public")
+      .select("*")
+      .eq("id", BBG_PM_ID)
+      .single()
+      .then(({ data: bbg }) => {
+        if (bbg) setMgmtResults([bbg]);
+      });
+  }, [data.path, data.managementGroupId]);
+
   // Search management groups
   useEffect(() => {
-    if (!mgmtSearch.trim() || data.path !== "management") {
-      setMgmtResults([]);
+    if (data.path !== "management") return;
+    if (!mgmtSearch.trim()) {
+      // Show default BBG suggestion
+      supabase
+        .from("property_managers_public")
+        .select("*")
+        .eq("id", BBG_PM_ID)
+        .single()
+        .then(({ data: bbg }) => {
+          if (bbg) setMgmtResults([bbg]);
+        });
       return;
     }
     const timer = setTimeout(async () => {
+      const search = mgmtSearch.trim().toLowerCase();
+      // Check if search matches any BBG alias
+      const matchesBbgAlias = BBG_ALIASES.some(alias => alias.includes(search) || search.includes(alias));
+      
       const { data: results } = await supabase
         .from("property_managers_public")
         .select("*")
         .ilike("name", `%${mgmtSearch}%`)
         .limit(10);
-      setMgmtResults(results || []);
+      
+      let finalResults = results || [];
+      
+      // If alias matched but BBG wasn't in results, fetch and prepend it
+      if (matchesBbgAlias && !finalResults.some((r: any) => r.id === BBG_PM_ID)) {
+        const { data: bbg } = await supabase
+          .from("property_managers_public")
+          .select("*")
+          .eq("id", BBG_PM_ID)
+          .single();
+        if (bbg) finalResults = [bbg, ...finalResults];
+      }
+      
+      setMgmtResults(finalResults);
     }, 300);
     return () => clearTimeout(timer);
   }, [mgmtSearch, data.path]);
@@ -313,7 +357,12 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           className="pr-10"
         />
         {mgmtResults.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full rounded-xl border bg-popover shadow-elevated max-h-64 overflow-y-auto">
+          <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated max-h-64 overflow-y-auto">
+            {!mgmtSearch.trim() && (
+              <div className="px-4 pt-3 pb-1">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested — Our verified partner</span>
+              </div>
+            )}
             {mgmtResults.map((mgr: any) => (
               <button
                 key={mgr.id}
@@ -324,7 +373,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                     managementGroupLogo: mgr.logo_url || "",
                   });
                   setMgmtSearch("");
-                  setMgmtResults([]);
                   revealNext();
                 }}
                 className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors"
@@ -335,16 +383,16 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-foreground">{mgr.name}</p>
-                    {mgr.verified && <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald"><CheckCircle className="h-3 w-3" />Verified</span>}
+                    {mgr.verified && <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600"><CheckCircle className="h-3 w-3" />Verified Partner</span>}
                   </div>
-                  <p className="text-xs text-muted-foreground">{mgr.city}{mgr.state ? `, ${mgr.state}` : ""} · {mgr.properties_count || 0} properties</p>
+                  <p className="text-xs text-muted-foreground">Official SubIn partner — {mgr.city || "Boston"}{mgr.state ? `, ${mgr.state}` : ", MA"}</p>
                 </div>
               </button>
             ))}
           </div>
         )}
         {mgmtSearch.trim() && mgmtResults.length === 0 && (
-          <div className="absolute z-10 mt-1 w-full rounded-xl border bg-popover p-4 shadow-elevated">
+          <div className="mt-3 w-full rounded-xl border bg-popover p-4 shadow-elevated">
             <p className="text-sm text-muted-foreground">No results found.</p>
             <button
               onClick={() => { update({ path: "own" }); setActiveStep(1); }}
@@ -355,6 +403,18 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           </div>
         )}
       </div>
+      {data.managementGroupId && (
+        <div className="flex items-center gap-3 rounded-xl border-2 border-primary bg-primary/5 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <span className="text-xs font-bold text-primary">BBG</span>
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">{data.managementGroupName}</p>
+            <p className="text-xs text-muted-foreground">Selected</p>
+          </div>
+          <CheckCircle className="h-5 w-5 text-primary" />
+        </div>
+      )}
     </div>
   );
 
