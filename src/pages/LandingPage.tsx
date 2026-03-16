@@ -183,7 +183,7 @@ const LandingPage = () => {
                 step: "03",
                 icon: Home,
                 title: "Match & move in",
-                description: "Find a verified guest, sign digitally, and hand over the keys. Easy as that 🤝",
+                description: "Find a verified guest, sign digitally, and hand over the keys. Easy as that.",
                 color: "bg-emerald/10 text-emerald",
               },
             ].map((item, index) => (
