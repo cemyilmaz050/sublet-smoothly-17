@@ -81,7 +81,7 @@ const NotificationBell = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-full transition-all duration-150 ease-in-out hover:bg-muted">
+        <Button variant="ghost" size="icon" className="relative rounded-full transition-all duration-150 ease-in-out hover:bg-[#F3F4F6]">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground min-w-[18px] h-[18px] px-1">

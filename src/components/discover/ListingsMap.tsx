@@ -80,7 +80,7 @@ const PILL_COMMON = `
 
 const BASE_STYLE = `
   ${PILL_COMMON}
-  background: #F5F0E8;
+  background: #ffffff;
   color: #1A1A2E;
   border: 1px solid rgba(0,0,0,0.08);
   box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.04);
@@ -104,7 +104,7 @@ const MOBILE_EXTRA = `
 
 const CLUSTER_STYLE = `
   ${PILL_COMMON}
-  background: #F5F0E8;
+  background: #ffffff;
   color: #4845D2;
   border: 2px solid #4845D2;
   box-shadow: 0 2px 8px rgba(72,69,210,0.15), 0 1px 2px rgba(0,0,0,0.04);
@@ -121,14 +121,14 @@ function createPriceIcon(price: number | null, isActive: boolean, isMobile: bool
     ? ACTIVE_STYLE
     : BASE_STYLE + (isMobile ? MOBILE_EXTRA : "");
   const delayStyle = animDelay > 0 ? `animation-delay: ${animDelay}ms;` : "";
-  const bgColor = isActive ? '#4845D2' : '#F5F0E8';
+  const bgColor = isActive ? '#4845D2' : '#ffffff';
   const notch = NOTCH.replace('currentBgColor', bgColor);
 
   return L.divIcon({
     className: "subin-price-marker",
     html: `<div style="${style} ${delayStyle}"
       onmouseenter="this.style.background='#4845D2';this.style.color='#ffffff';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1.05)';this.style.boxShadow='0 4px 16px rgba(72,69,210,0.35), 0 2px 4px rgba(0,0,0,0.08)';this.querySelector('.notch').style.borderTopColor='#4845D2';"
-      onmouseleave="${isActive ? '' : "this.style.background='#F5F0E8';this.style.color='#1A1A2E';this.style.borderColor='rgba(0,0,0,0.08)';this.style.transform='translate(-50%,-100%) scale(1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.04)';this.querySelector('.notch').style.borderTopColor='#F5F0E8';"}"
+      onmouseleave="${isActive ? '' : "this.style.background='#ffffff';this.style.color='#1A1A2E';this.style.borderColor='rgba(0,0,0,0.08)';this.style.transform='translate(-50%,-100%) scale(1)';this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.04)';this.querySelector('.notch').style.borderTopColor='#ffffff';"}"
     >${label}<span class="notch" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid ${bgColor};"></span></div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
@@ -141,8 +141,8 @@ function createClusterIcon(count: number, animDelay: number = 0) {
     className: "subin-cluster-marker",
     html: `<div style="${CLUSTER_STYLE} ${delayStyle}"
       onmouseenter="this.style.background='#4845D2';this.style.color='#ffffff';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1.05)';this.querySelector('.notch').style.borderTopColor='#4845D2';"
-      onmouseleave="this.style.background='#F5F0E8';this.style.color='#4845D2';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';this.querySelector('.notch').style.borderTopColor='#F5F0E8';"
-    >${count} listings<span class="notch" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #F5F0E8;"></span></div>`,
+      onmouseleave="this.style.background='#ffffff';this.style.color='#4845D2';this.style.borderColor='#4845D2';this.style.transform='translate(-50%,-100%) scale(1)';this.querySelector('.notch').style.borderTopColor='#ffffff';"
+    >${count} listings<span class="notch" style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #ffffff;"></span></div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
   });
