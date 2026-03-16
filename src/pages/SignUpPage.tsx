@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Home, Search, Mail, ArrowRight, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, GraduationCap } from "lucide-react";
+import { Home, Search, Mail, ArrowRight, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, GraduationCap, Building2 } from "lucide-react";
 
 import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
@@ -35,8 +35,8 @@ const SignUpPage = () => {
   const { user, isReady } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const initialRole = searchParams.get("role") as "tenant" | "subtenant" | null;
-  const [selectedRole, setSelectedRole] = useState<"tenant" | "subtenant" | null>(initialRole);
+  const initialRole = searchParams.get("role") as "tenant" | "subtenant" | "manager" | null;
+  const [selectedRole, setSelectedRole] = useState<"tenant" | "subtenant" | "manager" | null>(initialRole);
   const [step, setStep] = useState(initialRole ? 2 : 1);
 
   const [firstName, setFirstName] = useState("");
@@ -53,6 +53,7 @@ const SignUpPage = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [nonBbgManagerBlock, setNonBbgManagerBlock] = useState(false);
 
   const isEduEmail = email.trim().toLowerCase().endsWith(".edu");
 
@@ -94,6 +95,12 @@ const SignUpPage = () => {
       title: "I need a place",
       description: "I want to browse sublets and find the perfect summer spot",
     },
+    {
+      id: "manager" as const,
+      icon: Building2,
+      title: "I am a property manager",
+      description: "Manage your properties and oversee sublet listings on SubIn",
+    },
   ];
 
   const validate = (): boolean => {
@@ -124,7 +131,7 @@ const SignUpPage = () => {
     }
 
     if (!selectedRole) {
-      setSubmitError("Pick whether you're leaving or looking for a place first!");
+      setSubmitError("Pick whether you're leaving, looking, or managing first!");
       setStep(1);
       return;
     }
@@ -134,13 +141,19 @@ const SignUpPage = () => {
       return;
     }
 
+    // If manager role selected, check email domain
+    const isBbgEmail = email.trim().toLowerCase().endsWith("@realestateboston.com");
+    if (selectedRole === "manager" && !isBbgEmail) {
+      setSubmitError(null);
+      setNonBbgManagerBlock(true);
+      return;
+    }
+
     setLoading(true);
     setSubmitError(null);
 
-    // Auto-assign manager role for BBG staff emails
-    const effectiveRole = email.trim().toLowerCase().endsWith("@realestateboston.com")
-      ? "manager"
-      : selectedRole;
+    // Use manager role for BBG emails regardless of selection, or if they picked manager
+    const effectiveRole = isBbgEmail ? "manager" : selectedRole;
 
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -212,6 +225,38 @@ const SignUpPage = () => {
     setResending(false);
   };
 
+  // Non-BBG manager block screen
+  if (nonBbgManagerBlock) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container flex items-center justify-center px-4 py-12 sm:py-16">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center space-y-6">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <Building2 className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">Property Manager Access</h1>
+            <p className="text-muted-foreground leading-relaxed">
+              The property manager dashboard is currently only available to Boston Brokerage Group staff. If you are a BBG employee, please use your official BBG email address to sign in.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              If you are a different property manager, contact us at{" "}
+              <a href="mailto:hello@subinapp.com" className="font-medium text-primary hover:underline">hello@subinapp.com</a>{" "}
+              to get set up on SubIn.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button onClick={() => { setNonBbgManagerBlock(false); setStep(2); }} size="lg">
+                Try with a BBG email
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/listings")}>
+                Browse listings instead
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   // Duplicate account screen
   if (duplicateEmail) {
     return (
@@ -282,7 +327,7 @@ const SignUpPage = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg">
           <div className="text-center">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-              {step === 1 ? "What brings you to SubIn? 👋" : "Let's get you set up"}
+              {step === 1 ? "What brings you to SubIn?" : "Let's get you set up"}
             </h1>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
               {step === 1 ? "Pick one — you can always switch later" : "Takes under 30 seconds"}
@@ -311,7 +356,7 @@ const SignUpPage = () => {
                   key={role.id}
                   onClick={() => { setSelectedRole(role.id); setStep(2); }}
                   className={cn(
-                    "group w-full rounded-xl border-2 p-5 sm:p-6 text-left transition-all hover:border-primary hover:bg-accent/50",
+                    "group w-full rounded-xl border-2 p-4 sm:p-5 text-left transition-all hover:border-primary hover:bg-accent/50",
                     selectedRole === role.id ? "border-primary bg-accent/50" : "border-border"
                   )}
                 >
