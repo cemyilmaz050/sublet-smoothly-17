@@ -33,6 +33,7 @@ interface AppWithDetails {
   listing_headline: string | null;
   listing_address: string | null;
   listing_monthly_rent: number | null;
+  renter_verified?: boolean;
 }
 
 const ManagerApplications = () => {
@@ -75,6 +76,10 @@ const ManagerApplications = () => {
       const { data: profiles } = await supabase.from("profiles_public" as any).select("id, first_name, last_name").in("id", applicantIds) as { data: { id: string; first_name: string | null; last_name: string | null }[] | null };
       const profileMap = Object.fromEntries((profiles || []).map(p => [p.id, p]));
 
+      // Fetch renter verification status
+      const { data: renterApps } = await supabase.from("renter_applications" as any).select("renter_id").in("renter_id", applicantIds) as any;
+      const renterAppSet = new Set((renterApps || []).map((r: any) => r.renter_id));
+
       return apps.map(app => {
         const p = profileMap[app.applicant_id];
         const l = listingMap[app.listing_id];
@@ -84,6 +89,7 @@ const ManagerApplications = () => {
           listing_headline: l?.headline ?? null,
           listing_address: l?.address ?? null,
           listing_monthly_rent: l?.monthly_rent ?? null,
+          renter_verified: renterAppSet.has(app.applicant_id),
         } as AppWithDetails;
       });
     },
@@ -126,6 +132,11 @@ const ManagerApplications = () => {
   });
 
   const handleDecision = async (app: AppWithDetails, decision: "approved" | "declined") => {
+    // Block approving unverified renters
+    if (decision === "approved" && !app.renter_verified) {
+      toast.error("This renter has not completed all 3 verification steps yet — you can only confirm fully verified renters.");
+      return;
+    }
     await updateMut.mutateAsync({ id: app.id, status: decision });
     await supabase.from("notifications").insert({
       user_id: app.applicant_id,
@@ -286,12 +297,24 @@ const ManagerApplications = () => {
                         {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "—"}
                       </div>
                       {app.message && <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>}
-                      {bgStatus && (
-                        <Badge variant={bgStatus === "verified" ? "emerald" : bgStatus === "declined" ? "destructive" : "secondary"} className="mt-2 text-xs gap-1">
-                          <ShieldCheck className="h-3 w-3" />
-                          {bgStatus === "verified" ? "BG Verified" : bgStatus === "declined" ? "BG Declined" : "Needs Info"}
-                        </Badge>
-                      )}
+                      {/* Renter verification badge */}
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {app.renter_verified ? (
+                          <Badge variant="emerald" className="text-[10px] gap-0.5">
+                            <ShieldCheck className="h-3 w-3" /> Fully Verified
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-[10px] gap-0.5 border-amber/30 text-amber">
+                            ⏳ Verification In Progress
+                          </Badge>
+                        )}
+                        {bgStatus && (
+                          <Badge variant={bgStatus === "verified" ? "emerald" : bgStatus === "declined" ? "destructive" : "secondary"} className="text-[10px] gap-0.5">
+                            <ShieldCheck className="h-3 w-3" />
+                            {bgStatus === "verified" ? "BG Verified" : bgStatus === "declined" ? "BG Declined" : "Needs Info"}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-4 flex gap-2">

@@ -11,6 +11,7 @@ interface Applicant {
   name: string;
   initial: string;
   verified: boolean;
+  renter_verified?: boolean;
   listing_headline: string;
   listing_address: string;
   message: string | null;
@@ -66,6 +67,15 @@ const RecentApplicants = ({ applicants, onAccept, onDecline }: Props) => {
                       {app.verified && <CheckCircle className="h-3.5 w-3.5 shrink-0 text-emerald" />}
                     </div>
                     <p className="text-[10px] text-muted-foreground truncate">{app.listing_address}</p>
+                    {app.renter_verified ? (
+                      <Badge variant="outline" className="mt-1 text-[9px] border-emerald/30 text-emerald gap-0.5 py-0 px-1.5">
+                        <CheckCircle className="h-2.5 w-2.5" /> Fully Verified
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="mt-1 text-[9px] border-amber/30 text-amber gap-0.5 py-0 px-1.5">
+                        In Progress
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <p className="mt-2 text-[11px] text-muted-foreground">
