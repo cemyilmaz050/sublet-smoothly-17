@@ -71,10 +71,12 @@ const App = () => (
       <BrowserRouter>
         <ErrorBoundary>
         <AuthProvider>
+          <VerificationPollingProvider>
           <AuthModalProvider>
             <AuthModal />
             <div className="flex min-h-screen flex-col">
               <PersistentNavbar />
+              <VerificationPendingBanner />
               <div className="flex-1">
                 <Routes>
                   {/* Public routes */}
