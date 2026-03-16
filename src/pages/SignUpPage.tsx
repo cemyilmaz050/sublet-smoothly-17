@@ -35,8 +35,8 @@ const SignUpPage = () => {
   const { user, isReady } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const initialRole = searchParams.get("role") as "tenant" | "subtenant" | null;
-  const [selectedRole, setSelectedRole] = useState<"tenant" | "subtenant" | null>(initialRole);
+  const initialRole = searchParams.get("role") as "tenant" | "subtenant" | "manager" | null;
+  const [selectedRole, setSelectedRole] = useState<"tenant" | "subtenant" | "manager" | null>(initialRole);
   const [step, setStep] = useState(initialRole ? 2 : 1);
 
   const [firstName, setFirstName] = useState("");
