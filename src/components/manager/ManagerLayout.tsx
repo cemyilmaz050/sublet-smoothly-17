@@ -40,6 +40,23 @@ function SidebarNav() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { user } = useAuth();
+
+  const { data: pendingCount = 0 } = useQuery({
+    queryKey: ["manager-pending-count", user?.id],
+    enabled: !!user,
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("listings")
+        .select("id", { count: "exact", head: true })
+        .eq("manager_id", user!.id)
+        .eq("status", "pending");
+      return count ?? 0;
+    },
+  });
+
+  const badges: Record<string, number> = { pendingApprovals: pendingCount };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
