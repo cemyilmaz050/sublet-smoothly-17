@@ -9,6 +9,8 @@ import { VerificationPollingProvider } from "@/hooks/useVerificationPolling";
 import AuthModal from "@/components/AuthModal";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ManagerProtectedRoute from "@/components/ManagerProtectedRoute";
+import AdminProtectedRoute from "@/components/AdminProtectedRoute";
 import Navbar from "@/components/Navbar";
 import VerificationPendingBanner from "@/components/VerificationPendingBanner";
 import Footer from "@/components/Footer";
