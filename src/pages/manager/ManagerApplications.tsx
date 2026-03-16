@@ -297,12 +297,24 @@ const ManagerApplications = () => {
                         {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "—"}
                       </div>
                       {app.message && <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>}
-                      {bgStatus && (
-                        <Badge variant={bgStatus === "verified" ? "emerald" : bgStatus === "declined" ? "destructive" : "secondary"} className="mt-2 text-xs gap-1">
-                          <ShieldCheck className="h-3 w-3" />
-                          {bgStatus === "verified" ? "BG Verified" : bgStatus === "declined" ? "BG Declined" : "Needs Info"}
-                        </Badge>
-                      )}
+                      {/* Renter verification badge */}
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {app.renter_verified ? (
+                          <Badge variant="emerald" className="text-[10px] gap-0.5">
+                            <ShieldCheck className="h-3 w-3" /> Fully Verified
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-[10px] gap-0.5 border-amber/30 text-amber">
+                            ⏳ Verification In Progress
+                          </Badge>
+                        )}
+                        {bgStatus && (
+                          <Badge variant={bgStatus === "verified" ? "emerald" : bgStatus === "declined" ? "destructive" : "secondary"} className="text-[10px] gap-0.5">
+                            <ShieldCheck className="h-3 w-3" />
+                            {bgStatus === "verified" ? "BG Verified" : bgStatus === "declined" ? "BG Declined" : "Needs Info"}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-4 flex gap-2">
