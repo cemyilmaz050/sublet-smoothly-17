@@ -85,7 +85,7 @@ const App = () => (
               <div className="flex-1">
                 <Routes>
                   {/* Public routes */}
-                  <Route path="/" element={<ListingsPage />} />
+                  <Route path="/" element={<HomePage />} />
                   <Route path="/listings" element={<ListingsPage />} />
                   <Route path="/about" element={<LandingPage />} />
                   <Route path="/signup" element={<SignUpPage />} />
