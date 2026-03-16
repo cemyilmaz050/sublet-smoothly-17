@@ -75,7 +75,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     }
     const timer = setTimeout(async () => {
       const { data: results } = await supabase
-        .from("property_managers")
+        .from("property_managers_public")
         .select("*")
         .ilike("name", `%${mgmtSearch}%`)
         .limit(10);
