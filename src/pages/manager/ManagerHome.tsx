@@ -124,7 +124,7 @@ const ManagerHome = () => {
             <p className="text-sm text-muted-foreground py-6 text-center">No recent activity yet.</p>
           ) : (
             recentNotifications.map((n: any) => (
-              <Link key={n.id} to={n.link || "/manager/notifications"}>
+              <Link key={n.id} to={n.link || `${P}/notifications`}>
                 <div className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent/50">
                   <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">
                     {notifIcon(n.type)}

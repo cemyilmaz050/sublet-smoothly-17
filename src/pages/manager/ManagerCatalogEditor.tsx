@@ -89,7 +89,7 @@ const ManagerCatalogEditor = () => {
 
       if (!prop) {
         toast.error("Property not found");
-        navigate("/manager/catalog");
+        navigate("/portal-mgmt-bbg/catalog");
         return;
       }
 
