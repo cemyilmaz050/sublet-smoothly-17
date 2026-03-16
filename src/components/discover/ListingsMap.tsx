@@ -104,10 +104,10 @@ const MOBILE_EXTRA = `
 
 const CLUSTER_STYLE = `
   ${PILL_COMMON}
-  background: #ffffff;
-  color: #4845D2;
-  border: 2px solid #4845D2;
-  box-shadow: 0 2px 8px rgba(72,69,210,0.15), 0 1px 2px rgba(0,0,0,0.04);
+  background: #4845D2;
+  color: #ffffff;
+  border: 1px solid #4845D2;
+  box-shadow: 0 4px 16px rgba(72,69,210,0.35), 0 2px 4px rgba(0,0,0,0.08);
   transform: translate(-50%, -100%);
   padding: 6px 14px;
   font-size: 12px;
