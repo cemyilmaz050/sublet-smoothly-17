@@ -318,7 +318,7 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <p className="text-2xl font-bold text-foreground">Be the SubIn rep at your university 🎓</p>
+            <p className="text-2xl font-bold text-foreground">Be the SubIn rep at your university</p>
             <p className="mt-2 text-muted-foreground">
               Earn $50 for every successful sublet you refer. Apply to become a campus ambassador.
             </p>
