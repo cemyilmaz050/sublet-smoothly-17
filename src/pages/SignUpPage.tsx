@@ -317,7 +317,7 @@ const SignUpPage = () => {
                   key={role.id}
                   onClick={() => { setSelectedRole(role.id); setStep(2); }}
                   className={cn(
-                    "group w-full rounded-xl border-2 p-5 sm:p-6 text-left transition-all hover:border-primary hover:bg-accent/50",
+                    "group w-full rounded-xl border-2 p-4 sm:p-5 text-left transition-all hover:border-primary hover:bg-accent/50",
                     selectedRole === role.id ? "border-primary bg-accent/50" : "border-border"
                   )}
                 >
