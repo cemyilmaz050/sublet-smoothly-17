@@ -56,12 +56,12 @@ const FinderCompare = ({ listings, answers, onSelect }: Props) => {
                     </Badge>
                     {isBestValue && (
                       <Badge className="bg-emerald/90 text-emerald-foreground font-semibold">
-                        💚 Best Value
+                        <Heart className="mr-1 h-3 w-3" /> Best Value
                       </Badge>
                     )}
                     {isClosest && (
                       <Badge className="bg-primary text-primary-foreground font-semibold">
-                        📍 Closest to You
+                        <Navigation className="mr-1 h-3 w-3" /> Closest to You
                       </Badge>
                     )}
                   </div>
