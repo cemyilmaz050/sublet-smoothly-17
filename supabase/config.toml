@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.delete-listing]
 verify_jwt = false
+
+[functions.admin-verify-user]
+verify_jwt = false
