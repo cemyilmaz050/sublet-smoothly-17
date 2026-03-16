@@ -52,7 +52,7 @@ const HomePage = () => {
         <motion.span
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground"
+          className="mb-3 sm:mb-5 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground"
         >
           Boston Summer Sublets
         </motion.span>
@@ -61,7 +61,7 @@ const HomePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="text-[32px] sm:text-[52px] font-semibold leading-[1.08] tracking-tight text-foreground"
+          className="text-[26px] sm:text-[52px] font-semibold leading-[1.08] tracking-tight text-foreground"
         >
           Your Boston summer, sorted
         </motion.h1>
@@ -70,9 +70,9 @@ const HomePage = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mt-4 max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed"
+          className="mt-2 sm:mt-4 max-w-xl text-[13px] sm:text-lg text-muted-foreground leading-snug sm:leading-relaxed line-clamp-2"
         >
-          Skip the stress. Find a verified sublet near your school or internship in minutes — or list your place and earn while you're away.
+          Find a verified sublet near your school or internship — or list your place and earn while you're away.
         </motion.p>
 
         {/* Trust pills */}
@@ -80,37 +80,38 @@ const HomePage = () => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="mt-6 flex flex-wrap items-center justify-center gap-3"
+          className="mt-3 sm:mt-6 flex items-center justify-center gap-2 sm:gap-3"
         >
           {[
-            { icon: ShieldCheck, label: "Verified listings" },
-            { icon: Building2, label: "BBG approved" },
-            { icon: Lock, label: "Secure payments" },
+            { icon: ShieldCheck, label: "Verified", labelFull: "Verified listings" },
+            { icon: Building2, label: "BBG approved", labelFull: "BBG approved" },
+            { icon: Lock, label: "Secure", labelFull: "Secure payments" },
           ].map((pill) => (
-            <span key={pill.label} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1.5 text-xs text-muted-foreground">
-              <pill.icon className="h-3.5 w-3.5" />
-              {pill.label}
+            <span key={pill.labelFull} className="inline-flex items-center gap-1 sm:gap-1.5 rounded-full border border-border bg-muted/50 px-2 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs text-muted-foreground whitespace-nowrap">
+              <pill.icon className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+              <span className="sm:hidden">{pill.label}</span>
+              <span className="hidden sm:inline">{pill.labelFull}</span>
             </span>
           ))}
         </motion.div>
 
         {/* Two choice cards */}
-        <div className="mt-10 grid w-full max-w-2xl gap-5 sm:grid-cols-2">
+        <div className="mt-6 sm:mt-10 grid w-full max-w-2xl gap-2.5 sm:gap-5 grid-cols-2">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
             <Link to="/signup?role=tenant" className="block h-full">
-              <div className="group flex h-full flex-col items-center rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
-                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
-                  <KeyRound className="h-7 w-7 text-foreground" strokeWidth={1.5} />
+              <div className="group flex h-full flex-col items-center rounded-2xl border border-border bg-card p-4 sm:p-8 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                <div className="mb-3 sm:mb-5 flex h-9 w-9 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-muted">
+                  <KeyRound className="h-5 w-5 sm:h-7 sm:w-7 text-foreground" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">I have a place to sublet</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <h3 className="text-[15px] sm:text-lg font-semibold text-foreground leading-tight">I have a place to sublet</h3>
+                <p className="mt-1 sm:mt-2 text-[11px] sm:text-sm leading-snug sm:leading-relaxed text-muted-foreground">
                   List in 3 minutes and find a verified subtenant fast
                 </p>
-                <Button className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button className="mt-3 sm:mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 h-10 sm:h-11 text-sm">
                   Start listing
                 </Button>
               </div>
@@ -123,19 +124,19 @@ const HomePage = () => {
             transition={{ delay: 0.28 }}
           >
             <Link to="/find" className="block h-full">
-              <div className="group flex h-full flex-col items-center rounded-2xl border border-border bg-card p-8 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
-                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-muted">
-                  <Home className="h-7 w-7 text-foreground" strokeWidth={1.5} />
+              <div className="group flex h-full flex-col items-center rounded-2xl border border-border bg-card p-4 sm:p-8 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                <div className="mb-3 sm:mb-5 flex h-9 w-9 sm:h-14 sm:w-14 items-center justify-center rounded-xl bg-muted">
+                  <Home className="h-5 w-5 sm:h-7 sm:w-7 text-foreground" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">I need a place this summer</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <h3 className="text-[15px] sm:text-lg font-semibold text-foreground leading-tight">I need a place this summer</h3>
+                <p className="mt-1 sm:mt-2 text-[11px] sm:text-sm leading-snug sm:leading-relaxed text-muted-foreground">
                   Answer 5 questions — AI finds your perfect match
                 </p>
-                <Button className="mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button className="mt-3 sm:mt-6 w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 h-10 sm:h-11 text-sm">
                   <Sparkles className="mr-1.5 h-4 w-4" />
                   Find my place
                 </Button>
-                <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium text-primary">
+                <span className="mt-2 hidden sm:inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium text-primary">
                   <Sparkles className="h-3 w-3" /> AI Powered
                 </span>
               </div>
@@ -143,12 +144,12 @@ const HomePage = () => {
           </motion.div>
         </div>
 
-        {/* Stats bar */}
+        {/* Stats bar — hidden on mobile */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="mt-12 flex items-center justify-center gap-8 sm:gap-12"
+          className="mt-12 hidden sm:flex items-center justify-center gap-8 sm:gap-12"
         >
           {[
             { value: stats.listings, label: "Active listings" },
@@ -167,7 +168,7 @@ const HomePage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.55 }}
-          className="mt-8"
+          className="mt-4 sm:mt-8"
         >
           <Link to="/listings" className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
             or browse all listings
