@@ -32,6 +32,7 @@ import AgreementPage from "./pages/AgreementPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import AIFinderPage from "./pages/AIFinderPage";
 
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";
@@ -47,19 +48,21 @@ import ManagerSettings from "./pages/manager/ManagerSettings";
 
 const queryClient = new QueryClient();
 
-/** Persistent navbar shown on all routes except the manager portal */
+/** Persistent navbar shown on all routes except the manager portal and AI finder */
 function PersistentNavbar() {
   const location = useLocation();
   const isManagerRoute = location.pathname.startsWith("/manager");
-  if (isManagerRoute) return null;
+  const isFinderRoute = location.pathname === "/find";
+  if (isManagerRoute || isFinderRoute) return null;
   return <Navbar />;
 }
 
-/** Hide footer on full-screen pages like messages and manager portal */
+/** Hide footer on full-screen pages like messages, manager portal, and AI finder */
 function PersistentFooter() {
   const location = useLocation();
   if (location.pathname.startsWith("/manager")) return null;
   if (location.pathname.startsWith("/messages")) return null;
+  if (location.pathname === "/find") return null;
   return <Footer />;
 }
 
@@ -92,6 +95,7 @@ const App = () => (
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/managers/:slug" element={<ManagerProfilePage />} />
                   <Route path="/refer" element={<ReferPage />} />
+                  <Route path="/find" element={<AIFinderPage />} />
 
                   {/* Protected routes */}
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
