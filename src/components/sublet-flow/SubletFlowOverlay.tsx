@@ -230,7 +230,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       const { error } = await supabase.from("listings").insert(payload);
       if (error) throw error;
 
-      setSuccessMessage("Your property is live! 🎉");
+      setSuccessMessage("Your property is live!");
       setShowSuccess(true);
       fireConfetti();
     } catch (err: any) {
