@@ -225,6 +225,38 @@ const SignUpPage = () => {
     setResending(false);
   };
 
+  // Non-BBG manager block screen
+  if (nonBbgManagerBlock) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container flex items-center justify-center px-4 py-12 sm:py-16">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-lg text-center space-y-6">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <Building2 className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground">Property Manager Access</h1>
+            <p className="text-muted-foreground leading-relaxed">
+              The property manager dashboard is currently only available to Boston Brokerage Group staff. If you are a BBG employee, please use your official BBG email address to sign in.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              If you are a different property manager, contact us at{" "}
+              <a href="mailto:hello@subinapp.com" className="font-medium text-primary hover:underline">hello@subinapp.com</a>{" "}
+              to get set up on SubIn.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button onClick={() => { setNonBbgManagerBlock(false); setStep(2); }} size="lg">
+                Try with a BBG email
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/listings")}>
+                Browse listings instead
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
+
   // Duplicate account screen
   if (duplicateEmail) {
     return (
