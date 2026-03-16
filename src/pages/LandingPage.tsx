@@ -159,7 +159,7 @@ const LandingPage = () => {
             viewport={{ once: true }}
             className="text-center"
           >
-            <h2 className="text-3xl font-bold text-foreground">How it works ✨</h2>
+            <h2 className="text-3xl font-bold text-foreground">How it works</h2>
             <p className="mt-3 text-muted-foreground">Three simple steps — takes about 3 minutes</p>
           </motion.div>
 
