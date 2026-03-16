@@ -568,7 +568,7 @@ const ListingsPage = () => {
               ))}
               {filtered.length === 0 && !loading && (
                 <div className="flex flex-col items-center py-16 text-center">
-                  <p className="text-4xl mb-3">🏙️</p>
+                  <Building2 className="h-10 w-10 text-muted-foreground mb-3" />
                   <p className="text-base font-semibold text-foreground">No places here yet</p>
                   <p className="mt-1 text-sm text-muted-foreground max-w-xs">Boston is filling up fast though. Check back soon or broaden your search!</p>
                 </div>
