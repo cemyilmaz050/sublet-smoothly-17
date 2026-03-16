@@ -203,6 +203,13 @@ export type Database = {
             referencedRelation: "property_managers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "catalog_properties_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "property_managers_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       catalog_units: {
@@ -540,6 +547,13 @@ export type Database = {
             columns: ["management_group_id"]
             isOneToOne: false
             referencedRelation: "property_managers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "listings_management_group_id_fkey"
+            columns: ["management_group_id"]
+            isOneToOne: false
+            referencedRelation: "property_managers_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1086,6 +1100,60 @@ export type Database = {
           id?: string | null
           last_name?: string | null
           role?: string | null
+        }
+        Relationships: []
+      }
+      property_managers_public: {
+        Row: {
+          address: string | null
+          city: string | null
+          country: string | null
+          cover_photo_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          logo_url: string | null
+          name: string | null
+          properties_count: number | null
+          slug: string | null
+          state: string | null
+          status: string | null
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          cover_photo_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          properties_count?: number | null
+          slug?: string | null
+          state?: string | null
+          status?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          cover_photo_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string | null
+          logo_url?: string | null
+          name?: string | null
+          properties_count?: number | null
+          slug?: string | null
+          state?: string | null
+          status?: string | null
+          verified?: boolean | null
+          website?: string | null
         }
         Relationships: []
       }

@@ -16,7 +16,7 @@ const ManagerProfilePage = () => {
     const load = async () => {
       setLoading(true);
       const { data: mgr } = await supabase
-        .from("property_managers")
+        .from("property_managers_public")
         .select("*")
         .eq("slug", slug)
         .single();
