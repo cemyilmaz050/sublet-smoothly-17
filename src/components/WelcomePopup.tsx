@@ -58,7 +58,7 @@ interface WelcomePopupProps {
   dismiss: (choice: WelcomeChoice) => void;
 }
 
-const overlayClass = "fixed inset-0 z-[9999] flex items-center justify-center";
+const overlayClass = "fixed inset-0 z-[500] flex items-center justify-center";
 const overlayBg = { backgroundColor: "rgba(0,0,0,0.5)" };
 
 function SubInWordmark() {
