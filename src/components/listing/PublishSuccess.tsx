@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, ExternalLink, Copy, Mail, Share2, Clock } from "lucide-react";
+import { CheckCircle, ExternalLink, Copy, Mail, Share2, Clock, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
