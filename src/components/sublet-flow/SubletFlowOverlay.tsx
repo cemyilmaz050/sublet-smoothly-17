@@ -774,9 +774,14 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           </div>
         )}
 
-        {/* ID Verification gate */}
+        {/* Optional ID Verification — not required to publish */}
         {idVerified === false && (
-          <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
+          <div className="rounded-lg border border-muted bg-muted/30 p-4">
+            <p className="text-sm text-muted-foreground mb-2">
+              <span className="font-medium text-foreground">Optional:</span> Verify your ID now to receive payouts faster when you get booked.
+            </p>
+            <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
+          </div>
         )}
 
         <label className="flex items-start gap-2">
@@ -784,7 +789,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <span className="text-sm text-foreground">I confirm all information is accurate and I agree to the platform sublet terms</span>
         </label>
 
-        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy || idVerified === false} className="w-full">
+        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy} className="w-full">
           {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</> : <><Home className="mr-2 h-4 w-4" /> Publish Property</>}
         </Button>
       </div>
