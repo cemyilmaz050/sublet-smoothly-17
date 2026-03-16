@@ -38,6 +38,8 @@ import AIFinderPage from "./pages/AIFinderPage";
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";
 import ManagerHome from "./pages/manager/ManagerHome";
+import ManagerCatalog from "./pages/manager/ManagerCatalog";
+import ManagerCatalogEditor from "./pages/manager/ManagerCatalogEditor";
 import ManagerListings from "./pages/manager/ManagerListings";
 import ManagerApplications from "./pages/manager/ManagerApplications";
 import ManagerApprovals from "./pages/manager/ManagerApprovals";
