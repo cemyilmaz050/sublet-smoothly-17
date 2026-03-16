@@ -56,7 +56,7 @@ const queryClient = new QueryClient();
 /** Persistent navbar shown on all routes except the manager portal, AI finder, and home hero */
 function PersistentNavbar() {
   const location = useLocation();
-  const isManagerRoute = location.pathname.startsWith("/manager");
+  const isManagerRoute = location.pathname.startsWith("/manager") || location.pathname.startsWith("/portal-mgmt-bbg");
   const isFinderRoute = location.pathname === "/find";
   if (isManagerRoute || isFinderRoute) return null;
   return <Navbar />;
