@@ -11,6 +11,7 @@ interface Applicant {
   name: string;
   initial: string;
   verified: boolean;
+  renter_verified?: boolean;
   listing_headline: string;
   listing_address: string;
   message: string | null;
