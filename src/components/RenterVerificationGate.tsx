@@ -37,11 +37,75 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
     return null;
   };
 
-  if (isFullyVerified && open) {
-    onVerified?.();
-    onOpenChange(false);
-    return null;
-  }
+  // When fully verified, mark profile and send notifications
+  useEffect(() => {
+    if (isFullyVerified && open && !notifiedRef.current && user) {
+      notifiedRef.current = true;
+      // Mark profile as renter_verified
+      supabase.from("profiles").update({ renter_verified: true } as any).eq("id", user.id).then(() => {});
+      // Notify relevant hosts (via knocks/applications)
+      sendVerificationNotifications(user.id);
+      onVerified?.();
+      onOpenChange(false);
+    }
+  }, [isFullyVerified, open, user]);
+
+  const sendVerificationNotifications = async (userId: string) => {
+    try {
+      const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", userId).single();
+      const renterName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "A renter";
+
+      // Find all listings this renter has knocked on or applied to
+      const [{ data: knocks }, { data: apps }] = await Promise.all([
+        supabase.from("knocks" as any).select("listing_id, tenant_id").eq("knocker_id", userId),
+        supabase.from("applications").select("listing_id").eq("applicant_id", userId),
+      ]);
+
+      const listingIds = [...new Set([
+        ...((knocks as any[]) || []).map((k: any) => k.listing_id),
+        ...((apps as any[]) || []).map((a: any) => a.listing_id),
+      ])];
+
+      if (listingIds.length === 0) return;
+
+      const { data: listings } = await supabase.from("listings").select("id, tenant_id, manager_id, headline, address").in("id", listingIds);
+      if (!listings) return;
+
+      // Notify each unique host and manager
+      const notifiedUsers = new Set<string>();
+      for (const listing of listings) {
+        const targets = [listing.tenant_id, listing.manager_id].filter(Boolean);
+        for (const targetId of targets) {
+          if (!targetId || notifiedUsers.has(targetId) || targetId === userId) continue;
+          notifiedUsers.add(targetId);
+
+          await supabase.from("notifications").insert({
+            user_id: targetId,
+            title: `${renterName} is now fully verified! ✅`,
+            message: `${renterName} is now fully verified and ready to book your listing at ${listing.address || listing.headline || "your place"}`,
+            type: "verification",
+            link: "/dashboard/tenant",
+          });
+
+          supabase.functions.invoke("send-notification-email", {
+            body: {
+              to: targetId,
+              subject: `${renterName} is now fully verified on SubIn`,
+              type: "renter_verified",
+              data: {
+                renter_name: renterName,
+                listing_title: listing.headline || "your listing",
+                listing_address: listing.address || "",
+                action_url: `${window.location.origin}/dashboard/tenant`,
+              },
+            },
+          }).catch(() => {});
+        }
+      }
+    } catch (err) {
+      console.error("Failed to send verification notifications:", err);
+    }
+  };
 
   const steps = [
     {
