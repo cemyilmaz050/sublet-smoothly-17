@@ -104,7 +104,7 @@ const MOBILE_EXTRA = `
 
 const CLUSTER_STYLE = `
   ${PILL_COMMON}
-  background: #ffffff;
+  background: #F5F0E8;
   color: #4845D2;
   border: 2px solid #4845D2;
   box-shadow: 0 2px 8px rgba(72,69,210,0.15), 0 1px 2px rgba(0,0,0,0.04);
