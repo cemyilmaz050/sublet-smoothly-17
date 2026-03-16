@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useVerificationPolling } from "@/hooks/useVerificationPolling";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
+import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 interface StripeIdVerificationProps {
   idVerified: boolean;
@@ -17,14 +19,18 @@ type VerificationState = "idle" | "loading" | "pending" | "verified" | "failed" 
 
 const POLL_INTERVAL = 2000;
 const POLL_TIMEOUT = 30000;
+const TEN_MINUTES = 10 * 60 * 1000;
 
 const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationProps) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { startPolling: startBgPolling } = useVerificationPolling();
   const [state, setState] = useState<VerificationState>(idVerified ? "verified" : "idle");
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [showSlowMessage, setShowSlowMessage] = useState(false);
+  const [pendingStart, setPendingStart] = useState<number | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -65,12 +71,11 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
   const startPolling = useCallback(() => {
     setShowSlowMessage(false);
-    // Poll every 2 seconds
+    setPendingStart(Date.now());
     pollRef.current = setInterval(async () => {
       await checkStatus();
     }, POLL_INTERVAL);
 
-    // After 30 seconds, show slow message
     timeoutRef.current = setTimeout(() => {
       setShowSlowMessage(true);
     }, POLL_TIMEOUT);
@@ -84,6 +89,14 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
       toast.info("Still processing — we'll update automatically when it's ready.");
     }
   };
+
+  const handleContinueBrowsing = () => {
+    // Start background polling via context, then navigate away
+    startBgPolling();
+    navigate("/");
+  };
+
+  const showManualFallback = pendingStart && Date.now() - pendingStart > TEN_MINUTES;
 
   const startVerification = async () => {
     if (!user) return;
