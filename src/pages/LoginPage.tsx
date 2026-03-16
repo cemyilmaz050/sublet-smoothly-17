@@ -291,28 +291,6 @@ const LoginPage = () => {
             </p>
           </div>
 
-          {/* Demo Staff Login */}
-          <Card className="mt-6 border-dashed border-2 border-primary/30 bg-primary/[0.03]">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-foreground">Boston Brokerage Group — Staff Login</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Demo account for property management staff</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 text-xs h-9"
-                    onClick={handleDemoLogin}
-                    disabled={loading}
-                  >
-                    <Building2 className="mr-1.5 h-3.5 w-3.5" />
-                    Log in as BBG Staff
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </motion.div>
       </div>
     </div>
