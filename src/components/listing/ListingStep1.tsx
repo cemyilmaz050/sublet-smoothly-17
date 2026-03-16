@@ -1,9 +1,21 @@
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ListingFormData, PROPERTY_TYPES } from "@/types/listing";
-import { Building2, User } from "lucide-react";
+import { Building2, User, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const BBG_PROPERTIES = [
+  "25 Iroquois St",
+  "276 East Cottage #3",
+  "276 East Cottage #1",
+  "37 Harbor View #3",
+  "26 Symphony #1",
+  "81 Windsor",
+  "15 Sunset #2",
+  "118 Buttonwood #3 Room 1",
+];
 
 interface Props {
   data: ListingFormData;
@@ -12,17 +24,32 @@ interface Props {
 }
 
 const ListingStep1 = ({ data, onChange, errors }: Props) => {
+  const [selectedProperty, setSelectedProperty] = useState<string>(
+    BBG_PROPERTIES.includes(data.address) ? data.address : ""
+  );
+
+  const handleSelectProperty = (addr: string) => {
+    setSelectedProperty(addr);
+    onChange({ address: addr });
+  };
+
   return (
     <div className="space-y-5">
       <h2 className="text-xl font-semibold text-foreground">About your place</h2>
 
       {/* Management question */}
       <div>
-        <Label className="text-sm font-medium">Is your apartment managed by a property management company?</Label>
+        <Label className="text-sm font-medium">Is your property managed by a property management company?</Label>
         <div className="mt-2 grid grid-cols-2 gap-3">
           <button
             type="button"
-            onClick={() => onChange({ management_type: "bbg" })}
+            onClick={() => {
+              onChange({ management_type: "bbg" });
+              if (!BBG_PROPERTIES.includes(data.address)) {
+                setSelectedProperty("");
+                onChange({ management_type: "bbg", address: "" });
+              }
+            }}
             className={cn(
               "flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
               data.management_type === "bbg"
@@ -35,7 +62,10 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
           </button>
           <button
             type="button"
-            onClick={() => onChange({ management_type: "self" })}
+            onClick={() => {
+              setSelectedProperty("");
+              onChange({ management_type: "self" });
+            }}
             className={cn(
               "flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
               data.management_type === "self"
@@ -60,17 +90,50 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
         {errors.management_type && <p className="mt-1 text-sm text-destructive">{errors.management_type}</p>}
       </div>
 
-      <div>
-        <Label htmlFor="address">Address *</Label>
-        <Input
-          id="address"
-          placeholder="123 Main St, Boston, MA"
-          className="mt-1.5"
-          value={data.address}
-          onChange={(e) => onChange({ address: e.target.value })}
-        />
-        {errors.address && <p className="mt-1 text-sm text-destructive">{errors.address}</p>}
-      </div>
+      {/* BBG Property Catalog */}
+      {data.management_type === "bbg" && (
+        <div>
+          <Label className="text-sm font-medium">Select your property from the Boston Brokerage Group catalog</Label>
+          <div className="mt-2 grid gap-2">
+            {BBG_PROPERTIES.map((addr) => (
+              <button
+                key={addr}
+                type="button"
+                onClick={() => handleSelectProperty(addr)}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-all",
+                  selectedProperty === addr
+                    ? "border-primary bg-primary/5 shadow-sm"
+                    : "border-border hover:border-primary/40"
+                )}
+              >
+                <Building2 className={cn("h-4 w-4 shrink-0", selectedProperty === addr ? "text-primary" : "text-muted-foreground")} />
+                <span className="flex-1 text-sm font-medium text-foreground">{addr}</span>
+                {selectedProperty === addr && (
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
+                )}
+              </button>
+            ))}
+          </div>
+          {errors.address && <p className="mt-1 text-sm text-destructive">{errors.address}</p>}
+        </div>
+      )}
+
+      {/* Manual address for self-managed */}
+      {data.management_type !== "bbg" && (
+        <div>
+          <Label htmlFor="address">Address *</Label>
+          <Input
+            id="address"
+            placeholder="123 Main St, Boston, MA"
+            className="mt-1.5"
+            value={data.address}
+            onChange={(e) => onChange({ address: e.target.value })}
+          />
+          {errors.address && <p className="mt-1 text-sm text-destructive">{errors.address}</p>}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="unit">Unit Number</Label>

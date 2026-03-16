@@ -190,6 +190,11 @@ const ManagerApprovals = () => {
                         <MapPin className="h-3.5 w-3.5 shrink-0" />
                         {listing.address || "No address"} {listing.unit_number && `(Unit ${listing.unit_number})`}
                       </p>
+                      {listing.management_group_id && (
+                        <Badge variant="outline" className="mt-1 text-xs border-primary/30 text-primary">
+                          <Building2 className="mr-1 h-3 w-3" /> BBG Catalog Property
+                        </Badge>
+                      )}
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-xl font-bold text-foreground">
