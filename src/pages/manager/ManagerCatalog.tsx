@@ -24,7 +24,7 @@ const ManagerCatalog = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState<string | null>(null);
-  const [toggling, setToggling] = useState<string | null>(null);
+  
 
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ["manager-catalog", user?.id],

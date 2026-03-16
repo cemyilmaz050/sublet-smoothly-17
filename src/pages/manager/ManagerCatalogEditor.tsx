@@ -52,7 +52,7 @@ const ManagerCatalogEditor = () => {
 
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
-  const [publishing, setPublishing] = useState(false);
+  
   const [property, setProperty] = useState<any>(null);
   const [existingListingId, setExistingListingId] = useState<string | null>(null);
   const [existingUnitId, setExistingUnitId] = useState<string | null>(null);
