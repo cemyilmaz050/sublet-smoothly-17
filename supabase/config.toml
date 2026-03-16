@@ -1,37 +1,31 @@
 project_id = "ixkzgpwxzhkjdzlcqkzk"
 
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.check-subscription]
-verify_jwt = false
-
-[functions.customer-portal]
-verify_jwt = false
-
-[functions.sync-appfolio-public]
-verify_jwt = false
-
-[functions.confirm-booking]
-verify_jwt = false
-
-[functions.process-refund]
-verify_jwt = false
-
-[functions.send-notification-email]
-verify_jwt = false
-
-[functions.stripe-identity-webhook]
-verify_jwt = false
-
-[functions.send-cosigner-email]
-verify_jwt = false
-
-[functions.create-verification-session]
-verify_jwt = false
-
-[functions.delete-listing]
-verify_jwt = false
-
-[functions.admin-verify-user]
-verify_jwt = false
+[functions]
+  [functions.admin-verify-user]
+    verify_jwt = false
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.check-subscription]
+    verify_jwt = false
+  [functions.confirm-booking]
+    verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.create-verification-session]
+    verify_jwt = false
+  [functions.customer-portal]
+    verify_jwt = false
+  [functions.delete-listing]
+    verify_jwt = false
+  [functions.process-refund]
+    verify_jwt = false
+  [functions.send-cosigner-email]
+    verify_jwt = false
+  [functions.send-notification-email]
+    verify_jwt = false
+  [functions.stripe-identity-webhook]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.sync-appfolio-public]
+    verify_jwt = false
