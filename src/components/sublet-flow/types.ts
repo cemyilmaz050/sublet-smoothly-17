@@ -112,18 +112,18 @@ export const defaultFlowData: SubletFlowData = {
 };
 
 export const AMENITIES_OPTIONS = [
-  { icon: "📶", label: "WiFi" },
-  { icon: "🛋️", label: "Furnished" },
-  { icon: "❄️", label: "Air Conditioning" },
-  { icon: "🔥", label: "Heating" },
-  { icon: "🚗", label: "Parking" },
-  { icon: "🐾", label: "Pets Allowed" },
-  { icon: "🚿", label: "Washer/Dryer" },
-  { icon: "📺", label: "TV" },
-  { icon: "🍳", label: "Full Kitchen" },
-  { icon: "🏋️", label: "Gym Access" },
-  { icon: "🛗", label: "Elevator" },
-  { icon: "♿", label: "Accessible" },
+  { icon: "Wifi", label: "WiFi" },
+  { icon: "Sofa", label: "Furnished" },
+  { icon: "Snowflake", label: "Air Conditioning" },
+  { icon: "Flame", label: "Heating" },
+  { icon: "Car", label: "Parking" },
+  { icon: "PawPrint", label: "Pets Allowed" },
+  { icon: "WashingMachine", label: "Washer/Dryer" },
+  { icon: "Tv", label: "TV" },
+  { icon: "CookingPot", label: "Full Kitchen" },
+  { icon: "Dumbbell", label: "Gym Access" },
+  { icon: "ArrowUpDown", label: "Elevator" },
+  { icon: "Accessibility", label: "Accessible" },
 ];
 
 export type StepStatus = "active" | "completed" | "hidden";

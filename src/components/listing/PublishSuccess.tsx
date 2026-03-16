@@ -99,7 +99,7 @@ const PublishSuccess = ({ listingId, headline, onDashboard, isPending = false }:
           <CheckCircle className="h-14 w-14 text-primary" />
         </motion.div>
 
-        <h1 className="text-3xl font-bold text-foreground">Your place is live on SubIn 🚪</h1>
+        <h1 className="text-3xl font-bold text-foreground">Your place is live on SubIn</h1>
         <p className="mt-3 text-muted-foreground">
           People can start finding it right now!
         </p>

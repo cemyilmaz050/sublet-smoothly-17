@@ -159,7 +159,7 @@ const ManagerApprovals = () => {
       ) : pendingListings.length === 0 ? (
         <EmptyState
           icon={CheckCircle2}
-          title="All caught up! 🎉"
+          title="All caught up!"
           description="No listings waiting for approval right now."
         />
       ) : (

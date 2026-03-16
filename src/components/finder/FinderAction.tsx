@@ -79,7 +79,7 @@ const FinderAction = ({ listing, answers }: Props) => {
                 <MessageCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-foreground">💬 Message the host</h3>
+                <h3 className="text-lg font-bold text-foreground">Message the host</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Introduce yourself and ask any questions before committing
                 </p>

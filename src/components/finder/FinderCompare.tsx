@@ -92,7 +92,7 @@ const FinderCompare = ({ listings, answers, onSelect }: Props) => {
                   </div>
 
                   {listing.distanceLabel && (
-                    <p className="text-sm text-primary font-medium">📍 {listing.distanceLabel}</p>
+                    <p className="text-sm text-primary font-medium flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {listing.distanceLabel}</p>
                   )}
 
                   {/* Amenities checklist */}

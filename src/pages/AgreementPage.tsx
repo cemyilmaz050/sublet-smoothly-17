@@ -144,7 +144,7 @@ const AgreementPage = () => {
       });
     }
 
-    toast.success(bothSigned ? "Agreement fully signed! 🎉" : "You've signed the agreement!");
+    toast.success(bothSigned ? "Agreement fully signed!" : "You've signed the agreement!");
     await fetchAgreement();
     setSigning(false);
   };

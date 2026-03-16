@@ -198,7 +198,7 @@ export const KnockActivity = ({ knockCount, className }: { knockCount: number; c
       {knockCount >= 10 && (
         <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-coral to-destructive px-2 py-0.5 text-[10px] font-bold text-primary-foreground shadow-sm">
           <FlameIcon className="h-3 w-3 animate-flame-flicker" />
-          Hot listing 🔥
+          Hot listing
         </span>
       )}
     </div>
