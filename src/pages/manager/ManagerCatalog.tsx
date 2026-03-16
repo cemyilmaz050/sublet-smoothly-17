@@ -8,7 +8,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  Building2, MapPin, Home, Pencil, Plus, CheckCircle2, Clock, AlertCircle, Trash2, Loader2, Eye, EyeOff,
+  Building2, MapPin, Home, Pencil, Plus, CheckCircle2, Clock, Trash2, Loader2, EyeOff,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
