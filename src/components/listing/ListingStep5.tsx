@@ -29,12 +29,13 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
   const propType = PROPERTY_TYPES.find((t) => t.value === data.property_type)?.label || data.property_type;
   const guestLabel = GUEST_POLICIES.find((p) => p.value === data.guest_policy)?.label || data.guest_policy;
   const totalPhotos = data.photoUrls.length + data.photos.length;
+  const weeklyRent = data.monthly_rent ? Math.round(Number(data.monthly_rent) / 4) : 0;
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-semibold text-foreground">Review & Submit</h2>
+      <h2 className="text-xl font-semibold text-foreground">Review & publish ✨</h2>
 
-      <Section title="Property Basics" step={0} onEdit={onGoToStep}>
+      <Section title="About this place" step={0} onEdit={onGoToStep}>
         <p><strong>Address:</strong> {data.address} {data.unit_number && `(Unit ${data.unit_number})`}</p>
         <p><strong>Type:</strong> {propType} — {data.bedrooms} bed, {data.bathrooms} bath{data.sqft ? `, ${data.sqft} sqft` : ""}</p>
       </Section>
@@ -50,7 +51,7 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
       <Separator />
 
       <Section title="Pricing & Availability" step={2} onEdit={onGoToStep}>
-        <p><strong>Rent:</strong> ${data.monthly_rent}/mo — <strong>Deposit:</strong> ${data.security_deposit}</p>
+        <p><strong>Rent:</strong> ${data.monthly_rent}/mo · ~${weeklyRent}/week — <strong>Deposit:</strong> ${data.security_deposit}</p>
         <p><strong>Available:</strong> {data.available_from && format(new Date(data.available_from), "PPP")} → {data.available_until && format(new Date(data.available_until), "PPP")}</p>
         <p><strong>Min duration:</strong> {data.min_duration} month(s)</p>
       </Section>
@@ -72,7 +73,7 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
       <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4">
         <Checkbox checked={confirmed} onCheckedChange={(v) => onConfirmChange(!!v)} className="mt-0.5" />
         <span className="text-sm text-foreground">
-          I confirm all information is accurate and I have manager approval to sublet this property.
+          I confirm everything looks good and I have approval to sublet this place. Let's go! 🚀
         </span>
       </label>
     </div>

@@ -425,11 +425,11 @@ const AuthModal = () => {
                 <div className="space-y-4">
                   {/* Role selection */}
                   <div>
-                    <Label className="mb-2 block">I am...</Label>
+                    <Label className="mb-2 block">What brings you here?</Label>
                     <div className="grid grid-cols-2 gap-2">
                       {([
-                        { id: "tenant" as const, icon: Home, label: "Listing a sublet", desc: "Sublet my place" },
-                        { id: "subtenant" as const, icon: Search, label: "Looking for a place", desc: "Browse & apply" },
+                        { id: "tenant" as const, icon: Home, label: "I'm leaving my place 🗝️", desc: "Sublet my apartment" },
+                        { id: "subtenant" as const, icon: Search, label: "I need a place 🏠", desc: "Browse & apply" },
                       ]).map((r) => (
                         <button
                           key={r.id}
@@ -521,7 +521,7 @@ const AuthModal = () => {
                   </div>
 
                   <Button className="w-full h-12" size="lg" onClick={handleSignUp} disabled={signupLoading}>
-                    {signupLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : <>Create Account <ArrowRight className="ml-1 h-4 w-4" /></>}
+                    {signupLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : <>Let's Go! <ArrowRight className="ml-1 h-4 w-4" /></>}
                   </Button>
                 </div>
               </TabsContent>

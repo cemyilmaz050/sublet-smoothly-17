@@ -355,8 +355,13 @@ const ListingsPage = () => {
           mobileView === "map" && "hidden lg:block"
         )}>
           <div className="p-3 sm:p-4 lg:p-6">
+            {/* Warm headline */}
+            <div className="mb-4">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Summer in Boston sorted 🏠</h1>
+              <p className="text-sm text-muted-foreground mt-1">Find a place from another student — short term, verified, and stress free</p>
+            </div>
             <p className="mb-3 text-sm text-muted-foreground">
-              {filtered.length} listing{filtered.length !== 1 ? "s" : ""} found
+              {filtered.length} place{filtered.length !== 1 ? "s" : ""} available
               {calendarSelectedDate && viewMode === "calendar" && (
                 <span className="ml-2">
                   · Showing availability for{" "}
@@ -417,13 +422,19 @@ const ListingsPage = () => {
                         <div className="flex items-start justify-between">
                           <h3 className="font-semibold text-foreground group-hover:text-primary line-clamp-1 text-[15px]">{listing.headline || "Untitled"}</h3>
                           {listing.monthly_rent && (
-                            <p className="ml-2 whitespace-nowrap text-lg font-bold text-primary">
-                              ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
-                            </p>
+                            <div className="ml-2 text-right shrink-0">
+                              <p className="whitespace-nowrap text-lg font-bold text-primary">
+                                ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
+                              </p>
+                              <p className="text-[11px] text-muted-foreground">~${Math.round(listing.monthly_rent / 4).toLocaleString()}/week</p>
+                            </div>
                           )}
                         </div>
                         <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" />{listing.address || "Unknown"}</p>
                         <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{formatDates(listing.available_from, listing.available_until)}</p>
+                        {listing.monthly_rent && listing.monthly_rent < 2000 && (
+                          <p className="mt-1 text-[11px] text-emerald font-medium">Cheaper than a Boston hotel 🎉</p>
+                        )}
                         {(listing.avg_rating ?? 0) > 0 && (
                           <div className="mt-1.5">
                             <StarRating rating={listing.avg_rating || 0} size="sm" showCount count={listing.review_count} />
@@ -455,7 +466,11 @@ const ListingsPage = () => {
                 </motion.div>
               ))}
               {filtered.length === 0 && !loading && (
-                <div className="py-16 text-center text-muted-foreground">No listings found matching your search.</div>
+                <div className="flex flex-col items-center py-16 text-center">
+                  <p className="text-4xl mb-3">🏙️</p>
+                  <p className="text-base font-semibold text-foreground">No places here yet</p>
+                  <p className="mt-1 text-sm text-muted-foreground max-w-xs">Boston is filling up fast though. Check back soon or broaden your search!</p>
+                </div>
               )}
             </div>
             )}
@@ -522,7 +537,7 @@ const ListingsPage = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Monthly Rent", value: `$${selectedListing.monthly_rent?.toLocaleString() ?? "—"}`, primary: true },
+                    { label: "Monthly Rent", value: `$${selectedListing.monthly_rent?.toLocaleString() ?? "—"}`, sub: selectedListing.monthly_rent ? `~$${Math.round(selectedListing.monthly_rent / 4).toLocaleString()}/week` : undefined, primary: true },
                     { label: "Bedrooms", value: selectedListing.bedrooms ?? "—" },
                     { label: "Bathrooms", value: selectedListing.bathrooms ?? "—" },
                     { label: "Sq. Ft.", value: selectedListing.sqft ?? "—" },
@@ -530,16 +545,20 @@ const ListingsPage = () => {
                     <div key={item.label} className="rounded-lg border p-3">
                       <p className="text-xs text-muted-foreground">{item.label}</p>
                       <p className={`text-lg font-bold ${item.primary ? "text-primary" : "text-foreground"}`}>{item.value}</p>
+                      {(item as any).sub && <p className="text-[11px] text-muted-foreground">{(item as any).sub}</p>}
                     </div>
                   ))}
                 </div>
+                {selectedListing.monthly_rent && selectedListing.monthly_rent < 2000 && (
+                  <p className="text-sm text-emerald font-medium text-center">Cheaper than a Boston hotel for the summer 🎉</p>
+                )}
                 <div className="space-y-2">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4" />{selectedListing.address || "Unknown"}</p>
                   <p className="flex items-center gap-2 text-sm text-muted-foreground"><Calendar className="h-4 w-4" />{formatDates(selectedListing.available_from, selectedListing.available_until)}</p>
                 </div>
                 {selectedListing.description && (
                   <div>
-                    <h4 className="mb-1 text-sm font-semibold text-foreground">About this listing</h4>
+                    <h4 className="mb-1 text-sm font-semibold text-foreground">About this place</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">{selectedListing.description}</p>
                   </div>
                 )}
