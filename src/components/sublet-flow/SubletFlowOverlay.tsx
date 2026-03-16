@@ -67,19 +67,63 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     }
   }, [activeStep, steps]);
 
+  // BBG aliases for fuzzy matching
+  const BBG_ALIASES = ["boston", "brokerage", "bbg", "management", "boston brokerage"];
+  const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
+
+  // Load default suggestion (BBG) when entering management path
+  useEffect(() => {
+    if (data.path !== "management") return;
+    if (data.managementGroupId) return; // already selected
+    supabase
+      .from("property_managers_public")
+      .select("*")
+      .eq("id", BBG_PM_ID)
+      .single()
+      .then(({ data: bbg }) => {
+        if (bbg) setMgmtResults([bbg]);
+      });
+  }, [data.path, data.managementGroupId]);
+
   // Search management groups
   useEffect(() => {
-    if (!mgmtSearch.trim() || data.path !== "management") {
-      setMgmtResults([]);
+    if (data.path !== "management") return;
+    if (!mgmtSearch.trim()) {
+      // Show default BBG suggestion
+      supabase
+        .from("property_managers_public")
+        .select("*")
+        .eq("id", BBG_PM_ID)
+        .single()
+        .then(({ data: bbg }) => {
+          if (bbg) setMgmtResults([bbg]);
+        });
       return;
     }
     const timer = setTimeout(async () => {
+      const search = mgmtSearch.trim().toLowerCase();
+      // Check if search matches any BBG alias
+      const matchesBbgAlias = BBG_ALIASES.some(alias => alias.includes(search) || search.includes(alias));
+      
       const { data: results } = await supabase
         .from("property_managers_public")
         .select("*")
         .ilike("name", `%${mgmtSearch}%`)
         .limit(10);
-      setMgmtResults(results || []);
+      
+      let finalResults = results || [];
+      
+      // If alias matched but BBG wasn't in results, fetch and prepend it
+      if (matchesBbgAlias && !finalResults.some((r: any) => r.id === BBG_PM_ID)) {
+        const { data: bbg } = await supabase
+          .from("property_managers_public")
+          .select("*")
+          .eq("id", BBG_PM_ID)
+          .single();
+        if (bbg) finalResults = [bbg, ...finalResults];
+      }
+      
+      setMgmtResults(finalResults);
     }, 300);
     return () => clearTimeout(timer);
   }, [mgmtSearch, data.path]);
