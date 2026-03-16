@@ -537,7 +537,7 @@ const ListingsPage = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Monthly Rent", value: `$${selectedListing.monthly_rent?.toLocaleString() ?? "—"}`, primary: true },
+                    { label: "Monthly Rent", value: `$${selectedListing.monthly_rent?.toLocaleString() ?? "—"}`, sub: selectedListing.monthly_rent ? `~$${Math.round(selectedListing.monthly_rent / 4).toLocaleString()}/week` : undefined, primary: true },
                     { label: "Bedrooms", value: selectedListing.bedrooms ?? "—" },
                     { label: "Bathrooms", value: selectedListing.bathrooms ?? "—" },
                     { label: "Sq. Ft.", value: selectedListing.sqft ?? "—" },
@@ -545,9 +545,13 @@ const ListingsPage = () => {
                     <div key={item.label} className="rounded-lg border p-3">
                       <p className="text-xs text-muted-foreground">{item.label}</p>
                       <p className={`text-lg font-bold ${item.primary ? "text-primary" : "text-foreground"}`}>{item.value}</p>
+                      {(item as any).sub && <p className="text-[11px] text-muted-foreground">{(item as any).sub}</p>}
                     </div>
                   ))}
                 </div>
+                {selectedListing.monthly_rent && selectedListing.monthly_rent < 2000 && (
+                  <p className="text-sm text-emerald font-medium text-center">Cheaper than a Boston hotel for the summer 🎉</p>
+                )}
                 <div className="space-y-2">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4" />{selectedListing.address || "Unknown"}</p>
                   <p className="flex items-center gap-2 text-sm text-muted-foreground"><Calendar className="h-4 w-4" />{formatDates(selectedListing.available_from, selectedListing.available_until)}</p>
