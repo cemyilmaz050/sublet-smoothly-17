@@ -244,6 +244,30 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
                       <Users className="h-3.5 w-3.5" /> {(listing as any).knock_count || 0} knocks
                     </span>
                   </div>
+
+                  {/* Status banner for pending/rejected */}
+                  {listing.status === "pending" && (
+                    <div className="mt-2 flex items-center gap-1.5 rounded-md bg-amber/10 px-2.5 py-1.5">
+                      <Clock className="h-3 w-3 text-amber shrink-0" />
+                      <p className="text-[11px] text-amber-foreground">Under review by Boston Brokerage Group — usually approved within 24 hours</p>
+                    </div>
+                  )}
+                  {listing.status === "rejected" && (
+                    <div className="mt-2 space-y-1.5">
+                      <div className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1.5">
+                        <AlertTriangle className="h-3 w-3 text-destructive shrink-0" />
+                        <p className="text-[11px] text-destructive">Changes needed — check your notifications for details</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full text-xs"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/listings/edit/${listing.id}`); }}
+                      >
+                        <Pencil className="mr-1 h-3 w-3" /> Edit & Resubmit
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
