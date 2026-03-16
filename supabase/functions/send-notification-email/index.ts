@@ -61,14 +61,14 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
     case "meeting_request":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">New Meeting Request</h1>
-        <p style="${mutedStyle}">${data.requester_name} wants to schedule a viewing for your listing.</p>
+        <p style="${mutedStyle}">${esc(data.requester_name)} wants to schedule a viewing for your listing.</p>
         <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 0 0 4px;"><strong>Property:</strong> ${data.listing_title}</p>
-          <p style="margin: 0 0 4px;"><strong>Date:</strong> ${data.meeting_date}</p>
-          <p style="margin: 0 0 4px;"><strong>Time:</strong> ${data.meeting_time}</p>
-          ${data.message ? `<p style="margin: 8px 0 0; ${mutedStyle}">"${data.message}"</p>` : ""}
+          <p style="margin: 0 0 4px;"><strong>Property:</strong> ${esc(data.listing_title)}</p>
+          <p style="margin: 0 0 4px;"><strong>Date:</strong> ${esc(data.meeting_date)}</p>
+          <p style="margin: 0 0 4px;"><strong>Time:</strong> ${esc(data.meeting_time)}</p>
+          ${data.message ? `<p style="margin: 8px 0 0; ${mutedStyle}">"${esc(data.message)}"</p>` : ""}
         </div>
-        <a href="${data.action_url}" style="${btnStyle}">View & Respond</a>
+        <a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">View &amp; Respond</a>
         ${footer}</div>`;
 
     case "meeting_confirmed":
@@ -76,64 +76,64 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Meeting Confirmed</h1>
         <p style="${mutedStyle}">Your viewing has been confirmed.</p>
         <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 0 0 4px;"><strong>Property:</strong> ${data.listing_title}</p>
-          <p style="margin: 0 0 4px;"><strong>Address:</strong> ${data.address}</p>
-          <p style="margin: 0 0 4px;"><strong>Date:</strong> ${data.meeting_date}</p>
-          <p style="margin: 0 0 4px;"><strong>Time:</strong> ${data.meeting_time}</p>
+          <p style="margin: 0 0 4px;"><strong>Property:</strong> ${esc(data.listing_title)}</p>
+          <p style="margin: 0 0 4px;"><strong>Address:</strong> ${esc(data.address)}</p>
+          <p style="margin: 0 0 4px;"><strong>Date:</strong> ${esc(data.meeting_date)}</p>
+          <p style="margin: 0 0 4px;"><strong>Time:</strong> ${esc(data.meeting_time)}</p>
         </div>
-        <a href="${data.action_url}" style="${btnStyle}">Open Chat</a>
+        <a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">Open Chat</a>
         ${footer}</div>`;
 
     case "booking_confirmed":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Booking Confirmed</h1>
-        <p style="${mutedStyle}">${data.message}</p>
+        <p style="${mutedStyle}">${esc(data.message)}</p>
         <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 0 0 4px;"><strong>Property:</strong> ${data.listing_title}</p>
-          <p style="margin: 0 0 4px;"><strong>Deposit:</strong> $${data.deposit_amount}</p>
-          <p style="margin: 0 0 4px;"><strong>Total Paid:</strong> $${data.total_paid}</p>
+          <p style="margin: 0 0 4px;"><strong>Property:</strong> ${esc(data.listing_title)}</p>
+          <p style="margin: 0 0 4px;"><strong>Deposit:</strong> $${esc(data.deposit_amount)}</p>
+          <p style="margin: 0 0 4px;"><strong>Total Paid:</strong> $${esc(data.total_paid)}</p>
         </div>
-        <a href="${data.action_url}" style="${btnStyle}">View Details</a>
+        <a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">View Details</a>
         ${footer}</div>`;
 
     case "new_message":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">New Message</h1>
-        <p style="${mutedStyle}"><strong>${data.sender_name}</strong> sent you a message${data.listing_title ? ` about "${data.listing_title}"` : ""}:</p>
+        <p style="${mutedStyle}"><strong>${esc(data.sender_name)}</strong> sent you a message${data.listing_title ? ` about "${esc(data.listing_title)}"` : ""}:</p>
         <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 0; ${mutedStyle}">"${data.preview}"</p>
+          <p style="margin: 0; ${mutedStyle}">"${esc(data.preview)}"</p>
         </div>
-        <a href="${data.action_url}" style="${btnStyle}">Reply</a>
+        <a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">Reply</a>
         ${footer}</div>`;
 
     case "listing_live":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Your Listing is Live</h1>
-        <p style="${mutedStyle}">Your listing "${data.listing_title}" is now live on SubIn and visible to potential sub-lessees.</p>
-        <a href="${data.action_url}" style="${btnStyle}">View Your Listing</a>
+        <p style="${mutedStyle}">Your listing "${esc(data.listing_title)}" is now live on SubIn and visible to potential sub-lessees.</p>
+        <a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">View Your Listing</a>
         ${footer}</div>`;
 
     case "application_received":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">New Application</h1>
-        <p style="${mutedStyle}">${data.applicant_name} has applied for your listing "${data.listing_title}".</p>
-        ${data.message ? `<div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin: 16px 0;"><p style="margin: 0; ${mutedStyle}">"${data.message}"</p></div>` : ""}
-        <a href="${data.action_url}" style="${btnStyle}">Review Application</a>
+        <p style="${mutedStyle}">${esc(data.applicant_name)} has applied for your listing "${esc(data.listing_title)}".</p>
+        ${data.message ? `<div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin: 16px 0;"><p style="margin: 0; ${mutedStyle}">"${esc(data.message)}"</p></div>` : ""}
+        <a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">Review Application</a>
         ${footer}</div>`;
 
     case "knock":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Someone knocked on your listing</h1>
-        <p style="${mutedStyle}"><strong>${data.knocker_name}</strong> is interested in your place at <strong>${data.listing_address || data.listing_title}</strong>. Send them a message to start the conversation.</p>
+        <p style="${mutedStyle}"><strong>${esc(data.knocker_name)}</strong> is interested in your place at <strong>${esc(data.listing_address || data.listing_title)}</strong>. Send them a message to start the conversation.</p>
         <div style="margin: 24px 0;">
-          <a href="${data.message_url}" style="${btnStyle}">Message Them</a>
+          <a href="${sanitizeUrl(data.message_url)}" style="${btnStyle}">Message Them</a>
         </div>
         ${footer}</div>`;
 
     case "listing_deleted":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Listing Deleted</h1>
-        <p style="${mutedStyle}">Your listing "<strong>${data.listing_title}</strong>" has been successfully deleted from SubIn.</p>
+        <p style="${mutedStyle}">Your listing "<strong>${esc(data.listing_title)}</strong>" has been successfully deleted from SubIn.</p>
         <p style="${mutedStyle}">All related applications have been removed and any active deposits have been refunded.</p>
         ${footer}</div>`;
 
@@ -141,29 +141,29 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Co-signer Request</h1>
         <p style="${mutedStyle}">You've been listed as a co-signer for a SubIn sublet. Please review and confirm your details.</p>
-        ${data.action_url ? `<a href="${data.action_url}" style="${btnStyle}">Review & Confirm</a>` : ""}
+        ${data.action_url ? `<a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">Review &amp; Confirm</a>` : ""}
         ${footer}</div>`;
 
     case "background_check":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Background Check Update</h1>
-        <p style="${mutedStyle}">${data.message || "Your background check status has been updated."}</p>
-        ${data.action_url ? `<a href="${data.action_url}" style="${btnStyle}">View Details</a>` : ""}
+        <p style="${mutedStyle}">${esc(data.message || "Your background check status has been updated.")}</p>
+        ${data.action_url ? `<a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">View Details</a>` : ""}
         ${footer}</div>`;
 
     case "payment_receipt":
       return `<div style="${baseStyle}">${logo}
         <h1 style="font-size: 24px; margin-bottom: 16px; color: #1a1a2e;">Payment Receipt</h1>
-        <p style="${mutedStyle}">${data.message || "Your payment has been processed."}</p>
+        <p style="${mutedStyle}">${esc(data.message || "Your payment has been processed.")}</p>
         <div style="background: #f9fafb; border-radius: 10px; padding: 16px; margin: 16px 0;">
-          ${data.amount ? `<p style="margin: 0 0 4px;"><strong>Amount:</strong> $${data.amount}</p>` : ""}
-          ${data.listing_title ? `<p style="margin: 0 0 4px;"><strong>Property:</strong> ${data.listing_title}</p>` : ""}
+          ${data.amount ? `<p style="margin: 0 0 4px;"><strong>Amount:</strong> $${esc(data.amount)}</p>` : ""}
+          ${data.listing_title ? `<p style="margin: 0 0 4px;"><strong>Property:</strong> ${esc(data.listing_title)}</p>` : ""}
         </div>
-        ${data.action_url ? `<a href="${data.action_url}" style="${btnStyle}">View Receipt</a>` : ""}
+        ${data.action_url ? `<a href="${sanitizeUrl(data.action_url)}" style="${btnStyle}">View Receipt</a>` : ""}
         ${footer}</div>`;
 
     default:
-      return `<div style="${baseStyle}">${logo}<p style="${mutedStyle}">${data.message || ""}</p>${footer}</div>`;
+      return `<div style="${baseStyle}">${logo}<p style="${mutedStyle}">${esc(data.message || "")}</p>${footer}</div>`;
   }
 };
 
