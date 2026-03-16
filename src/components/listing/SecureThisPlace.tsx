@@ -268,7 +268,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       </p>
 
       {/* Verification Gate */}
-      <RenterVerificationGate open={showGate} onOpenChange={setShowGate} onVerified={handleVerified} />
+      <RenterVerificationGate open={showGate} onOpenChange={setShowGate} onVerified={handleVerified} action={pendingAction || undefined} />
       <VerificationSuccessScreen open={showSuccess} onClose={handleSuccessDismiss} />
 
       {/* Schedule Modal */}
