@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Circle, ShieldCheck, FileText, Users, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRenterVerification } from "@/hooks/useRenterVerification";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import StripeIdVerification from "@/components/StripeIdVerification";
 import RenterApplicationForm from "@/components/RenterApplicationForm";
 import CosignerForm from "@/components/CosignerForm";
