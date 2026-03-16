@@ -62,8 +62,8 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm">
-              🎓 Trusted by students across Boston
+            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm inline-flex items-center gap-1.5">
+              <GraduationCap className="h-3.5 w-3.5" /> Trusted by students across Boston
             </Badge>
             <h1 className="text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               Summer in Boston{" "}
