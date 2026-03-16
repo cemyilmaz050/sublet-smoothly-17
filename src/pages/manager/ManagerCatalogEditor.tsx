@@ -708,35 +708,23 @@ const ManagerCatalogEditor = () => {
         </CardContent>
       </Card>
 
-      {/* Save Buttons */}
+      {/* Save Button */}
       <div className="sticky bottom-0 bg-background/95 backdrop-blur-sm py-4 border-t -mx-6 px-6 lg:-mx-8 lg:px-8">
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={handleSaveDraft}
-            disabled={saving || publishing}
-            size="lg"
-            className="flex-1"
-          >
-            {saving ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
-            ) : (
-              <><Save className="mr-2 h-4 w-4" /> Save as Draft</>
-            )}
-          </Button>
-          <Button
-            onClick={handleSaveAndPublish}
-            disabled={saving || publishing}
-            size="lg"
-            className="flex-1"
-          >
-            {publishing ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</>
-            ) : (
-              <><Rocket className="mr-2 h-4 w-4" /> Save & Publish</>
-            )}
-          </Button>
-        </div>
+        <Button
+          onClick={handleSaveToCatalog}
+          disabled={saving}
+          size="lg"
+          className="w-full"
+        >
+          {saving ? (
+            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</>
+          ) : (
+            <><Save className="mr-2 h-4 w-4" /> Save to Catalog</>
+          )}
+        </Button>
+        <p className="text-xs text-muted-foreground text-center mt-2">
+          This saves to your internal catalog only. Listings go public when a subletter creates one and you approve it.
+        </p>
       </div>
     </div>
   );
