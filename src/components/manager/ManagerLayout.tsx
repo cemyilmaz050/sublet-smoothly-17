@@ -17,13 +17,16 @@ import {
 import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Building2, Users, MessageSquare, Bell,
-  ShieldCheck, DollarSign, Settings, LogOut,
+  ShieldCheck, DollarSign, Settings, LogOut, ClipboardCheck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import bbgLogo from "@/assets/bbg-logo.png";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 const navItems = [
   { title: "Dashboard", url: "/manager", icon: LayoutDashboard },
+  { title: "Pending Approvals", url: "/manager/approvals", icon: ClipboardCheck, badgeKey: "pendingApprovals" as const },
   { title: "Active Sublet Listings", url: "/manager/listings", icon: Building2 },
   { title: "Applications", url: "/manager/applications", icon: Users },
   { title: "Background Checks", url: "/manager/checks", icon: ShieldCheck },
