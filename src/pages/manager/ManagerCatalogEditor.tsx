@@ -360,10 +360,8 @@ const ManagerCatalogEditor = () => {
     try {
       const propId = await savePropertyAndUnit();
       if (!propId) { setSaving(false); return; }
-      await upsertListing(propId, "draft");
       queryClient.invalidateQueries({ queryKey: ["manager-catalog"] });
-      queryClient.invalidateQueries({ queryKey: ["manager-listings"] });
-      toast.success("Saved as draft");
+      toast.success("Saved to catalog");
       if (isNew) navigate(`/portal-mgmt-bbg/catalog/${propId}`, { replace: true });
     } catch (err: any) {
       console.error("Save error:", err);
