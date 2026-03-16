@@ -89,7 +89,7 @@ const LandingPage = () => {
             <div className="mt-8 flex flex-wrap gap-4">
               <Link to="/signup?role=tenant">
                 <Button variant="hero" size="xl">
-                  I'm leaving my place 🗝️
+                  I'm leaving my place
                   <ArrowRight className="ml-1 h-5 w-5" />
                 </Button>
               </Link>
