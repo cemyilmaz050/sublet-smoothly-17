@@ -216,7 +216,7 @@ const RenterVerificationGate = ({ open, onOpenChange, onVerified }: RenterVerifi
             {steps.map((step) => {
               const Icon = step.icon;
               const StatusIcon = step.complete ? CheckCircle2 : Circle;
-              const canStart = step.num === 1 || steps[step.num - 2].complete;
+              const canStart = true;
 
               return (
                 <button
