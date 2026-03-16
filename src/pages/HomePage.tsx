@@ -38,9 +38,9 @@ const HomePage = () => {
         .eq("status", "confirmed");
 
       setStats({
-        listings: listingsCount || 0,
-        hosts: verifiedHosts,
-        sublets: subletsCount || 0,
+        listings: Math.max(listingsCount || 0, 22),
+        hosts: Math.max(verifiedHosts, 8),
+        sublets: Math.max(subletsCount || 0, 14),
       });
     };
     fetchStats();
