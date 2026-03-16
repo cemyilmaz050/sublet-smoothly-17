@@ -34,6 +34,7 @@ export const defaultListingForm: ListingFormData = {
   bedrooms: "",
   bathrooms: "",
   sqft: "",
+  management_type: "",
   photos: [],
   photoUrls: [],
   headline: "",
