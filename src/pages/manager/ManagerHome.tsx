@@ -115,7 +115,7 @@ const ManagerHome = () => {
       <Card className="shadow-card">
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
           <h2 className="text-base font-semibold text-foreground">Recent Activity</h2>
-          <Link to="/manager/notifications">
+          <Link to={`${P}/notifications`}>
             <Button variant="ghost" size="sm" className="text-xs">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
           </Link>
         </div>
