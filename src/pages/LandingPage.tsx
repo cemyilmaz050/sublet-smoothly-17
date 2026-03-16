@@ -295,7 +295,7 @@ const LandingPage = () => {
       {/* CTA */}
       <section className="border-t bg-card py-20">
         <div className="container text-center">
-          <h2 className="text-3xl font-bold text-foreground">Ready to find your summer spot? 🌞</h2>
+          <h2 className="text-3xl font-bold text-foreground">Ready to find your summer spot?</h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             Join hundreds of students who trust SubIn for safe, verified sublets in Boston.
           </p>
