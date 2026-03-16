@@ -327,7 +327,7 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
       <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
         <DialogContent className="sm:max-w-sm max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Lock it in 🔒</DialogTitle>
+            <DialogTitle>Lock it in</DialogTitle>
             <DialogDescription>Reserve {listing.headline || "this place"} with a deposit.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

@@ -651,7 +651,7 @@ const ListingsPage = () => {
                   ))}
                 </div>
                 {selectedListing.monthly_rent && selectedListing.monthly_rent < 2000 && (
-                  <p className="text-sm text-emerald font-medium text-center">Cheaper than a Boston hotel for the summer 🎉</p>
+                  <p className="text-sm text-emerald font-medium text-center">Cheaper than a Boston hotel for the summer</p>
                 )}
                 <div className="space-y-2">
                   <p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4" />{selectedListing.address || "Unknown"}</p>

@@ -280,7 +280,7 @@ const SignUpPage = () => {
               {step === 1 ? "What brings you to SubIn? 👋" : "Let's get you set up"}
             </h1>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-              {step === 1 ? "Pick one — you can always switch later" : "Takes under 30 seconds ⚡"}
+              {step === 1 ? "Pick one — you can always switch later" : "Takes under 30 seconds"}
             </p>
           </div>
 
