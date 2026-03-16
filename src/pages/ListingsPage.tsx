@@ -462,12 +462,12 @@ const ListingsPage = () => {
             </div>
           </div>
 
-          {/* Right: Sticky map — never scrolls */}
+          {/* Right: Map — fills remaining height, never scrolls */}
           <div className={cn(
             "lg:block lg:w-[55%] border-l",
             mobileView === "map" ? "block w-full" : "hidden"
           )}>
-            <div className="sticky top-[8rem] h-[calc(100dvh-8rem)]">
+            <div className="h-full">
               {viewMode === "calendar" ? (
                 <CalendarView
                   listings={allListings}
