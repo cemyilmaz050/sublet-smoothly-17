@@ -668,8 +668,10 @@ export type Database = {
       profiles: {
         Row: {
           active_mode: string
+          application_complete: boolean
           avatar_url: string | null
           bio: string | null
+          cosigner_confirmed: boolean
           created_at: string
           documents_status: string
           first_name: string | null
@@ -679,6 +681,7 @@ export type Database = {
           last_name: string | null
           onboarding_complete: boolean
           phone: string | null
+          renter_verified: boolean
           role: string
           stripe_verification_session_id: string | null
           updated_at: string
@@ -686,8 +689,10 @@ export type Database = {
         }
         Insert: {
           active_mode?: string
+          application_complete?: boolean
           avatar_url?: string | null
           bio?: string | null
+          cosigner_confirmed?: boolean
           created_at?: string
           documents_status?: string
           first_name?: string | null
@@ -697,6 +702,7 @@ export type Database = {
           last_name?: string | null
           onboarding_complete?: boolean
           phone?: string | null
+          renter_verified?: boolean
           role?: string
           stripe_verification_session_id?: string | null
           updated_at?: string
@@ -704,8 +710,10 @@ export type Database = {
         }
         Update: {
           active_mode?: string
+          application_complete?: boolean
           avatar_url?: string | null
           bio?: string | null
+          cosigner_confirmed?: boolean
           created_at?: string
           documents_status?: string
           first_name?: string | null
@@ -715,6 +723,7 @@ export type Database = {
           last_name?: string | null
           onboarding_complete?: boolean
           phone?: string | null
+          renter_verified?: boolean
           role?: string
           stripe_verification_session_id?: string | null
           updated_at?: string
@@ -779,6 +788,69 @@ export type Database = {
           status?: string | null
           verified?: boolean | null
           website?: string | null
+        }
+        Relationships: []
+      }
+      renter_applications: {
+        Row: {
+          created_at: string
+          current_address: string
+          emergency_contact_name: string
+          emergency_contact_phone: string
+          eviction_details: string | null
+          full_name: string
+          has_pets: boolean
+          id: string
+          income_or_funding: string
+          intended_end_date: string
+          intended_start_date: string
+          pet_details: string | null
+          prior_evictions: boolean
+          reason_for_subletting: string
+          renter_id: string
+          status: string
+          university_or_employer: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          current_address: string
+          emergency_contact_name: string
+          emergency_contact_phone: string
+          eviction_details?: string | null
+          full_name: string
+          has_pets?: boolean
+          id?: string
+          income_or_funding: string
+          intended_end_date: string
+          intended_start_date: string
+          pet_details?: string | null
+          prior_evictions?: boolean
+          reason_for_subletting: string
+          renter_id: string
+          status?: string
+          university_or_employer: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          current_address?: string
+          emergency_contact_name?: string
+          emergency_contact_phone?: string
+          eviction_details?: string | null
+          full_name?: string
+          has_pets?: boolean
+          id?: string
+          income_or_funding?: string
+          intended_end_date?: string
+          intended_start_date?: string
+          pet_details?: string | null
+          prior_evictions?: boolean
+          reason_for_subletting?: string
+          renter_id?: string
+          status?: string
+          university_or_employer?: string
+          updated_at?: string
         }
         Relationships: []
       }
