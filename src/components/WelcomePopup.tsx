@@ -163,7 +163,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
                 Go to my dashboard
               </Button>
               <button onClick={handleSkip} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Skip for now — just browse
+                Skip for now, just browse
               </button>
             </motion.div>
           </motion.div>
