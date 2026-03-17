@@ -336,7 +336,7 @@ const AdminCreateListing = () => {
                   </p>
                   <div className="flex gap-3">
                     <Button variant="outline" onClick={resetForm}>Create Another</Button>
-                    <Button onClick={() => navigate("/s-admin-console")}>Back to Dashboard</Button>
+                    <Button onClick={() => navigate("/admin-subin-2026")}>Back to Dashboard</Button>
                   </div>
                 </CardContent>
               </Card>
