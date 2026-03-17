@@ -212,7 +212,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               </motion.div>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-foreground">Identity verified — you're all set</p>
+              <p className="text-lg font-bold text-foreground">Identity verified, you're all set</p>
               <p className="text-sm text-muted-foreground mt-1">
                 You can now schedule viewings and make payments on SubIn.
               </p>
