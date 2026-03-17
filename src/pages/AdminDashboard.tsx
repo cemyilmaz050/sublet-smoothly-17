@@ -470,5 +470,47 @@ const ManualVerifyTool = () => {
     </div>
   );
 };
+const TestModeToggle = () => {
+  const [testMode, setTestMode] = useState(() => {
+    return localStorage.getItem("subin_test_mode") === "true";
+  });
+
+  const toggle = () => {
+    const next = !testMode;
+    setTestMode(next);
+    localStorage.setItem("subin_test_mode", next ? "true" : "false");
+    toast.success(next ? "Test mode ON — verification is instant for all users" : "Test mode OFF — Stripe verification is active");
+  };
+
+  return (
+    <Card className="shadow-card">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Shield className="h-4 w-4 text-amber" />
+          Verification Test Mode
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          When enabled, clicking "Verify" instantly marks users as verified without going through Stripe. Use for demos and early users.
+        </p>
+        <div className="flex items-center gap-3">
+          <Button
+            variant={testMode ? "destructive" : "default"}
+            size="sm"
+            onClick={toggle}
+          >
+            {testMode ? "Disable Test Mode" : "Enable Test Mode"}
+          </Button>
+          {testMode && (
+            <Badge className="bg-amber/15 text-amber border-amber/30">
+              TEST MODE ACTIVE
+            </Badge>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default AdminDashboard;
