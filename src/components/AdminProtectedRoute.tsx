@@ -19,6 +19,17 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
+  const [authSettled, setAuthSettled] = useState(false);
+
+  // Wait for auth to fully settle before making redirect decisions
+  // This prevents premature redirects on direct URL navigation
+  useEffect(() => {
+    if (isReady) {
+      // Give an extra moment for session restoration on direct navigation
+      const timer = setTimeout(() => setAuthSettled(true), 150);
+      return () => clearTimeout(timer);
+    }
+  }, [isReady]);
 
   // Check if already PIN-verified this session
   useEffect(() => {
@@ -64,7 +75,7 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     }
   }, [pin]);
 
-  if (!isReady || checkingSession) {
+  if (!isReady || checkingSession || !authSettled) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
