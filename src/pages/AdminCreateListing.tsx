@@ -914,7 +914,12 @@ const AdminCreateListing = () => {
                       <div className="space-y-3 text-sm">
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Creating for</span>
-                          <span className="font-medium">{selectedUser?.first_name} {selectedUser?.last_name} ({selectedUser?.email})</span>
+                          <span className="font-medium">
+                            {isPendingUser
+                              ? <><Badge variant="outline" className="mr-1.5 text-amber-600 border-amber-300 bg-amber-50">Pending signup</Badge>{pendingEmail}</>
+                              : <>{selectedUser?.first_name} {selectedUser?.last_name} ({selectedUser?.email})</>
+                            }
+                          </span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Address</span>
