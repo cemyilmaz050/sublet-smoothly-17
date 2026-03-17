@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useVerificationPolling } from "@/hooks/useVerificationPolling";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail, Sparkles, Camera, Sun, CreditCard } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ShieldCheck, Loader2, CheckCircle2, AlertTriangle, RefreshCw, ArrowRight, Mail, Sparkles, Camera, Sun, CreditCard, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,11 +16,12 @@ interface StripeIdVerificationProps {
   onVerified?: () => void;
 }
 
-type VerificationState = "idle" | "loading" | "prep" | "pending" | "verified" | "failed" | "max_attempts";
+type VerificationState = "idle" | "loading" | "prep" | "pending" | "verified" | "failed" | "max_attempts" | "manual_upload";
 
-const POLL_INTERVAL = 5000; // 5 seconds as requested
+const POLL_INTERVAL = 5000;
 const TWO_MINUTES = 2 * 60 * 1000;
 const MAX_ATTEMPTS = 3;
+const LOADING_TIMEOUT_MS = 8000;
 
 const STATUS_MESSAGES = [
   "Checking your document...",
@@ -36,15 +38,19 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
   const [state, setState] = useState<VerificationState>(idVerified ? "verified" : "idle");
   const [error, setError] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loadingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pendingStart, setPendingStart] = useState<number | null>(null);
   const [statusMessageIndex, setStatusMessageIndex] = useState(0);
   const [showSlowMessage, setShowSlowMessage] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
+  const [manualFile, setManualFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
     };
   }, []);
 
@@ -114,16 +120,53 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
   const startVerification = async () => {
     if (!user) return;
+
+    // Check for admin test mode — instant verify
+    const testMode = localStorage.getItem("subin_test_mode") === "true";
+    if (testMode) {
+      setState("loading");
+      try {
+        await supabase.from("profiles").update({
+          id_verified: true,
+        } as any).eq("id", user.id);
+        setState("verified");
+        onVerified?.();
+        toast.success("Verified instantly (test mode)");
+      } catch {
+        toast.error("Test mode verification failed");
+        setState("idle");
+      }
+      return;
+    }
+
     setState("loading");
     setError(null);
     setShowSlowMessage(false);
+
+    // Set 8-second timeout on loading state
+    if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+    loadingTimeoutRef.current = setTimeout(() => {
+      // Only trigger if still in loading state
+      setState((current) => {
+        if (current === "loading") {
+          setError("Having trouble starting verification — tap here to try again");
+          return "failed";
+        }
+        return current;
+      });
+    }, LOADING_TIMEOUT_MS);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke(
         "create-verification-session"
       );
 
-      if (fnError) throw fnError;
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
+
+      if (fnError) {
+        console.error("Edge function error:", fnError);
+        throw new Error(fnError.message || "Failed to create verification session");
+      }
 
       if (data?.already_verified) {
         setState("verified");
@@ -139,12 +182,12 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
       if (data?.error) throw new Error(data.error);
 
       const clientSecret = data?.client_secret;
-      if (!clientSecret) throw new Error("No client secret returned");
+      if (!clientSecret) throw new Error("No client secret returned from server");
 
       const stripe = await loadStripe(
         "pk_live_51TABODCpbA85hge15GgiO276acyyu7ttgB7zKw8Ygsb8KwU2QUagdYnjI5s3bkeLsoMFshURYYq5DLzAqbMU865d00W47B1eMN"
       );
-      if (!stripe) throw new Error("Failed to load Stripe");
+      if (!stripe) throw new Error("Failed to load Stripe. Please check your connection and try again.");
 
       const result = await stripe.verifyIdentity(clientSecret);
 
@@ -176,9 +219,44 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
         startPolling();
       }
     } catch (err: any) {
+      if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
       console.error("Verification error:", err);
       setError(err.message || "Something went wrong. Please try again.");
       setState("failed");
+    }
+  };
+
+  const handleManualUpload = async () => {
+    if (!user || !manualFile) return;
+    setUploading(true);
+    try {
+      const ext = manualFile.name.split(".").pop() || "jpg";
+      const filePath = `${user.id}/manual-id-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("tenant-documents")
+        .upload(filePath, manualFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from("tenant-documents")
+        .getPublicUrl(filePath);
+
+      // Update profile with document URL and set documents_status to pending
+      await supabase.from("profiles").update({
+        id_document_url: urlData.publicUrl,
+        documents_status: "pending_review",
+      } as any).eq("id", user.id);
+
+      toast.success("ID uploaded! Our team will review it within 1 hour and verify you.");
+      setState("idle");
+      setManualFile(null);
+    } catch (err: any) {
+      console.error("Manual upload error:", err);
+      toast.error(err.message || "Failed to upload. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -223,6 +301,64 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
     );
   }
 
+  // ── Manual upload state ──
+  if (state === "manual_upload") {
+    return (
+      <Card className="border-primary/20 bg-card">
+        <CardContent className="space-y-4 p-5">
+          <div className="text-center">
+            <p className="text-base font-bold text-foreground">Upload Your ID Manually</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Take a clear photo of your government-issued ID and upload it. Our team will review and verify you within 1 hour.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-center w-full">
+              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl border-muted-foreground/30 cursor-pointer hover:border-primary/50 transition-colors bg-muted/30">
+                {manualFile ? (
+                  <div className="flex flex-col items-center gap-1">
+                    <ImageIcon className="h-8 w-8 text-primary" />
+                    <p className="text-sm font-medium text-foreground truncate max-w-[200px]">{manualFile.name}</p>
+                    <p className="text-xs text-muted-foreground">Tap to change</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-1">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Tap to upload your ID photo</p>
+                    <p className="text-xs text-muted-foreground">JPG, PNG, or PDF</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  className="hidden"
+                  onChange={(e) => setManualFile(e.target.files?.[0] || null)}
+                />
+              </label>
+            </div>
+
+            <Button
+              onClick={handleManualUpload}
+              disabled={!manualFile || uploading}
+              className="w-full h-11"
+            >
+              {uploading ? (
+                <><Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Uploading...</>
+              ) : (
+                <><Upload className="mr-1.5 h-4 w-4" /> Submit for Review</>
+              )}
+            </Button>
+          </div>
+
+          <Button variant="ghost" size="sm" onClick={() => setState("idle")} className="w-full text-xs">
+            ← Back to verification options
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // ── Max attempts state ──
   if (state === "max_attempts") {
     return (
@@ -233,21 +369,26 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             <div>
               <p className="text-sm font-semibold text-foreground">Having trouble?</p>
               <p className="text-sm text-muted-foreground mt-1">
-                No worries! Email us at{" "}
-                <a href="mailto:hello@subinapp.com" className="font-semibold text-primary underline">
-                  hello@subinapp.com
-                </a>{" "}
-                with a photo of your ID and we'll verify you manually within 1 hour.
+                No worries! You can upload your ID manually and we'll verify you within 1 hour.
               </p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { setAttemptCount(0); setState("idle"); }}
-          >
-            <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try Again Anyway
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button
+              size="sm"
+              onClick={() => setState("manual_upload")}
+              className="w-full"
+            >
+              <Upload className="mr-1.5 h-3.5 w-3.5" /> Upload ID Manually
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => { setAttemptCount(0); setState("idle"); }}
+            >
+              <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try Stripe Again
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -259,7 +400,6 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
       <Card className="border-primary/30 bg-primary/5">
         <CardContent className="space-y-4 p-5">
           <div className="flex flex-col items-center gap-4 py-4">
-            {/* Animated progress ring */}
             <div className="relative flex h-16 w-16 items-center justify-center">
               <svg className="absolute inset-0 h-16 w-16 -rotate-90" viewBox="0 0 64 64">
                 <circle cx="32" cy="32" r="28" fill="none" stroke="hsl(var(--primary) / 0.15)" strokeWidth="4" />
@@ -277,15 +417,10 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             </div>
 
             <div className="text-center">
-              <p className="text-base font-semibold text-foreground">
-                Your ID is being reviewed
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                This usually takes under 60 seconds
-              </p>
+              <p className="text-base font-semibold text-foreground">Your ID is being reviewed</p>
+              <p className="text-xs text-muted-foreground mt-1">This usually takes under 60 seconds</p>
             </div>
 
-            {/* Rotating status messages */}
             <AnimatePresence mode="wait">
               <motion.p
                 key={statusMessageIndex}
@@ -299,7 +434,6 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               </motion.p>
             </AnimatePresence>
 
-            {/* Animated dots */}
             <div className="flex gap-1.5">
               {[0, 1, 2, 3].map((i) => (
                 <motion.div
@@ -312,7 +446,6 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             </div>
           </div>
 
-          {/* 2-minute fallback */}
           <AnimatePresence>
             {showSlowMessage && (
               <motion.div
@@ -321,32 +454,20 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
                 exit={{ opacity: 0 }}
                 className="rounded-xl bg-muted p-4 text-center space-y-3"
               >
-                <p className="text-sm text-foreground font-medium">
-                  This is taking a little longer than usual
-                </p>
+                <p className="text-sm text-foreground font-medium">This is taking a little longer than usual</p>
                 <p className="text-xs text-muted-foreground">
                   You can continue browsing while we finish verifying you. We'll notify you the moment it's done.
                 </p>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleContinueBrowsing}
-                >
+                <Button variant="default" size="sm" onClick={handleContinueBrowsing}>
                   Continue Browsing <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </Button>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Always show continue browsing option */}
           {!showSlowMessage && (
             <div className="text-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleContinueBrowsing}
-                className="text-xs text-muted-foreground"
-              >
+              <Button variant="ghost" size="sm" onClick={handleContinueBrowsing} className="text-xs text-muted-foreground">
                 Continue Browsing <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </div>
@@ -368,18 +489,24 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               <p className="text-sm text-muted-foreground mt-1">
                 {error || "Something went wrong. Please try again."}
               </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Attempt {attemptCount} of {MAX_ATTEMPTS}
-              </p>
+              {attemptCount > 0 && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Attempt {attemptCount} of {MAX_ATTEMPTS}
+                </p>
+              )}
             </div>
           </div>
-          <Button
-            size="sm"
-            onClick={startVerification}
-            className="w-full sm:w-auto"
-          >
-            <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try Again
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button size="sm" onClick={startVerification} className="w-full sm:w-auto">
+              <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Try Again
+            </Button>
+            <button
+              onClick={() => setState("manual_upload")}
+              className="text-xs text-muted-foreground hover:text-primary underline transition-colors text-left"
+            >
+              Having trouble? Verify manually instead
+            </button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -427,12 +554,16 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             </div>
           </div>
 
-          <Button
-            onClick={startVerification}
-            className="w-full h-12"
-          >
+          <Button onClick={startVerification} className="w-full h-12">
             <ShieldCheck className="mr-1.5 h-4 w-4" /> Start Verification
           </Button>
+
+          <button
+            onClick={() => setState("manual_upload")}
+            className="w-full text-xs text-muted-foreground hover:text-primary underline transition-colors text-center"
+          >
+            Having trouble? Verify manually instead
+          </button>
         </CardContent>
       </Card>
     );
@@ -475,6 +606,13 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             </>
           )}
         </Button>
+
+        <button
+          onClick={() => setState("manual_upload")}
+          className="w-full text-xs text-muted-foreground hover:text-primary underline transition-colors text-center"
+        >
+          Having trouble? Verify manually instead
+        </button>
       </CardContent>
     </Card>
   );
