@@ -123,6 +123,7 @@ const App = () => (
                   <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
                   <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
                   <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
+                  <Route path="/documents/bbg" element={<ProtectedRoute><BBGDocumentFillingPage /></ProtectedRoute>} />
 
                   {/* Founder Admin — secret URL, email-gated, PIN-protected */}
                   <Route path="/admin-subin-2026" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
