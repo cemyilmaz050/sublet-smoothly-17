@@ -1070,7 +1070,7 @@ const AdminCreateListing = () => {
                     <div className="rounded-lg border p-3 bg-muted/50">
                       <p className="text-sm font-medium">{csvData.length} listings loaded</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Preview: {csvData.slice(0, 3).map((r) => r.address || r.headline || "—").join(", ")}
+                        Preview: {csvData.slice(0, 3).map((r) => r.address || r.headline || "-").join(", ")}
                         {csvData.length > 3 && ` +${csvData.length - 3} more`}
                       </p>
                     </div>

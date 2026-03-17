@@ -198,7 +198,7 @@ const ManagerApplications = () => {
       toast.success(
         finalStatus === "verified" ? "Applicant verified and approved!" :
         finalStatus === "declined" ? "Applicant declined." :
-        "Background check saved — needs more info."
+        "Background check saved, needs more info."
       );
       setBgCheckOpen(false);
     } catch (err: any) {

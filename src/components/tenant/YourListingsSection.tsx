@@ -216,7 +216,7 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
                   {/* Rent */}
                   <div className="absolute bottom-3 left-3">
                     <p className="text-2xl font-bold text-white drop-shadow-md">
-                      ${listing.monthly_rent?.toLocaleString() ?? "—"}
+                      ${listing.monthly_rent?.toLocaleString() ?? "-"}
                       <span className="text-sm font-normal opacity-80">/mo</span>
                     </p>
                   </div>
