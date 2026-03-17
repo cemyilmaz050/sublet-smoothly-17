@@ -1054,7 +1054,7 @@ const AdminCreateListing = () => {
                 {csvUser && (
                   <div className="flex items-center gap-2 rounded-lg border p-2.5 bg-primary/5">
                     <User className="h-4 w-4 text-primary" />
-                    <span className="text-sm">{csvUser.first_name} {csvUser.last_name} — {csvUser.email}</span>
+                    <span className="text-sm">{csvUser.first_name} {csvUser.last_name} · {csvUser.email}</span>
                   </div>
                 )}
 
