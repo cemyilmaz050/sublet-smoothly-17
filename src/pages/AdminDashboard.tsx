@@ -282,6 +282,9 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+        {/* Pending Listings */}
+        <PendingListingsSection />
+
         {/* Manual Verification Tool */}
         <Card className="shadow-card">
           <CardHeader className="pb-2">
