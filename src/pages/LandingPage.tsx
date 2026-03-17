@@ -29,7 +29,7 @@ const LandingPage = () => {
     {
       name: "Emma",
       university: "BU Class of 2025",
-      quote: "Found my summer place in 2 days. SubIn made it so easy — no sketchy Craigslist vibes.",
+      quote: "Found my summer place in 2 days. SubIn made it so easy, no sketchy Craigslist vibes.",
       rating: 5,
       color: "from-primary to-cyan",
     },
