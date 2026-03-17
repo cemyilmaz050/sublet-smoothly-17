@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Camera, GripVertical, Star, Upload, X, CheckCircle2 } from "lucide-react";
+import { Camera, GripVertical, Star, Upload, X, CheckCircle2, Trash2, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 
 /* ─── Types ─── */
 export interface UploadingPhoto {
@@ -13,36 +14,74 @@ export interface UploadingPhoto {
   progress: number;
   status: "uploading" | "done" | "error";
   resultUrl?: string;
+  fingerprint: string;
 }
 
 interface UniversalPhotoUploaderProps {
-  /** Already-uploaded photo URLs */
   photoUrls: string[];
   onPhotoUrlsChange: (urls: string[]) => void;
-  /** Storage bucket name (default: listing-photos) */
   bucket?: string;
-  /** Storage path prefix e.g. "catalog/abc123" */
   storagePath?: string;
-  /** Max photos allowed (default: 10) */
   maxPhotos?: number;
-  /** Min photos required (default: 0) */
   minPhotos?: number;
-  /** Show cover badge on first photo */
   showCoverBadge?: boolean;
-  /** Compact mode for smaller areas */
   compact?: boolean;
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/heic", "image/webp"];
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ACCEPTED_EXTENSIONS = /\.(jpg|jpeg|png|heic|webp)$/i;
+
+/* ─── Fingerprinting: name + size + quick pixel hash ─── */
+function fileFingerprint(file: File): string {
+  return `${file.size}_${file.name.replace(/\s+/g, "").toLowerCase()}`;
+}
+
+async function imageContentHash(file: File): Promise<string> {
+  try {
+    const buf = await file.slice(0, Math.min(file.size, 8192)).arrayBuffer();
+    const arr = new Uint8Array(buf);
+    let h = 0;
+    for (let i = 0; i < arr.length; i++) {
+      h = ((h << 5) - h + arr[i]) | 0;
+    }
+    return `${file.size}_${h}`;
+  } catch {
+    return fileFingerprint(file);
+  }
+}
+
+/* ─── Detect duplicate URLs by normalised path ─── */
+function urlFingerprint(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.pathname.split("/").pop()?.toLowerCase() || url;
+  } catch {
+    return url;
+  }
+}
+
+function findDuplicateUrls(urls: string[]): { unique: string[]; dupeCount: number } {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  let dupeCount = 0;
+  for (const url of urls) {
+    const fp = urlFingerprint(url);
+    if (seen.has(fp)) {
+      dupeCount++;
+    } else {
+      seen.add(fp);
+      unique.push(url);
+    }
+  }
+  return { unique, dupeCount };
+}
 
 const UniversalPhotoUploader = ({
   photoUrls,
   onPhotoUrlsChange,
   bucket = "listing-photos",
   storagePath = "uploads",
-  maxPhotos = 10,
+  maxPhotos = 15,
   minPhotos = 0,
   showCoverBadge = true,
   compact = false,
@@ -52,20 +91,26 @@ const UniversalPhotoUploader = ({
   const [allDoneFlash, setAllDoneFlash] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const [sessionFingerprints, setSessionFingerprints] = useState<Set<string>>(new Set());
+  const [similarWarnings, setSimilarWarnings] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const total = photoUrls.length + uploading.filter((u) => u.status !== "error").length;
   const remaining = maxPhotos - total;
 
-  // Completed count for progress
   const uploadedCount = uploading.filter((u) => u.status === "done").length;
   const activeCount = uploading.filter((u) => u.status === "uploading").length;
 
-  // Overall progress
   const overallProgress = useMemo(() => {
     if (uploading.length === 0) return 0;
     return uploading.reduce((sum, u) => sum + u.progress, 0) / uploading.length;
   }, [uploading]);
+
+  // Check for duplicate URLs already in photoUrls
+  const hasDuplicateUrls = useMemo(() => {
+    const { dupeCount } = findDuplicateUrls(photoUrls);
+    return dupeCount > 0;
+  }, [photoUrls]);
 
   // Flash "all done" when uploads complete
   useEffect(() => {
@@ -89,7 +134,6 @@ const UniversalPhotoUploader = ({
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
       const path = `${storagePath}/${crypto.randomUUID()}.${ext}`;
 
-      // Simulate progress since supabase SDK doesn't provide it
       const progressInterval = setInterval(() => {
         setUploading((prev) =>
           prev.map((u) =>
@@ -103,7 +147,6 @@ const UniversalPhotoUploader = ({
       try {
         const { error } = await supabase.storage.from(bucket).upload(path, file);
         clearInterval(progressInterval);
-
         if (error) throw error;
         const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
 
@@ -129,7 +172,7 @@ const UniversalPhotoUploader = ({
   );
 
   const processFiles = useCallback(
-    (files: FileList | File[]) => {
+    async (files: FileList | File[]) => {
       const fileArr = Array.from(files);
       const valid: File[] = [];
 
@@ -145,8 +188,36 @@ const UniversalPhotoUploader = ({
         valid.push(f);
       }
 
-      const toAdd = valid.slice(0, Math.max(0, remaining));
-      if (toAdd.length < valid.length) {
+      if (remaining <= 0) {
+        toast.error(`You've reached the maximum of ${maxPhotos} photos — remove some before adding more`);
+        return;
+      }
+
+      // Deduplicate against session
+      const deduplicated: File[] = [];
+      let skipped = 0;
+      const newFingerprints = new Set(sessionFingerprints);
+
+      for (const f of valid) {
+        const contentFp = await imageContentHash(f);
+        const simpleFp = fileFingerprint(f);
+        if (newFingerprints.has(contentFp) || newFingerprints.has(simpleFp)) {
+          skipped++;
+          continue;
+        }
+        newFingerprints.add(contentFp);
+        newFingerprints.add(simpleFp);
+        deduplicated.push(f);
+      }
+
+      if (skipped > 0) {
+        toast.info(`${skipped} duplicate photo${skipped > 1 ? "s were" : " was"} skipped — we only kept the unique ones`);
+      }
+
+      setSessionFingerprints(newFingerprints);
+
+      const toAdd = deduplicated.slice(0, Math.max(0, remaining));
+      if (toAdd.length < deduplicated.length) {
         toast.error(`Only ${remaining} more photo${remaining !== 1 ? "s" : ""} can be added`);
       }
       if (toAdd.length === 0) return;
@@ -157,14 +228,13 @@ const UniversalPhotoUploader = ({
         previewUrl: URL.createObjectURL(file),
         progress: 0,
         status: "uploading" as const,
+        fingerprint: fileFingerprint(file),
       }));
 
       setUploading((prev) => [...prev, ...newUploads]);
-
-      // Start all uploads in parallel
       newUploads.forEach((u) => uploadFile(u.file, u.id));
     },
-    [remaining, uploadFile]
+    [remaining, uploadFile, sessionFingerprints, maxPhotos]
   );
 
   const handleDrop = useCallback(
@@ -198,6 +268,14 @@ const UniversalPhotoUploader = ({
   );
 
   const removeUrl = (index: number) => {
+    setSimilarWarnings((prev) => {
+      const next = new Set<number>();
+      prev.forEach((i) => {
+        if (i < index) next.add(i);
+        else if (i > index) next.add(i - 1);
+      });
+      return next;
+    });
     onPhotoUrlsChange(photoUrls.filter((_, i) => i !== index));
   };
 
@@ -209,7 +287,25 @@ const UniversalPhotoUploader = ({
     });
   };
 
-  // Reorder via drag
+  const removeDuplicateUrls = () => {
+    const { unique, dupeCount } = findDuplicateUrls(photoUrls);
+    if (dupeCount === 0) {
+      toast.info("No duplicate photos found");
+      return;
+    }
+    onPhotoUrlsChange(unique);
+    toast.success(`Removed ${dupeCount} duplicate photo${dupeCount > 1 ? "s" : ""} — your listing now has ${unique.length} unique photos`);
+  };
+
+  const dismissSimilar = (index: number) => {
+    setSimilarWarnings((prev) => {
+      const next = new Set(prev);
+      next.delete(index);
+      return next;
+    });
+  };
+
+  // Reorder
   const handleReorderDragStart = (idx: number) => setDragIdx(idx);
   const handleReorderDragOver = (e: React.DragEvent, idx: number) => {
     e.preventDefault();
@@ -231,13 +327,25 @@ const UniversalPhotoUploader = ({
 
   return (
     <div className="space-y-4">
+      {/* Remove duplicates button */}
+      {hasDuplicateUrls && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={removeDuplicateUrls}
+          className="w-full gap-2 border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-950/30"
+        >
+          <Trash2 className="h-4 w-4" />
+          Remove duplicate photos
+        </Button>
+      )}
+
       {/* Upload progress bar */}
       {uploading.length > 0 && activeCount > 0 && (
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-              {uploadedCount} of {uploading.length} uploaded
-            </span>
+            <span>{uploadedCount} of {uploading.length} uploaded</span>
             <span>{Math.round(overallProgress)}%</span>
           </div>
           <Progress value={overallProgress} className="h-1.5" />
@@ -301,7 +409,6 @@ const UniversalPhotoUploader = ({
       {/* Photo grid */}
       {(photoUrls.length > 0 || uploading.length > 0) && (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
-          {/* Existing uploaded photos */}
           {photoUrls.map((url, i) => (
             <div
               key={`url-${i}`}
@@ -321,6 +428,18 @@ const UniversalPhotoUploader = ({
                   <Star className="h-3 w-3" /> Cover
                 </div>
               )}
+              {similarWarnings.has(i) && (
+                <div className="absolute left-1 bottom-7 flex items-center gap-1 rounded bg-amber-500/90 px-1.5 py-0.5 text-[9px] font-medium text-white">
+                  <AlertTriangle className="h-3 w-3" /> Similar
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); dismissSimilar(i); }}
+                    className="ml-0.5 hover:text-amber-200"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="absolute left-1 bottom-1 opacity-0 group-hover:opacity-70 transition-opacity">
                 <GripVertical className="h-4 w-4 text-white" />
@@ -335,12 +454,8 @@ const UniversalPhotoUploader = ({
             </div>
           ))}
 
-          {/* Currently uploading photos */}
           {uploading.map((u) => (
-            <div
-              key={u.id}
-              className="group relative aspect-square overflow-hidden rounded-lg border bg-muted"
-            >
+            <div key={u.id} className="group relative aspect-square overflow-hidden rounded-lg border bg-muted">
               <img
                 src={u.previewUrl}
                 alt=""
@@ -349,44 +464,22 @@ const UniversalPhotoUploader = ({
                   u.status === "uploading" ? "opacity-70" : "opacity-100"
                 )}
               />
-              {/* Upload overlay */}
               {u.status === "uploading" && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-[1px] transition-opacity">
                   <div className="relative h-10 w-10">
                     <svg className="h-10 w-10 -rotate-90" viewBox="0 0 36 36">
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="15.5"
-                        fill="none"
-                        stroke="hsl(var(--muted))"
-                        strokeWidth="3"
-                      />
-                      <circle
-                        cx="18"
-                        cy="18"
-                        r="15.5"
-                        fill="none"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth="3"
-                        strokeDasharray={`${u.progress * 0.975} 97.5`}
-                        strokeLinecap="round"
-                        className="transition-all duration-300"
-                      />
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="hsl(var(--primary))" strokeWidth="3" strokeDasharray={`${u.progress * 0.975} 97.5`} strokeLinecap="round" className="transition-all duration-300" />
                     </svg>
-                    <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">
-                      {Math.round(u.progress)}%
-                    </span>
+                    <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">{Math.round(u.progress)}%</span>
                   </div>
                 </div>
               )}
-              {/* Done overlay - brief flash */}
               {u.status === "done" && (
                 <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/20 animate-fade-out">
                   <CheckCircle2 className="h-8 w-8 text-emerald-500" />
                 </div>
               )}
-              {/* Error state */}
               {u.status === "error" && (
                 <div className="absolute inset-0 flex items-center justify-center bg-destructive/20">
                   <span className="text-[10px] font-medium text-destructive">Failed</span>
@@ -408,12 +501,10 @@ const UniversalPhotoUploader = ({
       <p
         className={cn(
           "text-center text-xs",
-          photoUrls.length >= minPhotos
-            ? "text-muted-foreground"
-            : "text-destructive"
+          photoUrls.length >= minPhotos ? "text-muted-foreground" : "text-destructive"
         )}
       >
-        {photoUrls.length + uploading.filter((u) => u.status !== "error").length} / {maxPhotos} photos
+        {photoUrls.length + uploading.filter((u) => u.status !== "error").length} of {maxPhotos} photos used
         {minPhotos > 0 && photoUrls.length < minPhotos && ` · ${minPhotos} minimum required`}
       </p>
     </div>
