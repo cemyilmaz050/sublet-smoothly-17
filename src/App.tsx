@@ -52,6 +52,8 @@ import ManagerNotifications from "./pages/manager/ManagerNotifications";
 import ManagerBackgroundChecks from "./pages/manager/ManagerBackgroundChecks";
 import ManagerPayments from "./pages/manager/ManagerPayments";
 import ManagerSettings from "./pages/manager/ManagerSettings";
+import ManagerDocuments from "./pages/manager/ManagerDocuments";
+import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
 
 const queryClient = new QueryClient();
 
