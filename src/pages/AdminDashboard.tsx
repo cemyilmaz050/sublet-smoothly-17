@@ -142,7 +142,7 @@ const AdminDashboard = () => {
             <h1 className="text-2xl font-bold text-foreground">Founder Dashboard</h1>
             <p className="text-sm text-muted-foreground">Platform metrics & insights</p>
           </div>
-          <Link to="/s-admin-console/create-listing">
+          <Link to="/admin-subin-2026/create-listing">
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
               Create Listing for User
