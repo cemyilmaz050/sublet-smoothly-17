@@ -172,8 +172,7 @@ const CreateListingPage = () => {
     setLoading(true);
     try {
       const id = draftId || crypto.randomUUID();
-      let photos = form.photoUrls;
-      if (form.photos.length > 0) photos = await uploadPhotos(id);
+      const photos = getPhotoUrls();
 
       const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
       const BBG_MANAGER_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
