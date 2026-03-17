@@ -91,9 +91,14 @@ const UniversalPhotoUploader = ({
   const [allDoneFlash, setAllDoneFlash] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
-  const [sessionFingerprints, setSessionFingerprints] = useState<Set<string>>(new Set());
   const [similarWarnings, setSimilarWarnings] = useState<Set<number>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sessionFingerprintsRef = useRef<Set<string>>(new Set());
+  const flushedRef = useRef(false);
+  const photoUrlsRef = useRef(photoUrls);
+  photoUrlsRef.current = photoUrls;
+  const onChangeRef = useRef(onPhotoUrlsChange);
+  onChangeRef.current = onPhotoUrlsChange;
 
   const total = photoUrls.length + uploading.filter((u) => u.status !== "error").length;
   const remaining = maxPhotos - total;
@@ -112,14 +117,15 @@ const UniversalPhotoUploader = ({
     return dupeCount > 0;
   }, [photoUrls]);
 
-  // Flash "all done" when uploads complete
+  // Flash "all done" when uploads complete — use flushedRef to prevent double-firing
   useEffect(() => {
-    if (uploading.length > 0 && activeCount === 0) {
+    if (uploading.length > 0 && activeCount === 0 && !flushedRef.current) {
       const doneUrls = uploading
         .filter((u) => u.status === "done" && u.resultUrl)
         .map((u) => u.resultUrl!);
       if (doneUrls.length > 0) {
-        onPhotoUrlsChange([...photoUrls, ...doneUrls]);
+        flushedRef.current = true;
+        onChangeRef.current([...photoUrlsRef.current, ...doneUrls]);
         setAllDoneFlash(true);
         setTimeout(() => {
           setUploading([]);
@@ -127,7 +133,7 @@ const UniversalPhotoUploader = ({
         }, 1500);
       }
     }
-  }, [activeCount, uploading, photoUrls, onPhotoUrlsChange]);
+  }, [activeCount, uploading]);
 
   const uploadFile = useCallback(
     async (file: File, uploadId: string) => {
@@ -196,7 +202,7 @@ const UniversalPhotoUploader = ({
       // Deduplicate against session
       const deduplicated: File[] = [];
       let skipped = 0;
-      const newFingerprints = new Set(sessionFingerprints);
+      const newFingerprints = new Set(sessionFingerprintsRef.current);
 
       for (const f of valid) {
         const contentFp = await imageContentHash(f);
@@ -214,7 +220,7 @@ const UniversalPhotoUploader = ({
         toast.info(`${skipped} duplicate photo${skipped > 1 ? "s were" : " was"} skipped — we only kept the unique ones`);
       }
 
-      setSessionFingerprints(newFingerprints);
+      sessionFingerprintsRef.current = newFingerprints;
 
       const toAdd = deduplicated.slice(0, Math.max(0, remaining));
       if (toAdd.length < deduplicated.length) {
@@ -231,10 +237,11 @@ const UniversalPhotoUploader = ({
         fingerprint: fileFingerprint(file),
       }));
 
+      flushedRef.current = false;
       setUploading((prev) => [...prev, ...newUploads]);
       newUploads.forEach((u) => uploadFile(u.file, u.id));
     },
-    [remaining, uploadFile, sessionFingerprints, maxPhotos]
+    [remaining, uploadFile, maxPhotos]
   );
 
   const handleDrop = useCallback(
