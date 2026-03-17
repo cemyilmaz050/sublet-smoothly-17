@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +21,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import BMGSubletApplicationView from "@/components/documents/BMGSubletApplicationView";
+import BBGGuarantyOfLeaseView from "@/components/documents/BBGGuarantyOfLeaseView";
 
 type DocPackage = {
   id: string;
@@ -401,6 +403,29 @@ function ApplicantDetailPanel({ pkg, onSendReminder, sendingReminder, buildTimel
   const name = `${pkg.applicant_profile?.first_name || ""} ${pkg.applicant_profile?.last_name || "Unknown"}`.trim();
   const initials = getInitials(pkg.applicant_profile?.first_name, pkg.applicant_profile?.last_name);
   const timeline = buildTimeline(pkg);
+  const [viewingDoc, setViewingDoc] = useState<"application" | "guaranty" | null>(null);
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = () => {
+    const printContent = printRef.current;
+    if (!printContent) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html><head><title>BBG Documents - ${name}</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <style>
+        @media print { body { margin: 0; } .page-break { page-break-before: always; } }
+        body { font-family: 'Times New Roman', Georgia, serif; }
+      </style>
+      </head><body>${printContent.innerHTML}</body></html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => { printWindow.print(); }, 500);
+  };
+
+  const tenantName = pkg.listing ? `Tenant` : "";
 
   return (
     <ScrollArea className="h-full">
@@ -456,16 +481,13 @@ function ApplicantDetailPanel({ pkg, onSendReminder, sendingReminder, buildTimel
               {pkg.application?.completed_at && (
                 <p>Submitted: {format(new Date(pkg.application.completed_at), "MMM d, yyyy 'at' h:mm a")}</p>
               )}
-              {pkg.application?.signed_at && (
-                <p>Signed: {format(new Date(pkg.application.signed_at), "MMM d, yyyy")}</p>
-              )}
             </div>
             {pkg.application?.status === "completed" && (
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => window.print()}>
-                  <Eye className="h-3 w-3 mr-1" /> View
+                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setViewingDoc("application")}>
+                  <Eye className="h-3 w-3 mr-1" /> View Document
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => window.print()}>
+                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={handlePrint}>
                   <Download className="h-3 w-3 mr-1" /> PDF
                 </Button>
               </div>
@@ -483,16 +505,13 @@ function ApplicantDetailPanel({ pkg, onSendReminder, sendingReminder, buildTimel
               {pkg.guaranty?.completed_at && (
                 <p>Submitted: {format(new Date(pkg.guaranty.completed_at), "MMM d, yyyy 'at' h:mm a")}</p>
               )}
-              {pkg.guaranty?.signed_at && (
-                <p>Signed: {format(new Date(pkg.guaranty.signed_at), "MMM d, yyyy")}</p>
-              )}
             </div>
             {pkg.guaranty?.status === "completed" && (
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => window.print()}>
-                  <Eye className="h-3 w-3 mr-1" /> View
+                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => setViewingDoc("guaranty")}>
+                  <Eye className="h-3 w-3 mr-1" /> View Document
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => window.print()}>
+                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={handlePrint}>
                   <Download className="h-3 w-3 mr-1" /> PDF
                 </Button>
               </div>
@@ -500,53 +519,34 @@ function ApplicantDetailPanel({ pkg, onSendReminder, sendingReminder, buildTimel
           </div>
         </div>
 
-        {/* Filled Data Preview (if application is complete) */}
-        {pkg.application?.status === "completed" && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Sublet Application Details</h3>
-            <div className="rounded-xl border bg-muted/30 p-4 space-y-2 text-sm">
-              {[
-                ["Full Name", pkg.application.full_name],
-                ["Phone", pkg.application.phone],
-                ["Email", pkg.application.email],
-                ["Current Address", `${pkg.application.current_address || ""}, ${pkg.application.current_city || ""} ${pkg.application.current_state || ""} ${pkg.application.current_zip || ""}`],
-                ["Occupation", pkg.application.occupation],
-                ["Employer", pkg.application.employer],
-                ["Salary", pkg.application.salary],
-                ["Cosigner", pkg.application.cosigner_name],
-                ["Move-in", pkg.application.move_in_date],
-                ["Move-out", pkg.application.move_out_date],
-                ["Rent", pkg.application.first_month_rent ? `$${pkg.application.first_month_rent}` : null],
-                ["Security Deposit", pkg.application.security_deposit ? `$${pkg.application.security_deposit}` : null],
-              ].filter(([, v]) => v && String(v).trim() && String(v).trim() !== ",").map(([label, value]) => (
-                <div key={String(label)} className="flex justify-between">
-                  <span className="text-muted-foreground">{label}</span>
-                  <span className="font-medium text-foreground text-right max-w-[60%] truncate">{String(value)}</span>
-                </div>
-              ))}
+        {/* Inline Document View — replaces the old generic data table */}
+        {viewingDoc === "application" && pkg.application?.status === "completed" && (
+          <div className="rounded-xl border overflow-hidden">
+            <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+              <h3 className="text-sm font-semibold text-foreground">Sublet Application — Original Format</h3>
+              <Button variant="ghost" size="sm" onClick={() => setViewingDoc(null)}><X className="h-4 w-4" /></Button>
+            </div>
+            <div className="overflow-auto max-h-[600px]">
+              <BMGSubletApplicationView
+                data={pkg.application}
+                tenantName={tenantName}
+                verificationId={pkg.id.slice(0, 8).toUpperCase()}
+              />
             </div>
           </div>
         )}
 
-        {pkg.guaranty?.status === "completed" && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Guaranty of Lease Details</h3>
-            <div className="rounded-xl border bg-muted/30 p-4 space-y-2 text-sm">
-              {[
-                ["Lessee Name", pkg.guaranty.lessee_name],
-                ["Guarantor Name", pkg.guaranty.guarantor_name],
-                ["Guarantor Phone", pkg.guaranty.guarantor_phone],
-                ["Guarantor Email", pkg.guaranty.guarantor_email],
-                ["Guarantor Address", pkg.guaranty.guarantor_address],
-                ["Annual Income", pkg.guaranty.guarantor_annual_income],
-                ["Premises", `${pkg.guaranty.premises_address || ""}, Unit ${pkg.guaranty.premises_unit || ""}, ${pkg.guaranty.premises_city || ""}`],
-                ["Agent", pkg.guaranty.agent_name],
-              ].filter(([, v]) => v && String(v).trim()).map(([label, value]) => (
-                <div key={String(label)} className="flex justify-between">
-                  <span className="text-muted-foreground">{label}</span>
-                  <span className="font-medium text-foreground text-right max-w-[60%] truncate">{String(value)}</span>
-                </div>
-              ))}
+        {viewingDoc === "guaranty" && pkg.guaranty?.status === "completed" && (
+          <div className="rounded-xl border overflow-hidden">
+            <div className="flex items-center justify-between p-3 border-b bg-muted/30">
+              <h3 className="text-sm font-semibold text-foreground">Guaranty of Lease — Original Format</h3>
+              <Button variant="ghost" size="sm" onClick={() => setViewingDoc(null)}><X className="h-4 w-4" /></Button>
+            </div>
+            <div className="overflow-auto max-h-[600px]">
+              <BBGGuarantyOfLeaseView
+                data={pkg.guaranty}
+                verificationId={pkg.id.slice(0, 8).toUpperCase()}
+              />
             </div>
           </div>
         )}
@@ -614,12 +614,33 @@ function ApplicantDetailPanel({ pkg, onSendReminder, sendingReminder, buildTimel
 
         {/* Actions */}
         <div className="flex gap-2 pt-2">
-          <Button className="flex-1" onClick={() => window.print()}>
+          <Button className="flex-1" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-1" /> Print All Documents
           </Button>
-          <Button variant="outline" className="flex-1" onClick={() => window.print()}>
+          <Button variant="outline" className="flex-1" onClick={handlePrint}>
             <Download className="h-4 w-4 mr-1" /> Download PDF
           </Button>
+        </div>
+
+        {/* Hidden print container with both documents */}
+        <div className="hidden">
+          <div ref={printRef}>
+            {pkg.application?.status === "completed" && (
+              <BMGSubletApplicationView
+                data={pkg.application}
+                tenantName={tenantName}
+                verificationId={pkg.id.slice(0, 8).toUpperCase()}
+              />
+            )}
+            {pkg.guaranty?.status === "completed" && (
+              <div className="page-break">
+                <BBGGuarantyOfLeaseView
+                  data={pkg.guaranty}
+                  verificationId={pkg.id.slice(0, 8).toUpperCase()}
+                />
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Legal reference label */}
