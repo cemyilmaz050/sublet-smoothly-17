@@ -38,14 +38,8 @@ const AdminDashboard = () => {
   const [dailySignups, setDailySignups] = useState<DailyMetric[]>([]);
   const [dailyListings, setDailyListings] = useState<DailyMetric[]>([]);
 
-  const isFounder = user && FOUNDER_IDS.includes(user.id);
-
   useEffect(() => {
     if (!user) return;
-    if (!FOUNDER_IDS.includes(user.id)) {
-      navigate("/");
-      return;
-    }
     fetchAllMetrics();
   }, [user]);
 
