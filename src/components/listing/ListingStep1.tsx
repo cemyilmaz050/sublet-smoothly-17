@@ -58,7 +58,7 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
             )}
           >
             <Building2 className={cn("h-6 w-6", data.management_type === "bbg" ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-sm font-medium text-foreground">Yes — managed by Boston Brokerage Group</span>
+            <span className="text-sm font-medium text-foreground">Yes, managed by Boston Brokerage Group</span>
           </button>
           <button
             type="button"
