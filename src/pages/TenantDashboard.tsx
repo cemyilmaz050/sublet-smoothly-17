@@ -59,6 +59,8 @@ const TenantDashboard = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSublet, setShowSublet] = useState(false);
+  const [showPreScreen, setShowPreScreen] = useState(false);
+  const [showFriendFlow, setShowFriendFlow] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [idVerified, setIdVerified] = useState(false);
