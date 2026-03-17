@@ -596,7 +596,7 @@ const AdminCreateListing = () => {
 
                       {form.is_bbg ? (
                         <div className="rounded-lg border p-3 bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-2">Select from BBG catalog (coming soon — enter address manually for now)</p>
+                          <p className="text-xs text-muted-foreground mb-2">Select from BBG catalog (coming soon, enter address manually for now)</p>
                           <Input value={form.address} onChange={(e) => updateForm({ address: e.target.value })} placeholder="BBG property address..." />
                         </div>
                       ) : (
