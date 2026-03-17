@@ -148,9 +148,16 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    console.error("[PROCESS-REFUND] ERROR:", error);
+    // Allow specific user-facing messages through
+    const msg = error instanceof Error ? error.message : "";
+    const safeMessages = [
+      "The 48-hour refund window has expired",
+      "This booking has already been refunded",
+      "You are not authorized to request a refund",
+    ];
+    const userMessage = safeMessages.some(s => msg.includes(s)) ? msg : "An unexpected error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: userMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

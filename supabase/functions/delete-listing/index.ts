@@ -167,9 +167,11 @@ serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 200 }
     );
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    log("ERROR", { message: msg });
-    return new Response(JSON.stringify({ error: msg }), {
+    console.error("[DELETE-LISTING] ERROR:", error);
+    const msg = error instanceof Error ? error.message : "";
+    const safeMessages = ["Not authorized to delete this listing", "Listing not found"];
+    const userMessage = safeMessages.some(s => msg.includes(s)) ? msg : "An unexpected error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: userMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
