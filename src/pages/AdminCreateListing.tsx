@@ -468,7 +468,39 @@ const AdminCreateListing = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {selectedUser ? (
+                      {/* Pending user toggle */}
+                      <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">This person has not signed up yet</p>
+                          <p className="text-xs text-muted-foreground">Create a listing linked to their email — it will appear when they sign up</p>
+                        </div>
+                        <Switch
+                          checked={isPendingUser}
+                          onCheckedChange={(v) => {
+                            setIsPendingUser(v);
+                            if (v) { setSelectedUser(null); setCreateNewUser(false); }
+                            else { setPendingEmail(""); }
+                          }}
+                        />
+                      </div>
+
+                      {isPendingUser ? (
+                        <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800 p-4">
+                          <Label className="text-sm font-medium">Enter their email address</Label>
+                          <Input
+                            type="email"
+                            value={pendingEmail}
+                            onChange={(e) => setPendingEmail(e.target.value)}
+                            placeholder="person@email.com"
+                            className="bg-background"
+                          />
+                          {pendingEmail && (
+                            <p className="text-xs text-muted-foreground">
+                              An activation email will be sent to <strong>{pendingEmail}</strong> when you save the listing.
+                            </p>
+                          )}
+                        </div>
+                      ) : selectedUser ? (
                         <div className="flex items-center justify-between rounded-lg border p-3 bg-primary/5">
                           <div>
                             <p className="text-sm font-medium">{selectedUser.first_name} {selectedUser.last_name}</p>
@@ -539,7 +571,7 @@ const AdminCreateListing = () => {
                         </>
                       )}
                       <div className="flex justify-end">
-                        <Button onClick={() => setStep(2)} disabled={!selectedUser}>
+                        <Button onClick={() => setStep(2)} disabled={!selectedUser && !isPendingUser}>
                           Next <ArrowRight className="ml-1.5 h-4 w-4" />
                         </Button>
                       </div>
