@@ -302,7 +302,7 @@ const AdminCreateListing = () => {
     <div className="min-h-screen bg-background">
       <main className="mx-auto max-w-4xl px-4 py-8 space-y-6">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/s-admin-console")}>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/admin-subin-2026")}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
@@ -336,7 +336,7 @@ const AdminCreateListing = () => {
                   </p>
                   <div className="flex gap-3">
                     <Button variant="outline" onClick={resetForm}>Create Another</Button>
-                    <Button onClick={() => navigate("/s-admin-console")}>Back to Dashboard</Button>
+                    <Button onClick={() => navigate("/admin-subin-2026")}>Back to Dashboard</Button>
                   </div>
                 </CardContent>
               </Card>

@@ -59,7 +59,9 @@ function PersistentNavbar() {
   const location = useLocation();
   const isManagerRoute = location.pathname.startsWith("/manager") || location.pathname.startsWith("/portal-mgmt-bbg");
   const isFinderRoute = location.pathname === "/find";
-  if (isManagerRoute || isFinderRoute) return null;
+  // Hide navbar on admin routes
+  const isAdminRoute = location.pathname.startsWith("/admin-subin-2026");
+  if (isManagerRoute || isFinderRoute || isAdminRoute) return null;
   return <Navbar />;
 }
 
@@ -70,6 +72,8 @@ function PersistentFooter() {
   if (location.pathname.startsWith("/messages")) return null;
   if (location.pathname === "/find") return null;
   if (location.pathname === "/") return null;
+  // Hide footer on admin routes
+  if (location.pathname.startsWith("/admin-subin-2026")) return null;
   return <Footer />;
 }
 
@@ -115,8 +119,10 @@ const App = () => (
                   <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
                   <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
                   <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
-                  <Route path="/s-admin-console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
-                  <Route path="/s-admin-console/create-listing" element={<AdminProtectedRoute><AdminCreateListing /></AdminProtectedRoute>} />
+
+                  {/* Founder Admin — secret URL, email-gated, PIN-protected */}
+                  <Route path="/admin-subin-2026" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                  <Route path="/admin-subin-2026/create-listing" element={<AdminProtectedRoute><AdminCreateListing /></AdminProtectedRoute>} />
 
                   {/* Manager Dashboard — unified layout */}
                   <Route path="/portal-mgmt-bbg" element={<ManagerProtectedRoute><ManagerLayout /></ManagerProtectedRoute>}>
@@ -136,7 +142,11 @@ const App = () => (
                   {/* Legacy /manager routes redirect silently to listings */}
                   <Route path="/manager/*" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
                   <Route path="/manager" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
-                  <Route path="/admin" element={<AdminProtectedRoute><Navigate to="/s-admin-console" replace /></AdminProtectedRoute>} />
+
+                  {/* Old admin URLs silently redirect to listings (hide existence) */}
+                  <Route path="/admin" element={<Navigate to="/listings" replace />} />
+                  <Route path="/s-admin-console" element={<Navigate to="/listings" replace />} />
+                  <Route path="/s-admin-console/*" element={<Navigate to="/listings" replace />} />
 
                   {/* Redirects from old manager routes */}
                   <Route path="/dashboard/manager" element={<Navigate to="/manager" replace />} />

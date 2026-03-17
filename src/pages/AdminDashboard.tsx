@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,7 @@ import { format, subDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
 
-// Hardcoded founder user IDs — only these can access
-const FOUNDER_IDS = [
-  "370d6445-15bc-4802-8626-1507c38fbdd4", // BBG staff
-];
+// Access control is enforced by AdminProtectedRoute (email whitelist + PIN)
 
 interface DailyMetric {
   date: string;
@@ -24,7 +21,7 @@ interface DailyMetric {
 
 const AdminDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalUsers: 0,
@@ -41,14 +38,8 @@ const AdminDashboard = () => {
   const [dailySignups, setDailySignups] = useState<DailyMetric[]>([]);
   const [dailyListings, setDailyListings] = useState<DailyMetric[]>([]);
 
-  const isFounder = user && FOUNDER_IDS.includes(user.id);
-
   useEffect(() => {
     if (!user) return;
-    if (!FOUNDER_IDS.includes(user.id)) {
-      navigate("/");
-      return;
-    }
     fetchAllMetrics();
   }, [user]);
 
@@ -121,8 +112,6 @@ const AdminDashboard = () => {
     return Array.from(map.entries()).map(([date, count]) => ({ date, count }));
   };
 
-  if (!isFounder) return null;
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -153,7 +142,7 @@ const AdminDashboard = () => {
             <h1 className="text-2xl font-bold text-foreground">Founder Dashboard</h1>
             <p className="text-sm text-muted-foreground">Platform metrics & insights</p>
           </div>
-          <Link to="/s-admin-console/create-listing">
+          <Link to="/admin-subin-2026/create-listing">
             <Button className="gap-2">
               <Plus className="h-4 w-4" />
               Create Listing for User
