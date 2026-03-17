@@ -408,7 +408,7 @@ const PendingListingsSection = () => {
   );
 };
 
-
+const ManualVerifyTool = () => {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
