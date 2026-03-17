@@ -935,7 +935,7 @@ const AdminCreateListing = () => {
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Deposit</span>
-                          <span className="font-medium">${form.security_deposit || "—"}</span>
+                          <span className="font-medium">${form.security_deposit || "-"}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Dates</span>
