@@ -99,7 +99,7 @@ const CreateListingPage = () => {
       if (form.bedrooms === "") e.bedrooms = "Required";
       if (form.bathrooms === "") e.bathrooms = "Required";
     } else if (s === 1) {
-      const totalPhotos = form.photoUrls.length + form.photos.length;
+      const totalPhotos = form.photoUrls.length;
       if (totalPhotos < 3) e.photos = `At least 3 photos required (${totalPhotos} uploaded)`;
       if (!form.headline.trim()) e.headline = "Headline is required";
       if (!form.description.trim()) e.description = "Description is required";
