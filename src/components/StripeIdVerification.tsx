@@ -233,7 +233,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             <div>
               <p className="text-sm font-semibold text-foreground">Having trouble?</p>
               <p className="text-sm text-muted-foreground mt-1">
-                No worries — email us at{" "}
+                No worries! Email us at{" "}
                 <a href="mailto:hello@subinapp.com" className="font-semibold text-primary underline">
                   hello@subinapp.com
                 </a>{" "}
