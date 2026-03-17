@@ -207,9 +207,10 @@ const AdminCreateListing = () => {
 
   // ── Save ──
   const handleSave = async (status: "draft" | "active") => {
-    if (!selectedUser) { toast.error("Please select a user"); return; }
+    if (!isPendingUser && !selectedUser) { toast.error("Please select a user"); return; }
+    if (isPendingUser && !pendingEmail.trim()) { toast.error("Please enter an email address"); return; }
     if (!form.address.trim()) { toast.error("Address is required"); return; }
-    if (form.photoUrls.length < 3 && status === "active") { toast.error("At least 3 photos required to publish"); return; }
+    if (form.photoUrls.length < 3 && status === "active" && !isPendingUser) { toast.error("At least 3 photos required to publish"); return; }
     setSaving(true);
     try {
       const houseRules = [
@@ -220,36 +221,78 @@ const AdminCreateListing = () => {
         form.custom_rules?.trim() || null,
       ].filter(Boolean).join(". ");
 
-      const { data, error } = await supabase.functions.invoke("admin-create-listing", {
-        body: {
-          action: "create_listing",
-          tenant_id: selectedUser.id,
-          listing: {
-            address: form.address,
-            unit_number: form.unit_number || null,
-            property_type: form.property_type || null,
-            space_type: form.space_type || null,
-            bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
-            bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-            sqft: form.sqft ? Number(form.sqft) : null,
-            headline: form.headline || null,
-            description: form.description || null,
-            monthly_rent: form.monthly_rent ? Number(form.monthly_rent) : null,
-            security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
-            available_from: form.instant_available ? new Date().toISOString().split("T")[0] : form.available_from || null,
-            available_until: form.available_until || null,
-            amenities: form.amenities,
-            house_rules: houseRules,
-            guest_policy: form.guest_policy || null,
-            photos: form.photoUrls,
-            status,
+      if (isPendingUser) {
+        // Create pending listing for non-signedup user
+        const { data, error } = await supabase.functions.invoke("admin-create-listing", {
+          body: {
+            action: "create_pending_listing",
+            pending_email: pendingEmail.trim(),
+            listing: {
+              address: form.address,
+              unit_number: form.unit_number || null,
+              property_type: form.property_type || null,
+              space_type: form.space_type || null,
+              bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
+              bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
+              sqft: form.sqft ? Number(form.sqft) : null,
+              headline: form.headline || null,
+              description: form.description || null,
+              monthly_rent: form.monthly_rent ? Number(form.monthly_rent) : null,
+              security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
+              available_from: form.instant_available ? new Date().toISOString().split("T")[0] : form.available_from || null,
+              available_until: form.available_until || null,
+              amenities: form.amenities,
+              house_rules: houseRules,
+              guest_policy: form.guest_policy || null,
+              photos: form.photoUrls,
+            },
           },
-        },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setSavedId(data.listing_id);
-      toast.success(status === "active" ? "Listing published!" : "Listing saved as draft!");
+        });
+        if (error) throw error;
+        if (data?.error) {
+          if (data.existing_user) {
+            toast.error("This person already has an account. Turn off the toggle and search for them instead.");
+          } else {
+            throw new Error(data.error);
+          }
+          return;
+        }
+        setSavedId(data.listing_id);
+        setSavedPending(true);
+        toast.success("Pending listing created! Activation email sent.");
+      } else {
+        const { data, error } = await supabase.functions.invoke("admin-create-listing", {
+          body: {
+            action: "create_listing",
+            tenant_id: selectedUser!.id,
+            listing: {
+              address: form.address,
+              unit_number: form.unit_number || null,
+              property_type: form.property_type || null,
+              space_type: form.space_type || null,
+              bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
+              bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
+              sqft: form.sqft ? Number(form.sqft) : null,
+              headline: form.headline || null,
+              description: form.description || null,
+              monthly_rent: form.monthly_rent ? Number(form.monthly_rent) : null,
+              security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
+              available_from: form.instant_available ? new Date().toISOString().split("T")[0] : form.available_from || null,
+              available_until: form.available_until || null,
+              amenities: form.amenities,
+              house_rules: houseRules,
+              guest_policy: form.guest_policy || null,
+              photos: form.photoUrls,
+              status,
+            },
+          },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setSavedId(data.listing_id);
+        setSavedPending(false);
+        toast.success(status === "active" ? "Listing published!" : "Listing saved as draft!");
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to create listing");
     } finally {
