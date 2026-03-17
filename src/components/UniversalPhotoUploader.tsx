@@ -202,7 +202,7 @@ const UniversalPhotoUploader = ({
       // Deduplicate against session
       const deduplicated: File[] = [];
       let skipped = 0;
-      const newFingerprints = new Set(sessionFingerprints);
+      const newFingerprints = new Set(sessionFingerprintsRef.current);
 
       for (const f of valid) {
         const contentFp = await imageContentHash(f);
