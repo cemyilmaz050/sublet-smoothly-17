@@ -120,6 +120,25 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
 
   const startVerification = async () => {
     if (!user) return;
+
+    // Check for admin test mode — instant verify
+    const testMode = localStorage.getItem("subin_test_mode") === "true";
+    if (testMode) {
+      setState("loading");
+      try {
+        await supabase.from("profiles").update({
+          id_verified: true,
+        } as any).eq("id", user.id);
+        setState("verified");
+        onVerified?.();
+        toast.success("Verified instantly (test mode)");
+      } catch {
+        toast.error("Test mode verification failed");
+        setState("idle");
+      }
+      return;
+    }
+
     setState("loading");
     setError(null);
     setShowSlowMessage(false);
