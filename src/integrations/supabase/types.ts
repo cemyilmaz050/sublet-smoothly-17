@@ -649,6 +649,7 @@ export type Database = {
           monthly_rent: number | null
           move_in_flexibility: string | null
           path: string | null
+          pending_email: string | null
           photos: string[] | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           published_at: string | null
@@ -686,6 +687,7 @@ export type Database = {
           monthly_rent?: number | null
           move_in_flexibility?: string | null
           path?: string | null
+          pending_email?: string | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           published_at?: string | null
@@ -723,6 +725,7 @@ export type Database = {
           monthly_rent?: number | null
           move_in_flexibility?: string | null
           path?: string | null
+          pending_email?: string | null
           photos?: string[] | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           published_at?: string | null

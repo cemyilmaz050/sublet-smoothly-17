@@ -79,7 +79,23 @@ const AuthCallbackPage = () => {
         if (userEmail.endsWith("@realestateboston.com") && profile?.role === "manager") {
           navigate("/portal-mgmt-bbg", { replace: true });
         } else {
-          navigate("/listings", { replace: true });
+          // Check for pending listings that were just attached
+          const { data: pendingListings } = await supabase
+            .from("listings")
+            .select("id, address, headline")
+            .eq("tenant_id", userId)
+            .eq("source", "admin")
+            .eq("status", "draft");
+          
+          if (pendingListings && pendingListings.length > 0) {
+            toast.success(
+              `Welcome to SubIn! ${pendingListings.length === 1 ? 'Your listing is' : `${pendingListings.length} listings are`} ready and waiting for you.`,
+              { duration: 8000 }
+            );
+            navigate("/dashboard/tenant", { replace: true });
+          } else {
+            navigate("/listings", { replace: true });
+          }
         }
       }
     };

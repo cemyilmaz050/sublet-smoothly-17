@@ -104,6 +104,11 @@ const AdminCreateListing = () => {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [newLandmark, setNewLandmark] = useState("");
 
+  // Pending (not signed up) user state
+  const [isPendingUser, setIsPendingUser] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [savedPending, setSavedPending] = useState(false);
+
   // New user creation
   const [createNewUser, setCreateNewUser] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
@@ -207,9 +212,10 @@ const AdminCreateListing = () => {
 
   // ── Save ──
   const handleSave = async (status: "draft" | "active") => {
-    if (!selectedUser) { toast.error("Please select a user"); return; }
+    if (!isPendingUser && !selectedUser) { toast.error("Please select a user"); return; }
+    if (isPendingUser && !pendingEmail.trim()) { toast.error("Please enter an email address"); return; }
     if (!form.address.trim()) { toast.error("Address is required"); return; }
-    if (form.photoUrls.length < 3 && status === "active") { toast.error("At least 3 photos required to publish"); return; }
+    if (form.photoUrls.length < 3 && status === "active" && !isPendingUser) { toast.error("At least 3 photos required to publish"); return; }
     setSaving(true);
     try {
       const houseRules = [
@@ -220,36 +226,78 @@ const AdminCreateListing = () => {
         form.custom_rules?.trim() || null,
       ].filter(Boolean).join(". ");
 
-      const { data, error } = await supabase.functions.invoke("admin-create-listing", {
-        body: {
-          action: "create_listing",
-          tenant_id: selectedUser.id,
-          listing: {
-            address: form.address,
-            unit_number: form.unit_number || null,
-            property_type: form.property_type || null,
-            space_type: form.space_type || null,
-            bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
-            bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
-            sqft: form.sqft ? Number(form.sqft) : null,
-            headline: form.headline || null,
-            description: form.description || null,
-            monthly_rent: form.monthly_rent ? Number(form.monthly_rent) : null,
-            security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
-            available_from: form.instant_available ? new Date().toISOString().split("T")[0] : form.available_from || null,
-            available_until: form.available_until || null,
-            amenities: form.amenities,
-            house_rules: houseRules,
-            guest_policy: form.guest_policy || null,
-            photos: form.photoUrls,
-            status,
+      if (isPendingUser) {
+        // Create pending listing for non-signedup user
+        const { data, error } = await supabase.functions.invoke("admin-create-listing", {
+          body: {
+            action: "create_pending_listing",
+            pending_email: pendingEmail.trim(),
+            listing: {
+              address: form.address,
+              unit_number: form.unit_number || null,
+              property_type: form.property_type || null,
+              space_type: form.space_type || null,
+              bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
+              bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
+              sqft: form.sqft ? Number(form.sqft) : null,
+              headline: form.headline || null,
+              description: form.description || null,
+              monthly_rent: form.monthly_rent ? Number(form.monthly_rent) : null,
+              security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
+              available_from: form.instant_available ? new Date().toISOString().split("T")[0] : form.available_from || null,
+              available_until: form.available_until || null,
+              amenities: form.amenities,
+              house_rules: houseRules,
+              guest_policy: form.guest_policy || null,
+              photos: form.photoUrls,
+            },
           },
-        },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      setSavedId(data.listing_id);
-      toast.success(status === "active" ? "Listing published!" : "Listing saved as draft!");
+        });
+        if (error) throw error;
+        if (data?.error) {
+          if (data.existing_user) {
+            toast.error("This person already has an account. Turn off the toggle and search for them instead.");
+          } else {
+            throw new Error(data.error);
+          }
+          return;
+        }
+        setSavedId(data.listing_id);
+        setSavedPending(true);
+        toast.success("Pending listing created! Activation email sent.");
+      } else {
+        const { data, error } = await supabase.functions.invoke("admin-create-listing", {
+          body: {
+            action: "create_listing",
+            tenant_id: selectedUser!.id,
+            listing: {
+              address: form.address,
+              unit_number: form.unit_number || null,
+              property_type: form.property_type || null,
+              space_type: form.space_type || null,
+              bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
+              bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
+              sqft: form.sqft ? Number(form.sqft) : null,
+              headline: form.headline || null,
+              description: form.description || null,
+              monthly_rent: form.monthly_rent ? Number(form.monthly_rent) : null,
+              security_deposit: form.security_deposit ? Number(form.security_deposit) : null,
+              available_from: form.instant_available ? new Date().toISOString().split("T")[0] : form.available_from || null,
+              available_until: form.available_until || null,
+              amenities: form.amenities,
+              house_rules: houseRules,
+              guest_policy: form.guest_policy || null,
+              photos: form.photoUrls,
+              status,
+            },
+          },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        setSavedId(data.listing_id);
+        setSavedPending(false);
+        toast.success(status === "active" ? "Listing published!" : "Listing saved as draft!");
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to create listing");
     } finally {
@@ -326,6 +374,7 @@ const AdminCreateListing = () => {
   const resetForm = () => {
     setForm(emptyForm); setSelectedUser(null); setUserSearch(""); setUserResults([]);
     setSavedId(null); setScrapeUrl(""); setStep(1); setCreateNewUser(false);
+    setIsPendingUser(false); setPendingEmail(""); setSavedPending(false);
   };
 
   const addLandmark = () => {
@@ -363,18 +412,24 @@ const AdminCreateListing = () => {
               <Card className="shadow-card">
                 <CardContent className="flex flex-col items-center gap-4 py-12">
                   <CheckCircle2 className="h-12 w-12 text-emerald" />
-                  <h2 className="text-lg font-bold text-foreground">Listing Created & Published!</h2>
-                  <p className="text-sm text-muted-foreground text-center max-w-md">
-                    The listing has been created under <strong>{selectedUser?.first_name} {selectedUser?.last_name}</strong>'s account ({selectedUser?.email}). They've been notified and can review/edit it.
-                  </p>
-                  <a
-                    href={`/listings`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm text-primary underline"
-                  >
-                    View it live →
-                  </a>
+                  {savedPending ? (
+                    <>
+                      <h2 className="text-lg font-bold text-foreground">Listing Created — Waiting for Signup</h2>
+                      <p className="text-sm text-muted-foreground text-center max-w-md">
+                        Listing created and waiting for <strong>{pendingEmail}</strong> — they will see it automatically when they sign up. An activation email has been sent.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-lg font-bold text-foreground">Listing Created & Published!</h2>
+                      <p className="text-sm text-muted-foreground text-center max-w-md">
+                        The listing has been created under <strong>{selectedUser?.first_name} {selectedUser?.last_name}</strong>'s account ({selectedUser?.email}). They've been notified and can review/edit it.
+                      </p>
+                      <a href={`/listings`} target="_blank" rel="noreferrer" className="text-sm text-primary underline">
+                        View it live →
+                      </a>
+                    </>
+                  )}
                   <div className="flex gap-3">
                     <Button variant="outline" onClick={resetForm}>Create Another</Button>
                     <Button onClick={() => navigate("/admin-subin-2026")}>Back to Dashboard</Button>
@@ -413,7 +468,39 @@ const AdminCreateListing = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {selectedUser ? (
+                      {/* Pending user toggle */}
+                      <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">This person has not signed up yet</p>
+                          <p className="text-xs text-muted-foreground">Create a listing linked to their email — it will appear when they sign up</p>
+                        </div>
+                        <Switch
+                          checked={isPendingUser}
+                          onCheckedChange={(v) => {
+                            setIsPendingUser(v);
+                            if (v) { setSelectedUser(null); setCreateNewUser(false); }
+                            else { setPendingEmail(""); }
+                          }}
+                        />
+                      </div>
+
+                      {isPendingUser ? (
+                        <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800 p-4">
+                          <Label className="text-sm font-medium">Enter their email address</Label>
+                          <Input
+                            type="email"
+                            value={pendingEmail}
+                            onChange={(e) => setPendingEmail(e.target.value)}
+                            placeholder="person@email.com"
+                            className="bg-background"
+                          />
+                          {pendingEmail && (
+                            <p className="text-xs text-muted-foreground">
+                              An activation email will be sent to <strong>{pendingEmail}</strong> when you save the listing.
+                            </p>
+                          )}
+                        </div>
+                      ) : selectedUser ? (
                         <div className="flex items-center justify-between rounded-lg border p-3 bg-primary/5">
                           <div>
                             <p className="text-sm font-medium">{selectedUser.first_name} {selectedUser.last_name}</p>
@@ -484,7 +571,7 @@ const AdminCreateListing = () => {
                         </>
                       )}
                       <div className="flex justify-end">
-                        <Button onClick={() => setStep(2)} disabled={!selectedUser}>
+                        <Button onClick={() => setStep(2)} disabled={!selectedUser && !isPendingUser}>
                           Next <ArrowRight className="ml-1.5 h-4 w-4" />
                         </Button>
                       </div>
@@ -827,7 +914,12 @@ const AdminCreateListing = () => {
                       <div className="space-y-3 text-sm">
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Creating for</span>
-                          <span className="font-medium">{selectedUser?.first_name} {selectedUser?.last_name} ({selectedUser?.email})</span>
+                          <span className="font-medium">
+                            {isPendingUser
+                              ? <><Badge variant="outline" className="mr-1.5 text-amber-600 border-amber-300 bg-amber-50">Pending signup</Badge>{pendingEmail}</>
+                              : <>{selectedUser?.first_name} {selectedUser?.last_name} ({selectedUser?.email})</>
+                            }
+                          </span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Address</span>
@@ -880,14 +972,23 @@ const AdminCreateListing = () => {
                       <div className="flex justify-between pt-4">
                         <Button variant="outline" onClick={() => setStep(6)}><ArrowLeft className="mr-1.5 h-4 w-4" /> Back</Button>
                         <div className="flex gap-3">
-                          <Button variant="outline" onClick={() => handleSave("draft")} disabled={saving}>
-                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Save as Draft
-                          </Button>
-                          <Button onClick={() => handleSave("active")} disabled={saving}>
-                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                            Publish Now
-                          </Button>
+                          {isPendingUser ? (
+                            <Button onClick={() => handleSave("draft")} disabled={saving}>
+                              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                              Create Pending Listing
+                            </Button>
+                          ) : (
+                            <>
+                              <Button variant="outline" onClick={() => handleSave("draft")} disabled={saving}>
+                                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                Save as Draft
+                              </Button>
+                              <Button onClick={() => handleSave("active")} disabled={saving}>
+                                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                                Publish Now
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </CardContent>
