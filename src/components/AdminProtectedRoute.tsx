@@ -2,12 +2,12 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
-/**
- * Protects admin routes — only users with role "admin" can access.
- * Everyone else is silently redirected to /listings.
- */
+const FOUNDER_IDS = [
+  "370d6445-15bc-4802-8626-1507c38fbdd4",
+];
+
 const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isReady, role } = useAuth();
+  const { user, isReady } = useAuth();
 
   if (!isReady) {
     return (
@@ -17,7 +17,7 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  if (!user || role !== "admin") {
+  if (!user || !FOUNDER_IDS.includes(user.id)) {
     return <Navigate to="/listings" replace />;
   }
 
