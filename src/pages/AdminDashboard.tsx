@@ -370,7 +370,7 @@ const PendingListingsSection = () => {
       </CardHeader>
       <CardContent>
         {listings.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No pending listings — all users have signed up</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">No pending listings. All users have signed up</p>
         ) : (
           <div className="space-y-2">
             {listings.map((l: any) => (
