@@ -931,7 +931,7 @@ const AdminCreateListing = () => {
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Rent</span>
-                          <span className="font-medium">${form.monthly_rent || "—"}/mo {weeklyRent && `(≈$${weeklyRent}/wk)`}</span>
+                          <span className="font-medium">${form.monthly_rent || "-"}/mo {weeklyRent && `(≈$${weeklyRent}/wk)`}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Deposit</span>
