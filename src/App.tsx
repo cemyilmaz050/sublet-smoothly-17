@@ -145,8 +145,8 @@ const App = () => (
                   <Route path="/manager/*" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
                   <Route path="/manager" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
 
-                  {/* Old admin URLs silently redirect to listings (hide existence) */}
-                  <Route path="/admin" element={<Navigate to="/listings" replace />} />
+                  {/* Admin aliases */}
+                  <Route path="/admin" element={<Navigate to="/admin-subin-2026" replace />} />
                   <Route path="/s-admin-console" element={<Navigate to="/listings" replace />} />
                   <Route path="/s-admin-console/*" element={<Navigate to="/listings" replace />} />
 
