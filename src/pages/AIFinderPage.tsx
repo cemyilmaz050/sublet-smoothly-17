@@ -105,6 +105,7 @@ const AIFinderPage = () => {
               listings={savedListings}
               answers={answers!}
               onSelect={handleSelectListing}
+              onBack={handleBackToSwipe}
             />
           </motion.div>
         )}
