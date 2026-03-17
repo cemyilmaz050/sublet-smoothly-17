@@ -46,6 +46,7 @@ interface ListingItem {
   source: string;
   tenant_id: string;
   manager_id: string | null;
+  management_group_id: string | null;
   property_type?: string | null;
   tenant_verified?: boolean;
   avg_rating?: number;
@@ -76,7 +77,7 @@ const ListingsPage = () => {
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, property_type, knock_count, latitude, longitude")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
@@ -553,6 +554,18 @@ const ListingsPage = () => {
                   </div>
                 )}
                 <ReviewSection listingId={selectedListing.id} tenantId={selectedListing.tenant_id} />
+
+                {selectedListing.management_group_id && !isOwnListing(selectedListing) && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate(`/documents/bbg?listing_id=${selectedListing.id}`)}
+                  >
+                    <Pencil className="mr-1 h-4 w-4" />
+                    Complete BBG Documents
+                  </Button>
+                )}
 
                 <div className="space-y-3 pt-2">
                   {!isOwnListing(selectedListing) && (

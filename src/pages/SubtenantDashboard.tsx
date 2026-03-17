@@ -41,6 +41,7 @@ interface KnockedListing {
   created_at: string;
   listing_headline: string | null;
   listing_address: string | null;
+  management_group_id: string | null;
 }
 
 const SubtenantDashboard = () => {
@@ -83,7 +84,7 @@ const SubtenantDashboard = () => {
         const listingIds = [...new Set(knocksData.map((k: any) => k.listing_id))];
         const { data: listingsData } = await supabase
           .from("listings")
-          .select("id, headline, address")
+          .select("id, headline, address, management_group_id")
           .in("id", listingIds);
         const listingMap: Record<string, any> = {};
         (listingsData || []).forEach((l: any) => { listingMap[l.id] = l; });
@@ -92,6 +93,7 @@ const SubtenantDashboard = () => {
           ...k,
           listing_headline: listingMap[k.listing_id]?.headline || "Untitled",
           listing_address: listingMap[k.listing_id]?.address || "",
+          management_group_id: listingMap[k.listing_id]?.management_group_id || null,
         })));
       } else {
         setKnockedListings([]);
@@ -221,9 +223,20 @@ const SubtenantDashboard = () => {
                           <Clock className="h-3 w-3" /> Knocked {formatDate(knock.created_at)}
                         </p>
                       </div>
-                      <Badge variant={knock.responded ? "default" : "secondary"} className="capitalize text-xs">
-                        {knock.responded ? "Responded ✓" : "Waiting"}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {knock.management_group_id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/documents/bbg?listing_id=${knock.listing_id}`)}
+                          >
+                            Complete Docs
+                          </Button>
+                        )}
+                        <Badge variant={knock.responded ? "default" : "secondary"} className="capitalize text-xs">
+                          {knock.responded ? "Responded ✓" : "Waiting"}
+                        </Badge>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
