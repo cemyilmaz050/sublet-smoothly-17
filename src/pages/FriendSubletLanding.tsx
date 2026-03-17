@@ -24,10 +24,9 @@ const FriendSubletLanding = () => {
   useEffect(() => {
     if (!token) { setLoading(false); return; }
     const load = async () => {
-      const { data, error } = await (supabase.from("friend_sublet_invites" as any)
-        .select("*")
-        .eq("token", token)
-        .maybeSingle() as any);
+      // Use secure RPC to look up invite by token (no broad anon access)
+      const { data, error } = await supabase.rpc("get_invite_by_token" as any, { p_token: token }) as any;
+      const invite = Array.isArray(data) ? data[0] : data;
       if (data) {
         setInvite(data);
         // Fetch inviter name

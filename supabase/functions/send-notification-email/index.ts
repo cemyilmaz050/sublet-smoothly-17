@@ -167,6 +167,89 @@ const renderEmail = (type: string, data: Record<string, any>): string => {
   }
 };
 
+/**
+ * Validate that the recipient email belongs to a party the caller
+ * is legitimately transacting with (via bookings, knocks, applications,
+ * conversations, or cosigners).
+ */
+async function validateRecipient(
+  supabaseAdmin: any,
+  callerId: string,
+  recipientEmail: string
+): Promise<boolean> {
+  // Look up the recipient's user ID from auth
+  const { data: recipientUsers } = await supabaseAdmin.auth.admin.listUsers({
+    filter: `email.eq.${recipientEmail}`,
+    perPage: 1,
+  });
+
+  // If recipient is not a registered user, check cosigners
+  if (!recipientUsers?.users?.length) {
+    // Allow cosigner emails for the caller's cosigners
+    const { data: cosigner } = await supabaseAdmin
+      .from("cosigners")
+      .select("id")
+      .eq("tenant_id", callerId)
+      .eq("email", recipientEmail)
+      .limit(1)
+      .maybeSingle();
+    return !!cosigner;
+  }
+
+  const recipientId = recipientUsers.users[0].id;
+
+  // Check conversations (most common case)
+  const { data: convo } = await supabaseAdmin
+    .from("conversations")
+    .select("id")
+    .or(`and(participant_1.eq.${callerId},participant_2.eq.${recipientId}),and(participant_1.eq.${recipientId},participant_2.eq.${callerId})`)
+    .limit(1)
+    .maybeSingle();
+  if (convo) return true;
+
+  // Check bookings
+  const { data: booking } = await supabaseAdmin
+    .from("bookings")
+    .select("id")
+    .or(`and(tenant_id.eq.${callerId},subtenant_id.eq.${recipientId}),and(tenant_id.eq.${recipientId},subtenant_id.eq.${callerId})`)
+    .limit(1)
+    .maybeSingle();
+  if (booking) return true;
+
+  // Check knocks
+  const { data: knock } = await supabaseAdmin
+    .from("knocks")
+    .select("id")
+    .or(`and(tenant_id.eq.${callerId},knocker_id.eq.${recipientId}),and(tenant_id.eq.${recipientId},knocker_id.eq.${callerId})`)
+    .limit(1)
+    .maybeSingle();
+  if (knock) return true;
+
+  // Check if caller owns a listing the recipient applied to, or vice versa
+  const { data: app } = await supabaseAdmin.rpc("check_application_relationship", {
+    user_a: callerId,
+    user_b: recipientId,
+  }).maybeSingle();
+  // Fallback: direct query
+  if (!app) {
+    const { data: appDirect } = await supabaseAdmin
+      .from("applications")
+      .select("id, listing_id, applicant_id, listings!inner(tenant_id)")
+      .or(`applicant_id.eq.${recipientId},applicant_id.eq.${callerId}`)
+      .limit(5);
+    if (appDirect?.some((a: any) =>
+      (a.applicant_id === recipientId && a.listings?.tenant_id === callerId) ||
+      (a.applicant_id === callerId && a.listings?.tenant_id === recipientId)
+    )) return true;
+  }
+
+  // Self-email (e.g., listing_live, listing_deleted notifications to self)
+  const { data: callerUser } = await supabaseAdmin.auth.admin.getUserById(callerId);
+  if (callerUser?.user?.email === recipientEmail) return true;
+
+  return false;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -184,16 +267,25 @@ serve(async (req) => {
     const { data: userData, error: authError } = await supabaseAuth.auth.getUser(token);
     if (authError || !userData.user) throw new Error("Unauthorized: invalid token");
 
+    const callerId = userData.user.id;
+
     const { to, subject, type, data } = (await req.json()) as EmailRequest;
     if (!to || !subject || !type) {
       throw new Error("Missing required fields: to, subject, type");
     }
 
-    const html = renderEmail(type, data || {});
-
     const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
+
+    // Validate recipient is a legitimate transaction participant
+    const isValid = await validateRecipient(supabaseAdmin, callerId, to);
+    if (!isValid) {
+      console.warn(`[SEND-EMAIL] Blocked: user ${callerId} attempted to email unauthorized recipient ${to}`);
+      throw new Error("Recipient is not a valid transaction participant");
+    }
+
+    const html = renderEmail(type, data || {});
 
     const messageId = crypto.randomUUID();
 
@@ -231,10 +323,10 @@ serve(async (req) => {
         status: "failed",
         error_message: "Failed to enqueue email",
       });
-      throw new Error(`Failed to enqueue email: ${enqueueError.message}`);
+      throw new Error("Failed to send email");
     }
 
-    console.log(`[SEND-EMAIL] Enqueued: To=${to}, Subject=${subject}, Type=${type}`);
+    console.log(`[SEND-EMAIL] Enqueued: To=${to}, Type=${type}`);
 
     return new Response(
       JSON.stringify({ success: true, message: "Email enqueued for delivery", messageId }),
@@ -243,9 +335,12 @@ serve(async (req) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     console.error(`[SEND-EMAIL] Error: ${msg}`);
-    return new Response(JSON.stringify({ error: msg }), {
+    const userMsg = msg.includes("Unauthorized") || msg.includes("not a valid")
+      ? msg
+      : "Failed to send email";
+    return new Response(JSON.stringify({ error: userMsg }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: msg.includes("Unauthorized") ? 401 : 403,
     });
   }
 });
