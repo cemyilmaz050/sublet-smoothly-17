@@ -33,7 +33,7 @@ const FriendSubletLanding = () => {
         const { data: profile } = await supabase
           .from("profiles_public")
           .select("first_name, last_name")
-          .eq("id", data.inviter_id)
+          .eq("id", invite.inviter_id)
           .maybeSingle();
         if (profile) {
           setInviterName(`${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Your friend");
