@@ -57,24 +57,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Layer 2: PIN verification
-    // ADMIN_PIN_HASH should be the SHA-256 hex hash of the admin PIN
-    const expectedHash = Deno.env.get("ADMIN_PIN_HASH");
-    if (!expectedHash) {
+    // Layer 2: PIN verification (direct comparison — secret stores the raw PIN)
+    const expectedPin = Deno.env.get("ADMIN_PIN_HASH");
+    if (!expectedPin) {
       return new Response(JSON.stringify({ error: "Server misconfigured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Hash the submitted PIN and compare
-    const encoder = new TextEncoder();
-    const data = encoder.encode(pin);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-
-    if (hashHex !== expectedHash.toLowerCase()) {
+    if (pin !== expectedPin) {
       return new Response(JSON.stringify({ error: "Invalid PIN" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
