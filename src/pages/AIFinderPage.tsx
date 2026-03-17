@@ -41,6 +41,10 @@ const AIFinderPage = () => {
     }
   }, []);
 
+  const handleBackToSwipe = useCallback(() => {
+    setStep("swipe");
+  }, []);
+
   const handleSelectListing = useCallback((listing: ScoredListing) => {
     setSelectedListing(listing);
     setStep("action");
@@ -101,6 +105,7 @@ const AIFinderPage = () => {
               listings={savedListings}
               answers={answers!}
               onSelect={handleSelectListing}
+              onBack={handleBackToSwipe}
             />
           </motion.div>
         )}
