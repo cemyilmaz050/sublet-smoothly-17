@@ -24,17 +24,16 @@ const FriendSubletLanding = () => {
   useEffect(() => {
     if (!token) { setLoading(false); return; }
     const load = async () => {
-      const { data, error } = await (supabase.from("friend_sublet_invites" as any)
-        .select("*")
-        .eq("token", token)
-        .maybeSingle() as any);
-      if (data) {
-        setInvite(data);
+      // Use secure RPC to look up invite by token (no broad anon access)
+      const { data, error } = await supabase.rpc("get_invite_by_token" as any, { p_token: token }) as any;
+      const invite = Array.isArray(data) ? data[0] : data;
+      if (invite) {
+        setInvite(invite);
         // Fetch inviter name
         const { data: profile } = await supabase
           .from("profiles_public")
           .select("first_name, last_name")
-          .eq("id", data.inviter_id)
+          .eq("id", invite.inviter_id)
           .maybeSingle();
         if (profile) {
           setInviterName(`${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Your friend");

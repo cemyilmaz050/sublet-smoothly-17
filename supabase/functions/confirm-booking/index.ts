@@ -89,9 +89,19 @@ serve(async (req) => {
     if (listingError || !listing) throw new Error("Listing not found");
     logStep("Listing found", { listingId: actualListingId, headline: listing.headline });
 
-    const depositAmount = parseFloat(metadata.deposit_amount || String(listing.monthly_rent || 0));
-    const platformFee = parseFloat(metadata.platform_fee || "0");
-    const totalAmount = parseFloat(metadata.total_amount || String(session.amount_total ? session.amount_total / 100 : depositAmount));
+    // Use DB listing values as source of truth for financial amounts, not metadata
+    const PLATFORM_FEE_RATE = 0.06;
+    const depositAmount = Number(listing.security_deposit || listing.monthly_rent || 0);
+    const platformFee = Math.round(depositAmount * PLATFORM_FEE_RATE * 100) / 100;
+    const totalAmount = depositAmount + platformFee;
+
+    // Validate that Stripe actually charged the expected amount
+    const stripeAmountCents = session.amount_total;
+    const expectedCents = Math.round(totalAmount * 100);
+    if (stripeAmountCents && Math.abs(stripeAmountCents - expectedCents) > 1) {
+      logStep("Amount mismatch detected", { stripeAmountCents, expectedCents });
+      throw new Error("Payment amount does not match expected deposit. Please contact support.");
+    }
 
     // 48-hour refund window
     const refundEligibleUntil = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();

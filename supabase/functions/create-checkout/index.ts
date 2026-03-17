@@ -8,6 +8,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const PLATFORM_FEE_RATE = 0.06;
+
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : "";
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
@@ -23,6 +25,13 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_ANON_KEY") ?? ""
   );
 
+  // Use service role to look up listing data server-side
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
   try {
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
@@ -32,7 +41,7 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const body = await req.json().catch(() => ({}));
-    const { listingId, depositAmount, platformFee, totalAmount } = body;
+    const { listingId } = body;
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -47,8 +56,27 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://subinapp.com";
 
     // If listingId is provided, create a one-time deposit payment
-    if (listingId && depositAmount) {
-      logStep("Creating deposit checkout", { listingId, depositAmount, platformFee, totalAmount });
+    if (listingId) {
+      // Look up actual listing from DB — never trust client-supplied amounts
+      const { data: listing, error: listingError } = await supabaseAdmin
+        .from("listings")
+        .select("security_deposit, monthly_rent, headline, address")
+        .eq("id", listingId)
+        .single();
+
+      if (listingError || !listing) {
+        throw new Error("Listing not found");
+      }
+
+      const depositAmount = Number(listing.security_deposit || listing.monthly_rent || 0);
+      if (depositAmount <= 0) {
+        throw new Error("Listing has no valid deposit amount configured");
+      }
+
+      const platformFee = Math.round(depositAmount * PLATFORM_FEE_RATE * 100) / 100;
+      const totalAmount = depositAmount + platformFee;
+
+      logStep("Creating deposit checkout from DB values", { listingId, depositAmount, platformFee, totalAmount });
 
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -62,7 +90,7 @@ serve(async (req) => {
                 name: "Security Deposit + Platform Fee",
                 description: `SubIn deposit for listing`,
               },
-              unit_amount: Math.round((totalAmount || depositAmount) * 100),
+              unit_amount: Math.round(totalAmount * 100),
             },
             quantity: 1,
           },
@@ -72,8 +100,8 @@ serve(async (req) => {
           listing_id: listingId,
           subtenant_id: user.id,
           deposit_amount: String(depositAmount),
-          platform_fee: String(platformFee || 0),
-          total_amount: String(totalAmount || depositAmount),
+          platform_fee: String(platformFee),
+          total_amount: String(totalAmount),
           type: "sublet_deposit",
         },
         success_url: `${origin}/payments/confirmation?session_id={CHECKOUT_SESSION_ID}&listing_id=${listingId}`,
@@ -111,7 +139,7 @@ serve(async (req) => {
     });
   } catch (error) {
     logStep("ERROR", { message: error.message });
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Checkout failed. Please try again." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
