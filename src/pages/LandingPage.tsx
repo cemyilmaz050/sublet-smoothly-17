@@ -332,18 +332,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t bg-card py-12">
-        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Home className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-foreground">SubIn</span>
-          </div>
-          <p className="text-sm text-muted-foreground">© 2026 SubIn. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 };

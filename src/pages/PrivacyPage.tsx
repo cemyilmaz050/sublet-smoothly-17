@@ -1,6 +1,4 @@
 
-import Footer from "@/components/Footer";
-
 const PrivacyPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -74,7 +72,6 @@ const PrivacyPage = () => {
           </section>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

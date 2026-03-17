@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { ShieldCheck, Loader2, Lock, CreditCard } from "lucide-react";
 
-import Footer from "@/components/Footer";
+
 import CancellationPolicy from "@/components/CancellationPolicy";
 import PlatformFeeTooltip, { PLATFORM_FEE_PERCENT } from "@/components/PlatformFeeTooltip";
 import { supabase } from "@/integrations/supabase/client";
