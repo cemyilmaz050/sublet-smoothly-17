@@ -70,7 +70,7 @@ const LandingPage = () => {
               <span className="text-primary">sorted</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-              Find a place from another student — short term, verified, and stress free. No brokers, no BS.
+              Find a place from another student. Short term, verified, and stress free. No brokers, no BS.
             </p>
 
             {/* Live stats */}
