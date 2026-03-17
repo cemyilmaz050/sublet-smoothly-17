@@ -72,6 +72,8 @@ Deno.serve(async (req) => {
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
+    console.log("DEBUG_HASH:", hashHex);
+
     if (hashHex !== expectedHash.toLowerCase()) {
       return new Response(JSON.stringify({ error: "Invalid PIN" }), {
         status: 403,
