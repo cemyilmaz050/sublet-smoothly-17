@@ -223,9 +223,20 @@ const SubtenantDashboard = () => {
                           <Clock className="h-3 w-3" /> Knocked {formatDate(knock.created_at)}
                         </p>
                       </div>
-                      <Badge variant={knock.responded ? "default" : "secondary"} className="capitalize text-xs">
-                        {knock.responded ? "Responded ✓" : "Waiting"}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {knock.management_group_id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => navigate(`/documents/bbg?listing_id=${knock.listing_id}`)}
+                          >
+                            Complete Docs
+                          </Button>
+                        )}
+                        <Badge variant={knock.responded ? "default" : "secondary"} className="capitalize text-xs">
+                          {knock.responded ? "Responded ✓" : "Waiting"}
+                        </Badge>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
