@@ -220,7 +220,7 @@ const UniversalPhotoUploader = ({
         toast.info(`${skipped} duplicate photo${skipped > 1 ? "s were" : " was"} skipped — we only kept the unique ones`);
       }
 
-      setSessionFingerprints(newFingerprints);
+      sessionFingerprintsRef.current = newFingerprints;
 
       const toAdd = deduplicated.slice(0, Math.max(0, remaining));
       if (toAdd.length < deduplicated.length) {
