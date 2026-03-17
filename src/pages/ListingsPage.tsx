@@ -46,6 +46,7 @@ interface ListingItem {
   source: string;
   tenant_id: string;
   manager_id: string | null;
+  management_group_id: string | null;
   property_type?: string | null;
   tenant_verified?: boolean;
   avg_rating?: number;
