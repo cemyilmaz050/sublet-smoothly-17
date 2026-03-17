@@ -17,7 +17,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import {
   LayoutDashboard, Building2, Users, MessageSquare, Bell,
-  ShieldCheck, DollarSign, Settings, LogOut, ClipboardCheck,
+  ShieldCheck, DollarSign, Settings, LogOut, ClipboardCheck, FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import bbgLogo from "@/assets/bbg-logo.png";
