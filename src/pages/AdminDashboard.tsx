@@ -112,8 +112,6 @@ const AdminDashboard = () => {
     return Array.from(map.entries()).map(([date, count]) => ({ date, count }));
   };
 
-  if (!isFounder) return null;
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
