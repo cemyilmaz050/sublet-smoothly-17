@@ -31,3 +31,5 @@ project_id = "ixkzgpwxzhkjdzlcqkzk"
     verify_jwt = false
   [functions.send-friend-invite]
     verify_jwt = false
+  [functions.verify-admin-pin]
+    verify_jwt = false
