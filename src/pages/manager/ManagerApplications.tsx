@@ -134,7 +134,7 @@ const ManagerApplications = () => {
   const handleDecision = async (app: AppWithDetails, decision: "approved" | "declined") => {
     // Block approving unverified renters
     if (decision === "approved" && !app.renter_verified) {
-      toast.error("This renter has not completed all 3 verification steps yet — you can only confirm fully verified renters.");
+      toast.error("This renter has not completed all 3 verification steps yet. You can only confirm fully verified renters.");
       return;
     }
     await updateMut.mutateAsync({ id: app.id, status: decision });
