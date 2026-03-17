@@ -378,7 +378,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                   <p className="text-sm font-semibold text-foreground">Boston Brokerage Group</p>
                   <Badge variant="approved">Verified Partner</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">Official SubIn partner — Boston MA</p>
+                <p className="text-xs text-muted-foreground">Official SubIn partner · Boston MA</p>
               </div>
               <Check className="h-4 w-4 text-primary" />
             </button>
