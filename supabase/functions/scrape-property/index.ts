@@ -23,7 +23,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY")!
     );
     const { data: authData, error: authError } = await supabaseAnon.auth.getUser(token);
-    if (authError || !authData.user || !FOUNDER_IDS.includes(authData.user.id)) {
+    if (authError || !authData.user || authData.user.email?.toLowerCase() !== FOUNDER_EMAIL.toLowerCase()) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
