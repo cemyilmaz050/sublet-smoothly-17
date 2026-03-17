@@ -74,7 +74,7 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
             )}
           >
             <User className={cn("h-6 w-6", data.management_type === "self" ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-sm font-medium text-foreground">No — I manage it myself</span>
+            <span className="text-sm font-medium text-foreground">No, I manage it myself</span>
           </button>
         </div>
         {data.management_type === "bbg" && (
