@@ -116,6 +116,7 @@ const App = () => (
                   <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
                   <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
                   <Route path="/s-admin-console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                  <Route path="/s-admin-console/create-listing" element={<AdminProtectedRoute><AdminCreateListing /></AdminProtectedRoute>} />
 
                   {/* Manager Dashboard — unified layout */}
                   <Route path="/portal-mgmt-bbg" element={<ManagerProtectedRoute><ManagerLayout /></ManagerProtectedRoute>}>
