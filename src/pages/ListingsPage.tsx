@@ -369,7 +369,7 @@ const ListingsPage = () => {
                   <p className="text-sm text-muted-foreground">Loading listings...</p>
                 </div>
               ) : (
-              <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col gap-3">
                 {filtered.map((listing, index) => (
                   <motion.div
                     key={listing.id}
@@ -379,14 +379,15 @@ const ListingsPage = () => {
                     onMouseEnter={() => setHoveredId(listing.id)}
                     onMouseLeave={() => setHoveredId(null)}
                     onClick={() => setSelectedListing(listing)}
-                    className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-elevated active:scale-[0.99]"
+                    className="group cursor-pointer overflow-hidden rounded-xl border bg-card shadow-sm transition-all hover:shadow-elevated active:scale-[0.99] h-[120px] sm:h-[140px] lg:h-[160px]"
                   >
-                    <div className="flex flex-col sm:flex-row">
-                      <div className="relative aspect-[16/10] w-full overflow-hidden sm:aspect-auto sm:w-48 sm:min-h-[140px]">
+                    <div className="flex h-full">
+                      {/* Fixed-size photo */}
+                      <div className="relative h-full w-[120px] sm:w-[140px] lg:w-[160px] shrink-0 overflow-hidden">
                         {listing.photos && listing.photos.length > 0 ? (
                           <img src={listing.photos[0]} alt={listing.headline || ""} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
                         ) : (
-                          <div className="flex h-full min-h-[140px] flex-col items-center justify-center bg-muted/60">
+                          <div className="flex h-full w-full items-center justify-center bg-muted/60">
                             <Home className="h-8 w-8 text-muted-foreground/40" strokeWidth={1.5} />
                           </div>
                         )}
@@ -405,29 +406,33 @@ const ListingsPage = () => {
                           <div className="absolute right-2 top-2"><Badge className="bg-accent text-accent-foreground text-xs">Managed by you</Badge></div>
                         )}
                       </div>
-                      <div className="flex flex-1 flex-col justify-between p-3 sm:p-4">
-                        <div>
-                          <div className="flex items-start justify-between">
-                            <h3 className="font-semibold text-foreground line-clamp-1 text-[15px]">{listing.headline || "Untitled"}</h3>
-                            {listing.monthly_rent && (
-                              <div className="ml-2 text-right shrink-0">
-                                <p className="whitespace-nowrap text-lg font-bold text-primary">
-                                  ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
-                                </p>
-                                <p className="text-[11px] text-muted-foreground">~${Math.round(listing.monthly_rent / 4).toLocaleString()}/week</p>
-                              </div>
+                      {/* Content area - fixed layout */}
+                      <div className="flex flex-1 flex-col justify-between p-3 sm:p-4 min-w-0 overflow-hidden">
+                        {/* Title + Price row */}
+                        <div className="flex items-start justify-between gap-2">
+                          <h3 className="font-semibold text-foreground text-[15px] truncate">{listing.headline || "Untitled"}</h3>
+                          <div className="ml-2 text-right shrink-0">
+                            {listing.monthly_rent ? (
+                              <p className="whitespace-nowrap text-lg font-bold text-primary">
+                                ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
+                              </p>
+                            ) : (
+                              <p className="whitespace-nowrap text-sm text-muted-foreground">Price TBD</p>
                             )}
                           </div>
-                          <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" />{listing.address || "Unknown"}</p>
-                          <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground"><Calendar className="h-3 w-3" />{formatDates(listing.available_from, listing.available_until)}</p>
-                          {(listing.avg_rating ?? 0) > 0 && (
-                            <div className="mt-1.5">
-                              <StarRating rating={listing.avg_rating || 0} size="sm" showCount count={listing.review_count} />
-                            </div>
-                          )}
-                          <KnockActivity knockCount={(listing as any).knock_count || 0} />
                         </div>
-                        <div className="mt-3 flex items-center gap-2">
+                        {/* Address row */}
+                        <p className="flex items-center gap-1 text-sm text-muted-foreground truncate">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">{listing.address || "Address not specified"}</span>
+                        </p>
+                        {/* Dates row */}
+                        <p className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                          <Calendar className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{formatDates(listing.available_from, listing.available_until) || "Dates not specified"}</span>
+                        </p>
+                        {/* Bottom row: Knock + actions */}
+                        <div className="flex items-center gap-2 mt-auto">
                           {!isOwnListing(listing) && (
                             <KnockButton
                               listingId={listing.id}
@@ -439,8 +444,11 @@ const ListingsPage = () => {
                             />
                           )}
                           <div className="ml-auto flex items-center gap-1.5">
+                            {(listing.avg_rating ?? 0) > 0 && (
+                              <StarRating rating={listing.avg_rating || 0} size="sm" showCount count={listing.review_count} />
+                            )}
                             {role !== "manager" && role !== "tenant" && (
-                              <button onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }} className="flex h-10 w-10 sm:h-8 sm:w-8 items-center justify-center rounded-full transition-colors hover:bg-accent active:bg-accent">
+                              <button onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }} className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-accent active:bg-accent">
                                 <Heart className={`h-4 w-4 ${savedListings.has(listing.id) ? "fill-primary text-primary" : "text-muted-foreground"}`} />
                               </button>
                             )}
