@@ -443,7 +443,7 @@ const ManagerCatalogEditor = () => {
             onPhotoUrlsChange={(urls) => setForm((prev) => ({ ...prev, photos: urls }))}
             bucket="listing-photos"
             storagePath={`catalog/${propertyId === "new" ? "new" : propertyId}`}
-            maxPhotos={20}
+            maxPhotos={15}
             minPhotos={0}
             showCoverBadge
           />

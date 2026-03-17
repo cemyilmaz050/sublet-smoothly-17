@@ -16,14 +16,14 @@ const ListingStep2 = ({ data, onChange, errors }: Props) => {
       <h2 className="text-xl font-semibold text-foreground">Photos & Description</h2>
 
       <div>
-        <Label>Photos * (minimum 3, maximum 10)</Label>
+        <Label>Photos * (minimum 3, maximum 15)</Label>
         <div className="mt-1.5">
           <UniversalPhotoUploader
             photoUrls={data.photoUrls}
             onPhotoUrlsChange={(urls) => onChange({ photoUrls: urls })}
             bucket="listing-photos"
             storagePath={`listings/${crypto.randomUUID()}`}
-            maxPhotos={10}
+            maxPhotos={15}
             minPhotos={3}
             showCoverBadge
           />
