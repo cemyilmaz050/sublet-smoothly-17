@@ -31,7 +31,7 @@ const navItems = [
   { title: "Property Catalog", url: `${PORTAL_BASE}/catalog`, icon: Building2 },
   { title: "Pending Approvals", url: `${PORTAL_BASE}/approvals`, icon: ClipboardCheck, badgeKey: "pendingApprovals" as const },
   { title: "Active Sublet Listings", url: `${PORTAL_BASE}/listings`, icon: Building2 },
-  { title: "Documents", url: `${PORTAL_BASE}/documents`, icon: FileText },
+  { title: "Documents", url: `${PORTAL_BASE}/documents`, icon: FileText, badgeKey: "documents" as const },
   { title: "Applications", url: `${PORTAL_BASE}/applications`, icon: Users },
   { title: "Background Checks", url: `${PORTAL_BASE}/checks`, icon: ShieldCheck },
   { title: "Messages", url: `${PORTAL_BASE}/messages`, icon: MessageSquare },

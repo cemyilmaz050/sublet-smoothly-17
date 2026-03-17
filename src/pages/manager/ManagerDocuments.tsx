@@ -632,6 +632,3 @@ function ApplicantDetailPanel({ pkg, onSendReminder, sendingReminder, buildTimel
   );
 }
 
-function getInitials(first?: string | null, last?: string | null) {
-  return `${(first || "?")[0]}${(last || "")[0] || ""}`.toUpperCase();
-}
