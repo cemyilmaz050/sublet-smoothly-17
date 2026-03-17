@@ -126,7 +126,7 @@ const SignUpPage = () => {
 
   const handleSignUp = async () => {
     if (!isReady) {
-      setSubmitError("Hold on — we're still loading. Try again in a sec.");
+      setSubmitError("Hold on, we're still loading. Try again in a sec.");
       return;
     }
 
