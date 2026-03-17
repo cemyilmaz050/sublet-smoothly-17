@@ -12,10 +12,7 @@ import { format, subDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
 
-// Hardcoded founder user IDs — only these can access
-const FOUNDER_IDS = [
-  "370d6445-15bc-4802-8626-1507c38fbdd4", // BBG staff
-];
+// Access control is enforced by AdminProtectedRoute (email whitelist + PIN)
 
 interface DailyMetric {
   date: string;
