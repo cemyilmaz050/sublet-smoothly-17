@@ -45,9 +45,6 @@ const Navbar = () => {
     if (user && hasListing && isOnTenantDashboard) {
       return { label: "Browse as Sub-lessee", onClick: () => navigate("/listings") };
     }
-    if (user && hasListing) {
-      return { label: "Go to Your Listings", onClick: handleSubletClick };
-    }
     return { label: "Sublet Your Apartment", onClick: handleSubletClick };
   };
 
