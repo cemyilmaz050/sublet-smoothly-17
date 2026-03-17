@@ -972,14 +972,23 @@ const AdminCreateListing = () => {
                       <div className="flex justify-between pt-4">
                         <Button variant="outline" onClick={() => setStep(6)}><ArrowLeft className="mr-1.5 h-4 w-4" /> Back</Button>
                         <div className="flex gap-3">
-                          <Button variant="outline" onClick={() => handleSave("draft")} disabled={saving}>
-                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Save as Draft
-                          </Button>
-                          <Button onClick={() => handleSave("active")} disabled={saving}>
-                            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-                            Publish Now
-                          </Button>
+                          {isPendingUser ? (
+                            <Button onClick={() => handleSave("draft")} disabled={saving}>
+                              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                              Create Pending Listing
+                            </Button>
+                          ) : (
+                            <>
+                              <Button variant="outline" onClick={() => handleSave("draft")} disabled={saving}>
+                                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                Save as Draft
+                              </Button>
+                              <Button onClick={() => handleSave("active")} disabled={saving}>
+                                {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                                Publish Now
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </CardContent>
