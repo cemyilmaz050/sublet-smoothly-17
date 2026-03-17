@@ -927,7 +927,7 @@ const AdminCreateListing = () => {
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Property</span>
-                          <span className="font-medium">{form.bedrooms || "?"}BR / {form.bathrooms || "?"}BA · {form.property_type || "—"} · {form.sqft || "—"} sqft</span>
+                          <span className="font-medium">{form.bedrooms || "?"}BR / {form.bathrooms || "?"}BA · {form.property_type || "-"} · {form.sqft || "-"} sqft</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Rent</span>
