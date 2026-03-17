@@ -608,8 +608,8 @@ const AdminCreateListing = () => {
                         onPhotoUrlsChange={(urls) => updateForm({ photoUrls: urls })}
                         bucket="listing-photos"
                         storagePath={`admin/${selectedUser?.id || "temp"}`}
-                        maxPhotos={20}
-                        minPhotos={3}
+                         maxPhotos={15}
+                         minPhotos={3}
                         showCoverBadge
                       />
 

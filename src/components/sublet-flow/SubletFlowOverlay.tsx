@@ -691,7 +691,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           onPhotoUrlsChange={(u) => update({ photoUrls: u })}
           bucket="listing-photos"
           storagePath={`${user?.id || "anon"}/${crypto.randomUUID()}`}
-          maxPhotos={20}
+          maxPhotos={15}
           minPhotos={3}
           showCoverBadge
         />
