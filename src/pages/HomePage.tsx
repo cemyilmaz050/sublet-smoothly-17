@@ -72,7 +72,7 @@ const HomePage = () => {
           transition={{ delay: 0.1 }}
           className="mt-2 sm:mt-4 max-w-xl text-[13px] sm:text-lg text-muted-foreground leading-snug sm:leading-relaxed line-clamp-2"
         >
-          Find a verified sublet near your school or internship — or list your place and earn while you're away.
+          Find a verified sublet near your school or internship, or list your place and earn while you're away.
         </motion.p>
 
         {/* Trust pills */}
