@@ -126,7 +126,7 @@ const SignUpPage = () => {
 
   const handleSignUp = async () => {
     if (!isReady) {
-      setSubmitError("Hold on — we're still loading. Try again in a sec.");
+      setSubmitError("Hold on, we're still loading. Try again in a sec.");
       return;
     }
 
@@ -330,7 +330,7 @@ const SignUpPage = () => {
               {step === 1 ? "What brings you to SubIn?" : "Let's get you set up"}
             </h1>
             <p className="mt-2 text-sm sm:text-base text-muted-foreground">
-              {step === 1 ? "Pick one — you can always switch later" : "Takes under 30 seconds"}
+              {step === 1 ? "Pick one, you can always switch later" : "Takes under 30 seconds"}
             </p>
           </div>
 
@@ -343,7 +343,7 @@ const SignUpPage = () => {
                 className="flex w-full items-center justify-center gap-2.5 rounded-xl border-2 border-border bg-card px-4 h-14 text-base font-medium text-foreground shadow-sm transition-all hover:bg-accent/50 hover:shadow-md hover:border-primary/30 disabled:opacity-60 disabled:pointer-events-none"
               >
                 {googleLoading ? <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /> : <GoogleIcon />}
-                {googleLoading ? "Connecting..." : "Continue with Google — fastest way in"}
+                {googleLoading ? "Connecting..." : "Continue with Google, the fastest way in"}
               </button>
 
               <div className="relative">

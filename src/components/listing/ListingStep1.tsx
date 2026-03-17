@@ -58,7 +58,7 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
             )}
           >
             <Building2 className={cn("h-6 w-6", data.management_type === "bbg" ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-sm font-medium text-foreground">Yes — managed by Boston Brokerage Group</span>
+            <span className="text-sm font-medium text-foreground">Yes, managed by Boston Brokerage Group</span>
           </button>
           <button
             type="button"
@@ -74,17 +74,17 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
             )}
           >
             <User className={cn("h-6 w-6", data.management_type === "self" ? "text-primary" : "text-muted-foreground")} />
-            <span className="text-sm font-medium text-foreground">No — I manage it myself</span>
+            <span className="text-sm font-medium text-foreground">No, I manage it myself</span>
           </button>
         </div>
         {data.management_type === "bbg" && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Your listing will be reviewed by Boston Brokerage Group before going live — usually within 24 hours
+            Your listing will be reviewed by Boston Brokerage Group before going live, usually within 24 hours
           </p>
         )}
         {data.management_type === "self" && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Your listing will go live instantly when you publish — no approval needed!
+            Your listing will go live instantly when you publish. No approval needed!
           </p>
         )}
         {errors.management_type && <p className="mt-1 text-sm text-destructive">{errors.management_type}</p>}

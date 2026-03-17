@@ -212,7 +212,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               </motion.div>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-foreground">Identity verified — you're all set</p>
+              <p className="text-lg font-bold text-foreground">Identity verified, you're all set</p>
               <p className="text-sm text-muted-foreground mt-1">
                 You can now schedule viewings and make payments on SubIn.
               </p>
@@ -233,7 +233,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
             <div>
               <p className="text-sm font-semibold text-foreground">Having trouble?</p>
               <p className="text-sm text-muted-foreground mt-1">
-                No worries — email us at{" "}
+                No worries! Email us at{" "}
                 <a href="mailto:hello@subinapp.com" className="font-semibold text-primary underline">
                   hello@subinapp.com
                 </a>{" "}
@@ -412,7 +412,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">Good lighting, no glare</p>
-                <p className="text-xs text-muted-foreground">Natural light works best — avoid flash</p>
+                <p className="text-xs text-muted-foreground">Natural light works best. Avoid flash</p>
               </div>
             </div>
 
@@ -449,7 +449,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
           <div>
             <p className="text-sm font-semibold text-foreground">Verify Your Identity</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Quick ID scan and selfie — takes under 60 seconds. You'll need a government-issued ID.
+              Quick ID scan and selfie. Takes under 60 seconds. You'll need a government-issued ID.
             </p>
           </div>
         </div>

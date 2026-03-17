@@ -250,7 +250,7 @@ const ManagerApplicationsPage = () => {
                       </p>
                       <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "—"}
+                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "-"}
                       </div>
                       {app.message && (
                         <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>
@@ -309,7 +309,7 @@ const ManagerApplicationsPage = () => {
                 {/* Application date */}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  Applied {selectedApp.created_at ? format(new Date(selectedApp.created_at), "MMMM d, yyyy 'at' h:mm a") : "—"}
+                  Applied {selectedApp.created_at ? format(new Date(selectedApp.created_at), "MMMM d, yyyy 'at' h:mm a") : "-"}
                 </div>
 
                 {/* Message */}

@@ -352,7 +352,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated">
           {!mgmtSearch.trim() && (
             <div className="px-4 pt-3 pb-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested — Our verified partner</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested · Our verified partner</span>
             </div>
           )}
 
@@ -378,7 +378,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                   <p className="text-sm font-semibold text-foreground">Boston Brokerage Group</p>
                   <Badge variant="approved">Verified Partner</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">Official SubIn partner — Boston MA</p>
+                <p className="text-xs text-muted-foreground">Official SubIn partner · Boston MA</p>
               </div>
               <Check className="h-4 w-4 text-primary" />
             </button>
@@ -627,7 +627,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <span className="text-sm font-medium text-foreground">{label}</span>
       <div className="flex items-center gap-3">
         <button onClick={() => onChange(Math.max(min, (Number(value) || 0) - step))} className="flex h-8 w-8 items-center justify-center rounded-full border hover:bg-muted"><Minus className="h-4 w-4" /></button>
-        <span className="w-8 text-center text-sm font-semibold">{value === "" ? "—" : value}</span>
+        <span className="w-8 text-center text-sm font-semibold">{value === "" ? "-" : value}</span>
         <button onClick={() => onChange(Math.min(max, (Number(value) || 0) + step))} className="flex h-8 w-8 items-center justify-center rounded-full border hover:bg-muted"><Plus className="h-4 w-4" /></button>
       </div>
     </div>

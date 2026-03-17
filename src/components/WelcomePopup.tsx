@@ -122,7 +122,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
                 Continue my search
               </Button>
               <button onClick={handleSkip} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Skip for now — just browse
+                Skip for now, just browse
               </button>
             </motion.div>
           </motion.div>
@@ -163,7 +163,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
                 Go to my dashboard
               </Button>
               <button onClick={handleSkip} className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Skip for now — just browse
+                Skip for now, just browse
               </button>
             </motion.div>
           </motion.div>
@@ -222,7 +222,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
                   />
                 </div>
                 <button onClick={handleSkip} className="mt-6 block w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  Skip for now — just browse
+                  Skip for now, just browse
                 </button>
               </div>
             </motion.div>
@@ -277,7 +277,7 @@ export default function WelcomePopup({ show, returningMode, dismiss }: WelcomePo
               />
             </div>
             <button onClick={handleSkip} className="mt-6 block w-full text-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Skip for now — just browse
+              Skip for now, just browse
             </button>
           </motion.div>
         </motion.div>

@@ -523,7 +523,7 @@ const ManagerSubletRequestsPage = () => {
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{req.property_address}</TableCell>
-                      <TableCell>{req.unit_number || "—"}</TableCell>
+                      <TableCell>{req.unit_number || "-"}</TableCell>
                       <TableCell className="text-muted-foreground">
                         {new Date(req.created_at).toLocaleDateString()}
                       </TableCell>

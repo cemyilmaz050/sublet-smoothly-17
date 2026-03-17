@@ -134,7 +134,7 @@ const ManagerApplications = () => {
   const handleDecision = async (app: AppWithDetails, decision: "approved" | "declined") => {
     // Block approving unverified renters
     if (decision === "approved" && !app.renter_verified) {
-      toast.error("This renter has not completed all 3 verification steps yet — you can only confirm fully verified renters.");
+      toast.error("This renter has not completed all 3 verification steps yet. You can only confirm fully verified renters.");
       return;
     }
     await updateMut.mutateAsync({ id: app.id, status: decision });
@@ -198,7 +198,7 @@ const ManagerApplications = () => {
       toast.success(
         finalStatus === "verified" ? "Applicant verified and approved!" :
         finalStatus === "declined" ? "Applicant declined." :
-        "Background check saved — needs more info."
+        "Background check saved, needs more info."
       );
       setBgCheckOpen(false);
     } catch (err: any) {
@@ -294,7 +294,7 @@ const ManagerApplications = () => {
                       <p className="text-sm text-muted-foreground truncate mt-0.5">{app.listing_headline || app.listing_address || "Listing"}</p>
                       <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "—"}
+                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "-"}
                       </div>
                       {app.message && <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>}
                       {/* Renter verification badge */}
@@ -354,7 +354,7 @@ const ManagerApplications = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  Applied {selectedApp.created_at ? format(new Date(selectedApp.created_at), "MMMM d, yyyy 'at' h:mm a") : "—"}
+                  Applied {selectedApp.created_at ? format(new Date(selectedApp.created_at), "MMMM d, yyyy 'at' h:mm a") : "-"}
                 </div>
                 {selectedApp.message && (
                   <div className="rounded-lg bg-accent/50 p-3">

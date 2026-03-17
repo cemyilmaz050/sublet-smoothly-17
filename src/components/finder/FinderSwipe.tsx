@@ -119,7 +119,7 @@ const FinderSwipe = ({ listings, onComplete, answers }: Props) => {
               {/* Price */}
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold text-foreground">
-                  ${currentListing.monthly_rent?.toLocaleString() || "—"}
+                  ${currentListing.monthly_rent?.toLocaleString() || "-"}
                 </span>
                 <span className="text-muted-foreground">/mo</span>
                 {weeklyRent && (

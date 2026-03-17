@@ -29,7 +29,7 @@ const LandingPage = () => {
     {
       name: "Emma",
       university: "BU Class of 2025",
-      quote: "Found my summer place in 2 days. SubIn made it so easy — no sketchy Craigslist vibes.",
+      quote: "Found my summer place in 2 days. SubIn made it so easy, no sketchy Craigslist vibes.",
       rating: 5,
       color: "from-primary to-cyan",
     },
@@ -70,7 +70,7 @@ const LandingPage = () => {
               <span className="text-primary">sorted</span>
             </h1>
             <p className="mt-6 max-w-lg text-lg text-muted-foreground">
-              Find a place from another student — short term, verified, and stress free. No brokers, no BS.
+              Find a place from another student. Short term, verified, and stress free. No brokers, no BS.
             </p>
 
             {/* Live stats */}
@@ -160,7 +160,7 @@ const LandingPage = () => {
             className="text-center"
           >
             <h2 className="text-3xl font-bold text-foreground">How it works</h2>
-            <p className="mt-3 text-muted-foreground">Three simple steps — takes about 3 minutes</p>
+            <p className="mt-3 text-muted-foreground">Three simple steps, takes about 3 minutes</p>
           </motion.div>
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">

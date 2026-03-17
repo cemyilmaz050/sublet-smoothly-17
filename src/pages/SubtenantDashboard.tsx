@@ -203,7 +203,7 @@ const SubtenantDashboard = () => {
               <EmptyState
                 icon={DoorOpen}
                 title="No knocks yet"
-                description="Knock on listings you're interested in — it's a quick way to signal interest."
+                description="Knock on listings you're interested in. It's a quick way to signal interest."
                 actionLabel="Browse Listings"
                 onAction={() => navigate("/listings")}
               />

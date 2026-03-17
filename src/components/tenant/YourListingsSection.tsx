@@ -216,7 +216,7 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
                   {/* Rent */}
                   <div className="absolute bottom-3 left-3">
                     <p className="text-2xl font-bold text-white drop-shadow-md">
-                      ${listing.monthly_rent?.toLocaleString() ?? "—"}
+                      ${listing.monthly_rent?.toLocaleString() ?? "-"}
                       <span className="text-sm font-normal opacity-80">/mo</span>
                     </p>
                   </div>
@@ -249,14 +249,14 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
                   {listing.status === "pending" && (
                     <div className="mt-2 flex items-center gap-1.5 rounded-md bg-amber/10 px-2.5 py-1.5">
                       <Clock className="h-3 w-3 text-amber shrink-0" />
-                      <p className="text-[11px] text-amber-foreground">Under review by Boston Brokerage Group — usually approved within 24 hours</p>
+                      <p className="text-[11px] text-amber-foreground">Under review by Boston Brokerage Group, usually approved within 24 hours</p>
                     </div>
                   )}
                   {listing.status === "rejected" && (
                     <div className="mt-2 space-y-1.5">
                       <div className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1.5">
                         <AlertTriangle className="h-3 w-3 text-destructive shrink-0" />
-                        <p className="text-[11px] text-destructive">Changes needed — check your notifications for details</p>
+                        <p className="text-[11px] text-destructive">Changes needed. Check your notifications for details</p>
                       </div>
                       <Button
                         size="sm"

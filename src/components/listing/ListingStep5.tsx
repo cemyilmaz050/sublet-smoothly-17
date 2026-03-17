@@ -37,7 +37,7 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
 
       <Section title="About this place" step={0} onEdit={onGoToStep}>
         <p><strong>Address:</strong> {data.address} {data.unit_number && `(Unit ${data.unit_number})`}</p>
-        <p><strong>Type:</strong> {propType} — {data.bedrooms} bed, {data.bathrooms} bath{data.sqft ? `, ${data.sqft} sqft` : ""}</p>
+        <p><strong>Type:</strong> {propType}, {data.bedrooms} bed, {data.bathrooms} bath{data.sqft ? `, ${data.sqft} sqft` : ""}</p>
       </Section>
 
       <Separator />
@@ -51,7 +51,7 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
       <Separator />
 
       <Section title="Pricing & Availability" step={2} onEdit={onGoToStep}>
-        <p><strong>Rent:</strong> ${data.monthly_rent}/mo · ~${weeklyRent}/week — <strong>Deposit:</strong> ${data.security_deposit}</p>
+        <p><strong>Rent:</strong> ${data.monthly_rent}/mo · ~${weeklyRent}/week · <strong>Deposit:</strong> ${data.security_deposit}</p>
         <p><strong>Available:</strong> {data.available_from && format(new Date(data.available_from), "PPP")} → {data.available_until && format(new Date(data.available_until), "PPP")}</p>
         <p><strong>Min duration:</strong> {data.min_duration} month(s)</p>
       </Section>

@@ -34,7 +34,7 @@ const FriendSubletPreScreen = ({ onFriend, onMarketplace }: FriendSubletPreScree
                 <Users className="h-8 w-8" />
               </div>
               <div className="space-y-1">
-                <p className="text-lg font-semibold text-foreground">Yes — I know who I want</p>
+                <p className="text-lg font-semibold text-foreground">Yes, I know who I want</p>
                 <p className="text-sm text-muted-foreground">
                   Send them a link and get it done in under 3 minutes
                 </p>
@@ -52,7 +52,7 @@ const FriendSubletPreScreen = ({ onFriend, onMarketplace }: FriendSubletPreScree
                 <Search className="h-8 w-8" />
               </div>
               <div className="space-y-1">
-                <p className="text-lg font-semibold text-foreground">No — help me find someone</p>
+                <p className="text-lg font-semibold text-foreground">No, help me find someone</p>
                 <p className="text-sm text-muted-foreground">
                   List your place and let subtenants come to you
                 </p>

@@ -172,7 +172,7 @@ const FriendSubletFlow = ({ open, onClose }: FriendSubletFlowProps) => {
           </p>
           <div className="w-full rounded-xl border bg-muted/30 p-4 text-left space-y-1">
             <p className="text-xs font-medium text-muted-foreground">What happens next</p>
-            <p className="text-sm text-foreground">Your friend signs in with Google, confirms the details, and pays the deposit — all from one page.</p>
+            <p className="text-sm text-foreground">Your friend signs in with Google, confirms the details, and pays the deposit, all from one page.</p>
           </div>
           <div className="flex flex-col gap-2 mt-4 w-full">
             <Button onClick={handleClose}>Done</Button>
@@ -215,7 +215,7 @@ const FriendSubletFlow = ({ open, onClose }: FriendSubletFlowProps) => {
                       </div>
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">Who's taking over your place?</h1>
-                    <p className="text-muted-foreground">We'll send them a link — they can confirm in under 3 minutes</p>
+                    <p className="text-muted-foreground">We'll send them a link. They can confirm in under 3 minutes</p>
                   </div>
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -242,7 +242,7 @@ const FriendSubletFlow = ({ open, onClose }: FriendSubletFlowProps) => {
                       </div>
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">Where's the place?</h1>
-                    <p className="text-muted-foreground">Just the basics — keep it quick</p>
+                    <p className="text-muted-foreground">Just the basics, keep it quick</p>
                   </div>
                   <div className="space-y-4">
                     <div className="space-y-2">

@@ -35,7 +35,7 @@ class ErrorBoundary extends React.Component<
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">Something went wrong</h1>
           <p className="text-muted-foreground mb-8 max-w-md">
-            We're sorry — an unexpected error occurred. Our team has been notified and we're looking into it.
+            We're sorry, an unexpected error occurred. Our team has been notified and we're looking into it.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button

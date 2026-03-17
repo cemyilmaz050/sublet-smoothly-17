@@ -298,7 +298,7 @@ const TenantDashboard = () => {
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground">{listing.address || "No address"}</p>
                       <p className="mt-2 text-2xl font-bold text-primary">
-                        ${listing.monthly_rent?.toLocaleString() ?? "—"}
+                        ${listing.monthly_rent?.toLocaleString() ?? "-"}
                         <span className="text-sm font-normal text-muted-foreground">/mo</span>
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">

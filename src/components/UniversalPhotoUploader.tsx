@@ -184,7 +184,7 @@ const UniversalPhotoUploader = ({
 
       for (const f of fileArr) {
         if (f.size > MAX_FILE_SIZE) {
-          toast.error(`"${f.name}" is too large — please use a photo under 10MB`);
+          toast.error(`"${f.name}" is too large. Please use a photo under 10MB`);
           continue;
         }
         if (!f.type.startsWith("image/") && !ACCEPTED_EXTENSIONS.test(f.name)) {
@@ -195,7 +195,7 @@ const UniversalPhotoUploader = ({
       }
 
       if (remaining <= 0) {
-        toast.error(`You've reached the maximum of ${maxPhotos} photos — remove some before adding more`);
+        toast.error(`You've reached the maximum of ${maxPhotos} photos. Remove some before adding more`);
         return;
       }
 
@@ -217,7 +217,7 @@ const UniversalPhotoUploader = ({
       }
 
       if (skipped > 0) {
-        toast.info(`${skipped} duplicate photo${skipped > 1 ? "s were" : " was"} skipped — we only kept the unique ones`);
+        toast.info(`${skipped} duplicate photo${skipped > 1 ? "s were" : " was"} skipped. We only kept the unique ones`);
       }
 
       sessionFingerprintsRef.current = newFingerprints;
@@ -301,7 +301,7 @@ const UniversalPhotoUploader = ({
       return;
     }
     onPhotoUrlsChange(unique);
-    toast.success(`Removed ${dupeCount} duplicate photo${dupeCount > 1 ? "s" : ""} — your listing now has ${unique.length} unique photos`);
+    toast.success(`Removed ${dupeCount} duplicate photo${dupeCount > 1 ? "s" : ""}. Your listing now has ${unique.length} unique photos`);
   };
 
   const dismissSimilar = (index: number) => {

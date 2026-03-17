@@ -370,7 +370,7 @@ const PendingListingsSection = () => {
       </CardHeader>
       <CardContent>
         {listings.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No pending listings — all users have signed up</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">No pending listings. All users have signed up</p>
         ) : (
           <div className="space-y-2">
             {listings.map((l: any) => (
@@ -452,7 +452,7 @@ const ManualVerifyTool = () => {
         </Button>
       </div>
       <Textarea
-        placeholder="Reason for manual verification (optional) — e.g. 'Demo user', 'Stripe timeout'"
+        placeholder="Reason for manual verification (optional), e.g. 'Demo user', 'Stripe timeout'"
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={2}

@@ -63,7 +63,7 @@ const FinderAction = ({ listing, answers }: Props) => {
 
         {/* Action header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground">Great choice — here's how to make it yours</h1>
+          <h1 className="text-3xl font-bold text-foreground">Great choice! Here's how to make it yours</h1>
         </div>
 
         {/* Action buttons */}

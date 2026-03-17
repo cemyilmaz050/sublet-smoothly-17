@@ -414,9 +414,9 @@ const AdminCreateListing = () => {
                   <CheckCircle2 className="h-12 w-12 text-emerald" />
                   {savedPending ? (
                     <>
-                      <h2 className="text-lg font-bold text-foreground">Listing Created — Waiting for Signup</h2>
+                      <h2 className="text-lg font-bold text-foreground">Listing Created - Waiting for Signup</h2>
                       <p className="text-sm text-muted-foreground text-center max-w-md">
-                        Listing created and waiting for <strong>{pendingEmail}</strong> — they will see it automatically when they sign up. An activation email has been sent.
+                        Listing created and waiting for <strong>{pendingEmail}</strong>. They will see it automatically when they sign up. An activation email has been sent.
                       </p>
                     </>
                   ) : (
@@ -472,7 +472,7 @@ const AdminCreateListing = () => {
                       <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
                         <div>
                           <p className="text-sm font-medium text-foreground">This person has not signed up yet</p>
-                          <p className="text-xs text-muted-foreground">Create a listing linked to their email — it will appear when they sign up</p>
+                          <p className="text-xs text-muted-foreground">Create a listing linked to their email. It will appear when they sign up</p>
                         </div>
                         <Switch
                           checked={isPendingUser}
@@ -532,7 +532,7 @@ const AdminCreateListing = () => {
                             <Button size="sm" disabled={!newUserEmail.trim()} onClick={async () => {
                               const u = await lookupUser(newUserEmail);
                               if (u) { setSelectedUser(u); setCreateNewUser(false); }
-                              else toast.info("User not found — they'll need to sign up first, or look up an existing user.");
+                              else toast.info("User not found. They'll need to sign up first, or look up an existing user.");
                             }}>
                               Find / Create
                             </Button>
@@ -596,7 +596,7 @@ const AdminCreateListing = () => {
 
                       {form.is_bbg ? (
                         <div className="rounded-lg border p-3 bg-muted/50">
-                          <p className="text-xs text-muted-foreground mb-2">Select from BBG catalog (coming soon — enter address manually for now)</p>
+                          <p className="text-xs text-muted-foreground mb-2">Select from BBG catalog (coming soon, enter address manually for now)</p>
                           <Input value={form.address} onChange={(e) => updateForm({ address: e.target.value })} placeholder="BBG property address..." />
                         </div>
                       ) : (
@@ -733,7 +733,7 @@ const AdminCreateListing = () => {
                     <CardContent className="space-y-4">
                       <div>
                         <Label className="text-xs">Property Title</Label>
-                        <Input value={form.headline} onChange={(e) => updateForm({ headline: e.target.value })} placeholder="Sunny 2BR in Back Bay — Steps from Northeastern" />
+                        <Input value={form.headline} onChange={(e) => updateForm({ headline: e.target.value })} placeholder="Sunny 2BR in Back Bay, Steps from Northeastern" />
                       </div>
                       <div>
                         <div className="flex items-center justify-between mb-1">
@@ -927,20 +927,20 @@ const AdminCreateListing = () => {
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Property</span>
-                          <span className="font-medium">{form.bedrooms || "?"}BR / {form.bathrooms || "?"}BA · {form.property_type || "—"} · {form.sqft || "—"} sqft</span>
+                          <span className="font-medium">{form.bedrooms || "?"}BR / {form.bathrooms || "?"}BA · {form.property_type || "-"} · {form.sqft || "-"} sqft</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Rent</span>
-                          <span className="font-medium">${form.monthly_rent || "—"}/mo {weeklyRent && `(≈$${weeklyRent}/wk)`}</span>
+                          <span className="font-medium">${form.monthly_rent || "-"}/mo {weeklyRent && `(≈$${weeklyRent}/wk)`}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Deposit</span>
-                          <span className="font-medium">${form.security_deposit || "—"}</span>
+                          <span className="font-medium">${form.security_deposit || "-"}</span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Dates</span>
                           <span className="font-medium">
-                            {form.instant_available ? "Available now" : `${form.available_from || "—"} → ${form.available_until || "—"}`}
+                            {form.instant_available ? "Available now" : `${form.available_from || "-"} → ${form.available_until || "-"}`}
                           </span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
@@ -1054,7 +1054,7 @@ const AdminCreateListing = () => {
                 {csvUser && (
                   <div className="flex items-center gap-2 rounded-lg border p-2.5 bg-primary/5">
                     <User className="h-4 w-4 text-primary" />
-                    <span className="text-sm">{csvUser.first_name} {csvUser.last_name} — {csvUser.email}</span>
+                    <span className="text-sm">{csvUser.first_name} {csvUser.last_name} · {csvUser.email}</span>
                   </div>
                 )}
 
@@ -1070,7 +1070,7 @@ const AdminCreateListing = () => {
                     <div className="rounded-lg border p-3 bg-muted/50">
                       <p className="text-sm font-medium">{csvData.length} listings loaded</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Preview: {csvData.slice(0, 3).map((r) => r.address || r.headline || "—").join(", ")}
+                        Preview: {csvData.slice(0, 3).map((r) => r.address || r.headline || "-").join(", ")}
                         {csvData.length > 3 && ` +${csvData.length - 3} more`}
                       </p>
                     </div>
