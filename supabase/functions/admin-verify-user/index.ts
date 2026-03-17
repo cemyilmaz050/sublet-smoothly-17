@@ -7,9 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const FOUNDER_IDS = [
-  "370d6445-15bc-4802-8626-1507c38fbdd4",
-];
+const FOUNDER_EMAIL = "cemyilmaz050@gmail.com";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
