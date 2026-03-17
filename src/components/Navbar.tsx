@@ -6,6 +6,8 @@ import useHasPublishedListing from "@/hooks/useHasPublishedListing";
 import UserMenu from "@/components/UserMenu";
 import NotificationBell from "@/components/NotificationBell";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
+import FriendSubletPreScreen from "@/components/FriendSubletPreScreen";
+import FriendSubletFlow from "@/components/FriendSubletFlow";
 import logo from "@/assets/subin-logo.png";
 
 const Navbar = () => {
@@ -15,6 +17,8 @@ const Navbar = () => {
   const { requireAuth } = useAuthModal();
   const { hasListing } = useHasPublishedListing();
   const [subletOpen, setSubletOpen] = useState(false);
+  const [preScreenOpen, setPreScreenOpen] = useState(false);
+  const [friendFlowOpen, setFriendFlowOpen] = useState(false);
 
   const isOnTenantDashboard = location.pathname.startsWith("/tenant/dashboard") || location.pathname.startsWith("/dashboard/tenant");
 
@@ -24,7 +28,7 @@ const Navbar = () => {
         if (hasListing) {
           navigate("/tenant/dashboard");
         } else {
-          setSubletOpen(true);
+          setPreScreenOpen(true);
         }
       });
       return;
@@ -32,7 +36,7 @@ const Navbar = () => {
     if (hasListing) {
       navigate("/tenant/dashboard");
     } else {
-      setSubletOpen(true);
+      setPreScreenOpen(true);
     }
   };
 
@@ -72,6 +76,15 @@ const Navbar = () => {
         </div>
       </nav>
 
+      {/* Pre-screen: "Do you have someone in mind?" */}
+      {preScreenOpen && (
+        <FriendSubletPreScreen
+          onFriend={() => { setPreScreenOpen(false); setFriendFlowOpen(true); }}
+          onMarketplace={() => { setPreScreenOpen(false); setSubletOpen(true); }}
+        />
+      )}
+
+      <FriendSubletFlow open={friendFlowOpen} onClose={() => setFriendFlowOpen(false)} />
       <SubletFlowOverlay open={subletOpen} onClose={() => setSubletOpen(false)} />
     </>
   );

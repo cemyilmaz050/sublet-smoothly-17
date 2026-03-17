@@ -108,6 +108,7 @@ const App = () => (
                   <Route path="/managers/:slug" element={<ManagerProfilePage />} />
                   <Route path="/refer" element={<ReferPage />} />
                   <Route path="/find" element={<AIFinderPage />} />
+                  <Route path="/invite/friend" element={<FriendSubletLanding />} />
 
                   {/* Protected routes */}
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
