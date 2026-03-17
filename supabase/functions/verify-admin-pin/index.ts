@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
     }
 
     // Layer 2: PIN verification via SHA-256 hash comparison
-    const expectedHash = Deno.env.get("ADMIN_PIN_HASH");
+    const expectedHash = Deno.env.get("ADMIN_PIN_HASH")?.trim().toLowerCase();
     if (!expectedHash) {
       return new Response(JSON.stringify({ error: "Server misconfigured" }), {
         status: 500,
@@ -72,14 +72,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    const normalizedPin = pin.trim();
     const encoder = new TextEncoder();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(pin));
+    const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(normalizedPin));
     const hashHex = Array.from(new Uint8Array(hashBuffer))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-
-    if (hashHex !== expectedHash.toLowerCase()) {
+    if (hashHex !== expectedHash) {
       return new Response(JSON.stringify({ error: "Invalid PIN" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
