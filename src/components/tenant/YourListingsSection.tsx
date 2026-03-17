@@ -249,7 +249,7 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
                   {listing.status === "pending" && (
                     <div className="mt-2 flex items-center gap-1.5 rounded-md bg-amber/10 px-2.5 py-1.5">
                       <Clock className="h-3 w-3 text-amber shrink-0" />
-                      <p className="text-[11px] text-amber-foreground">Under review by Boston Brokerage Group — usually approved within 24 hours</p>
+                      <p className="text-[11px] text-amber-foreground">Under review by Boston Brokerage Group, usually approved within 24 hours</p>
                     </div>
                   )}
                   {listing.status === "rejected" && (
