@@ -41,6 +41,10 @@ const AIFinderPage = () => {
     }
   }, []);
 
+  const handleBackToSwipe = useCallback(() => {
+    setStep("swipe");
+  }, []);
+
   const handleSelectListing = useCallback((listing: ScoredListing) => {
     setSelectedListing(listing);
     setStep("action");
