@@ -150,6 +150,7 @@ export default {
         "pulse-dot": "pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "slide-in-down": "slide-in-down 0.3s ease-out",
         "flame-flicker": "flame-flicker 0.6s ease-in-out infinite",
+        "fade-out": "fade-out 0.8s ease-out 0.5s forwards",
       },
     },
   },
