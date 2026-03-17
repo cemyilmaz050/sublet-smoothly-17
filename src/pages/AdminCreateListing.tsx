@@ -733,7 +733,7 @@ const AdminCreateListing = () => {
                     <CardContent className="space-y-4">
                       <div>
                         <Label className="text-xs">Property Title</Label>
-                        <Input value={form.headline} onChange={(e) => updateForm({ headline: e.target.value })} placeholder="Sunny 2BR in Back Bay — Steps from Northeastern" />
+                        <Input value={form.headline} onChange={(e) => updateForm({ headline: e.target.value })} placeholder="Sunny 2BR in Back Bay, Steps from Northeastern" />
                       </div>
                       <div>
                         <div className="flex items-center justify-between mb-1">
