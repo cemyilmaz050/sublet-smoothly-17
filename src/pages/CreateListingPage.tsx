@@ -146,17 +146,14 @@ const CreateListingPage = () => {
     };
 
     if (draftId) {
-      let photos = form.photoUrls;
-      if (form.photos.length > 0) photos = await uploadPhotos(draftId);
+      const photos = getPhotoUrls();
       await supabase.from("listings").update({ ...payload, photos }).eq("id", draftId);
     } else {
       const { data } = await supabase.from("listings").insert(payload).select("id").single();
       if (data) {
         setDraftId(data.id);
-        if (form.photos.length > 0) {
-          const photos = await uploadPhotos(data.id);
-          await supabase.from("listings").update({ photos }).eq("id", data.id);
-        }
+        const photos = getPhotoUrls();
+        await supabase.from("listings").update({ photos }).eq("id", data.id);
       }
     }
   };
