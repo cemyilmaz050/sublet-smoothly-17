@@ -84,7 +84,7 @@ const SubtenantDashboard = () => {
         const listingIds = [...new Set(knocksData.map((k: any) => k.listing_id))];
         const { data: listingsData } = await supabase
           .from("listings")
-          .select("id, headline, address")
+          .select("id, headline, address, management_group_id")
           .in("id", listingIds);
         const listingMap: Record<string, any> = {};
         (listingsData || []).forEach((l: any) => { listingMap[l.id] = l; });
