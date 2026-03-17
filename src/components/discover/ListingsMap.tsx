@@ -116,7 +116,7 @@ const CLUSTER_STYLE = `
 const NOTCH = `<span style="position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid currentBgColor;"></span>`;
 
 function createPriceIcon(price: number | null, isActive: boolean, isMobile: boolean, animDelay: number = 0) {
-  const label = price ? `$${price.toLocaleString()}/mo` : "$ —";
+  const label = price ? `$${price.toLocaleString()}/mo` : "$-";
   const style = isActive
     ? ACTIVE_STYLE
     : BASE_STYLE + (isMobile ? MOBILE_EXTRA : "");
