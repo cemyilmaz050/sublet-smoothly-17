@@ -412,18 +412,24 @@ const AdminCreateListing = () => {
               <Card className="shadow-card">
                 <CardContent className="flex flex-col items-center gap-4 py-12">
                   <CheckCircle2 className="h-12 w-12 text-emerald" />
-                  <h2 className="text-lg font-bold text-foreground">Listing Created & Published!</h2>
-                  <p className="text-sm text-muted-foreground text-center max-w-md">
-                    The listing has been created under <strong>{selectedUser?.first_name} {selectedUser?.last_name}</strong>'s account ({selectedUser?.email}). They've been notified and can review/edit it.
-                  </p>
-                  <a
-                    href={`/listings`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm text-primary underline"
-                  >
-                    View it live →
-                  </a>
+                  {savedPending ? (
+                    <>
+                      <h2 className="text-lg font-bold text-foreground">Listing Created — Waiting for Signup</h2>
+                      <p className="text-sm text-muted-foreground text-center max-w-md">
+                        Listing created and waiting for <strong>{pendingEmail}</strong> — they will see it automatically when they sign up. An activation email has been sent.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-lg font-bold text-foreground">Listing Created & Published!</h2>
+                      <p className="text-sm text-muted-foreground text-center max-w-md">
+                        The listing has been created under <strong>{selectedUser?.first_name} {selectedUser?.last_name}</strong>'s account ({selectedUser?.email}). They've been notified and can review/edit it.
+                      </p>
+                      <a href={`/listings`} target="_blank" rel="noreferrer" className="text-sm text-primary underline">
+                        View it live →
+                      </a>
+                    </>
+                  )}
                   <div className="flex gap-3">
                     <Button variant="outline" onClick={resetForm}>Create Another</Button>
                     <Button onClick={() => navigate("/admin-subin-2026")}>Back to Dashboard</Button>
