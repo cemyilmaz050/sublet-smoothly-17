@@ -117,18 +117,8 @@ const CreateListingPage = () => {
     return Object.keys(e).length === 0;
   };
 
-  const uploadPhotos = async (listingId: string): Promise<string[]> => {
-    const urls: string[] = [...form.photoUrls];
-    for (const file of form.photos) {
-      const ext = file.name.split(".").pop();
-      const path = `${listingId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("listing-photos").upload(path, file);
-      if (error) { console.error("Upload error:", error); continue; }
-      const { data: urlData } = supabase.storage.from("listing-photos").getPublicUrl(path);
-      urls.push(urlData.publicUrl);
-    }
-    return urls;
-  };
+  // Photos are now uploaded directly via UniversalPhotoUploader
+  const getPhotoUrls = (): string[] => form.photoUrls;
 
   const saveDraft = async () => {
     if (!user) return;
