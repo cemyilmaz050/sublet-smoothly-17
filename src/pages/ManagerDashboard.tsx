@@ -67,7 +67,7 @@ const ManagerDashboard = () => {
   // Mock activity feed data
   const activityFeed = [
     { message: "New sublet request from Sarah J. for Unit 4B", time: "2 hours ago", type: "request" },
-    { message: "Payment received for 123 Main St — $2,400", time: "5 hours ago", type: "payment" },
+    { message: "Payment received for 123 Main St: $2,400", time: "5 hours ago", type: "payment" },
     { message: "New applicant verified for Listing #12", time: "1 day ago", type: "applicant" },
     { message: "Document uploaded by Mike C. for Unit 7A", time: "1 day ago", type: "document" },
   ];
