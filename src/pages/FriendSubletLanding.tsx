@@ -156,7 +156,7 @@ const FriendSubletLanding = () => {
               <Check className="h-10 w-10 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Done — your place is held!</h1>
+          <h1 className="text-3xl font-bold text-foreground">Done! Your place is held!</h1>
           <p className="text-muted-foreground">
             See you {invite.available_from ? `on ${new Date(invite.available_from).toLocaleDateString("en-US", { month: "long", day: "numeric" })}` : "soon"} 🏠
           </p>
