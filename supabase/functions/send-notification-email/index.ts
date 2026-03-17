@@ -260,7 +260,7 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("Unauthorized: missing authorization header");
     const token = authHeader.replace("Bearer ", "");
-    const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ?? "", {
+    const supabaseAuth = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
       auth: { persistSession: false },
       global: { headers: { Authorization: `Bearer ${token}` } },
     });
