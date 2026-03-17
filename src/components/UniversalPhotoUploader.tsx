@@ -217,7 +217,7 @@ const UniversalPhotoUploader = ({
       }
 
       if (skipped > 0) {
-        toast.info(`${skipped} duplicate photo${skipped > 1 ? "s were" : " was"} skipped — we only kept the unique ones`);
+        toast.info(`${skipped} duplicate photo${skipped > 1 ? "s were" : " was"} skipped. We only kept the unique ones`);
       }
 
       sessionFingerprintsRef.current = newFingerprints;
