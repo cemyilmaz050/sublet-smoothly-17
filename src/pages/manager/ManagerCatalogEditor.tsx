@@ -150,30 +150,6 @@ const ManagerCatalogEditor = () => {
     load();
   }, [propertyId, isNew, navigate]);
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
-    setUploadingPhotos(true);
-    const newUrls = [...form.photos];
-    const uploadId = propertyId === "new" ? crypto.randomUUID() : propertyId;
-
-    for (const file of Array.from(files)) {
-      const ext = file.name.split(".").pop();
-      const path = `catalog/${uploadId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("listing-photos").upload(path, file);
-      if (error) {
-        console.error("Upload error:", error);
-        continue;
-      }
-      const { data: urlData } = supabase.storage.from("listing-photos").getPublicUrl(path);
-      newUrls.push(urlData.publicUrl);
-    }
-
-    setForm((prev) => ({ ...prev, photos: newUrls }));
-    setUploadingPhotos(false);
-    toast.success(`${files.length} photo${files.length > 1 ? "s" : ""} uploaded`);
-  };
-
   const handleImportUrl = () => {
     if (!importUrl.trim()) return;
     const url = importUrl.trim();
@@ -184,10 +160,6 @@ const ManagerCatalogEditor = () => {
     setForm((prev) => ({ ...prev, photos: [...prev.photos, url] }));
     setImportUrl("");
     toast.success("Photo URL added");
-  };
-
-  const removePhoto = (idx: number) => {
-    setForm((prev) => ({ ...prev, photos: prev.photos.filter((_, i) => i !== idx) }));
   };
 
   const toggleAmenity = (amenity: string) => {
