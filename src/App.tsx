@@ -52,6 +52,8 @@ import ManagerNotifications from "./pages/manager/ManagerNotifications";
 import ManagerBackgroundChecks from "./pages/manager/ManagerBackgroundChecks";
 import ManagerPayments from "./pages/manager/ManagerPayments";
 import ManagerSettings from "./pages/manager/ManagerSettings";
+import ManagerDocuments from "./pages/manager/ManagerDocuments";
+import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
 
 const queryClient = new QueryClient();
 
@@ -121,6 +123,7 @@ const App = () => (
                   <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
                   <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
                   <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
+                  <Route path="/documents/bbg" element={<ProtectedRoute><BBGDocumentFillingPage /></ProtectedRoute>} />
 
                   {/* Founder Admin — secret URL, email-gated, PIN-protected */}
                   <Route path="/admin-subin-2026" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
@@ -138,6 +141,7 @@ const App = () => (
                     <Route path="notifications" element={<ManagerNotifications />} />
                     <Route path="checks" element={<ManagerBackgroundChecks />} />
                     <Route path="payments" element={<ManagerPayments />} />
+                    <Route path="documents" element={<ManagerDocuments />} />
                     <Route path="settings" element={<ManagerSettings />} />
                   </Route>
 
