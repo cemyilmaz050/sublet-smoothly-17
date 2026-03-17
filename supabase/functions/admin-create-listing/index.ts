@@ -35,6 +35,7 @@ serve(async (req) => {
       });
     }
 
+    const adminUserId = authData.user.id;
     const body = await req.json();
     const { action } = body;
 
@@ -85,7 +86,6 @@ serve(async (req) => {
         email: u.email,
       }));
 
-      // Get profiles
       const ids = users.map((u: any) => u.id);
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
@@ -184,6 +184,176 @@ serve(async (req) => {
       });
     }
 
+    // Action: create pending listing for non-signedup user
+    if (action === "create_pending_listing") {
+      const { pending_email, listing } = body;
+      if (!pending_email || !listing) {
+        return new Response(JSON.stringify({ error: "pending_email and listing data required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(pending_email)) {
+        return new Response(JSON.stringify({ error: "Invalid email format" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Check if user already exists — if so, redirect to normal flow
+      const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+      const existingUser = usersData?.users?.find(
+        (u: any) => u.email?.toLowerCase() === pending_email.toLowerCase()
+      );
+      if (existingUser) {
+        return new Response(JSON.stringify({ 
+          error: "This email already has an account. Use the normal listing creation flow instead.",
+          existing_user: true
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Create listing with admin as temporary tenant_id (will be reassigned on signup)
+      const payload = {
+        tenant_id: adminUserId,
+        pending_email: pending_email.toLowerCase(),
+        address: listing.address || null,
+        unit_number: listing.unit_number || null,
+        property_type: listing.property_type || null,
+        bedrooms: listing.bedrooms != null ? Number(listing.bedrooms) : null,
+        bathrooms: listing.bathrooms != null ? Number(listing.bathrooms) : null,
+        sqft: listing.sqft != null ? Number(listing.sqft) : null,
+        headline: listing.headline || null,
+        description: listing.description || null,
+        monthly_rent: listing.monthly_rent != null ? Number(listing.monthly_rent) : null,
+        security_deposit: listing.security_deposit != null ? Number(listing.security_deposit) : null,
+        available_from: listing.available_from || null,
+        available_until: listing.available_until || null,
+        min_duration: listing.min_duration || 1,
+        amenities: listing.amenities || [],
+        house_rules: listing.house_rules || null,
+        guest_policy: listing.guest_policy || null,
+        photos: listing.photos || [],
+        status: "draft",
+        source: "admin",
+      };
+
+      const { data: newListing, error: insertError } = await supabaseAdmin
+        .from("listings")
+        .insert(payload)
+        .select("id")
+        .single();
+
+      if (insertError) throw insertError;
+
+      // Send activation email via the email queue
+      const siteUrl = "https://sublet-smoothly-17.lovable.app";
+      const signupUrl = `${siteUrl}/signup?email=${encodeURIComponent(pending_email)}`;
+      const photoUrl = listing.photos?.[0] || null;
+      
+      try {
+        await supabaseAdmin.rpc("enqueue_email", {
+          queue_name: "transactional_emails",
+          payload: {
+            to: pending_email,
+            from_name: "SubIn",
+            from_email: "hello@subinapp.com",
+            subject: "Your SubIn listing is ready — activate your account",
+            html: buildActivationEmailHtml({
+              address: listing.address || "Your property",
+              available_from: listing.available_from || "",
+              available_until: listing.available_until || "",
+              monthly_rent: listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}` : "",
+              photo_url: photoUrl,
+              signup_url: signupUrl,
+            }),
+          },
+        });
+      } catch (emailErr) {
+        console.error("Failed to enqueue activation email:", emailErr);
+        // Don't fail the listing creation if email fails
+      }
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        listing_id: newListing.id,
+        pending: true,
+        email: pending_email,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Action: list pending listings
+    if (action === "list_pending") {
+      const { data: pendingListings, error: pendingErr } = await supabaseAdmin
+        .from("listings")
+        .select("id, address, unit_number, pending_email, created_at, monthly_rent, photos, status")
+        .not("pending_email", "is", null)
+        .order("created_at", { ascending: false });
+
+      if (pendingErr) throw pendingErr;
+
+      return new Response(JSON.stringify({ listings: pendingListings || [] }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Action: resend activation email for a pending listing
+    if (action === "resend_activation") {
+      const { listing_id } = body;
+      if (!listing_id) {
+        return new Response(JSON.stringify({ error: "listing_id required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: listing, error: fetchErr } = await supabaseAdmin
+        .from("listings")
+        .select("*")
+        .eq("id", listing_id)
+        .not("pending_email", "is", null)
+        .single();
+
+      if (fetchErr || !listing) {
+        return new Response(JSON.stringify({ error: "Pending listing not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const siteUrl = "https://sublet-smoothly-17.lovable.app";
+      const signupUrl = `${siteUrl}/signup?email=${encodeURIComponent(listing.pending_email)}`;
+
+      await supabaseAdmin.rpc("enqueue_email", {
+        queue_name: "transactional_emails",
+        payload: {
+          to: listing.pending_email,
+          from_name: "SubIn",
+          from_email: "hello@subinapp.com",
+          subject: "Your SubIn listing is ready — activate your account",
+          html: buildActivationEmailHtml({
+            address: listing.address || "Your property",
+            available_from: listing.available_from || "",
+            available_until: listing.available_until || "",
+            monthly_rent: listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}` : "",
+            photo_url: listing.photos?.[0] || null,
+            signup_url: signupUrl,
+          }),
+        },
+      });
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Action: duplicate listing
     if (action === "duplicate_listing") {
       const { listing_id, overrides } = body;
@@ -207,7 +377,7 @@ serve(async (req) => {
         });
       }
 
-      const { id, created_at, updated_at, published_at, view_count, save_count, knock_count, ...rest } = original;
+      const { id, created_at, updated_at, published_at, view_count, save_count, knock_count, pending_email, ...rest } = original;
       const duplicatePayload = {
         ...rest,
         ...overrides,
@@ -283,7 +453,6 @@ serve(async (req) => {
         }
       }
 
-      // Notify user
       const successCount = results.filter(r => r.success).length;
       if (successCount > 0) {
         await supabaseAdmin.from("notifications").insert({
@@ -312,3 +481,64 @@ serve(async (req) => {
     });
   }
 });
+
+// Build branded activation email HTML
+function buildActivationEmailHtml(data: {
+  address: string;
+  available_from: string;
+  available_until: string;
+  monthly_rent: string;
+  photo_url: string | null;
+  signup_url: string;
+}): string {
+  const photoBlock = data.photo_url
+    ? `<img src="${data.photo_url}" alt="Property" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:16px;" />`
+    : "";
+  
+  const dateRange = data.available_from && data.available_until
+    ? `${data.available_from} — ${data.available_until}`
+    : data.available_from || "Flexible";
+
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:'DM Sans',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+<tr><td align="center">
+<table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+  <tr><td style="background:#4f46e5;padding:28px 32px;text-align:center;">
+    <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">SubIn</h1>
+  </td></tr>
+  <tr><td style="padding:32px;">
+    ${photoBlock}
+    <h2 style="margin:0 0 8px;color:#18181b;font-size:18px;font-weight:600;">Your listing is ready</h2>
+    <p style="margin:0 0 20px;color:#71717a;font-size:14px;line-height:1.5;">
+      A SubIn listing has been set up for your property. Create your account to manage it.
+    </p>
+    <table style="width:100%;border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;margin-bottom:24px;" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:12px 16px;border-bottom:1px solid #e4e4e7;">
+        <span style="color:#71717a;font-size:12px;">Address</span><br/>
+        <span style="color:#18181b;font-size:14px;font-weight:500;">${data.address}</span>
+      </td></tr>
+      ${data.monthly_rent ? `<tr><td style="padding:12px 16px;border-bottom:1px solid #e4e4e7;">
+        <span style="color:#71717a;font-size:12px;">Monthly Rent</span><br/>
+        <span style="color:#4f46e5;font-size:16px;font-weight:700;">${data.monthly_rent}/mo</span>
+      </td></tr>` : ""}
+      <tr><td style="padding:12px 16px;">
+        <span style="color:#71717a;font-size:12px;">Dates</span><br/>
+        <span style="color:#18181b;font-size:14px;font-weight:500;">${dateRange}</span>
+      </td></tr>
+    </table>
+    <a href="${data.signup_url}" style="display:block;background:#4f46e5;color:#ffffff;text-align:center;padding:14px 24px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;">
+      Activate my account and view my listing
+    </a>
+    <p style="margin:20px 0 0;color:#a1a1aa;font-size:12px;text-align:center;">
+      Questions? Reply to this email or reach out at hello@subinapp.com
+    </p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+}
