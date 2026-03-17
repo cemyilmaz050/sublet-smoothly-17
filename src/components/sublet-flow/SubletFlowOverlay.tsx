@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import confetti from "canvas-confetti";
 import CompletedStepBar from "./CompletedStepBar";
 import CalendarRangePicker from "./CalendarRangePicker";
-import PhotoUploader from "./PhotoUploader";
+import UniversalPhotoUploader from "@/components/UniversalPhotoUploader";
 import { SubletFlowData, defaultFlowData, AMENITIES_OPTIONS } from "./types";
 
 interface SubletFlowOverlayProps {

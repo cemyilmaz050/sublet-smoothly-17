@@ -467,42 +467,15 @@ const ManagerCatalogEditor = () => {
       <Card className="shadow-card">
         <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-            {form.photos.map((url, i) => (
-              <div key={i} className="relative group aspect-square rounded-lg overflow-hidden bg-accent">
-                <img src={url} alt="" className="h-full w-full object-cover" />
-                {i === 0 && (
-                  <Badge className="absolute left-1.5 top-1.5 text-[10px]">Cover</Badge>
-                )}
-                <button
-                  onClick={() => removePhoto(i)}
-                  className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-            {form.photos.length < 20 && (
-              <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                {uploadingPhotos ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <>
-                    <Upload className="h-5 w-5" />
-                    <span className="text-[10px]">Upload</span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handlePhotoUpload}
-                  disabled={uploadingPhotos}
-                />
-              </label>
-            )}
-          </div>
+          <UniversalPhotoUploader
+            photoUrls={form.photos}
+            onPhotoUrlsChange={(urls) => setForm((prev) => ({ ...prev, photos: urls }))}
+            bucket="listing-photos"
+            storagePath={`catalog/${propertyId === "new" ? "new" : propertyId}`}
+            maxPhotos={20}
+            minPhotos={0}
+            showCoverBadge
+          />
 
           {/* Import from URL */}
           <div className="flex gap-2">
