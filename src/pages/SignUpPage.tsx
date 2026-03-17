@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Home, Search, Mail, ArrowRight, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, GraduationCap, Building2 } from "lucide-react";
 
-import Footer from "@/components/Footer";
 import { cn } from "@/lib/utils";
 import { useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
