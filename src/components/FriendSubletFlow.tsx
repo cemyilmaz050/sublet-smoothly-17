@@ -215,7 +215,7 @@ const FriendSubletFlow = ({ open, onClose }: FriendSubletFlowProps) => {
                       </div>
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">Who's taking over your place?</h1>
-                    <p className="text-muted-foreground">We'll send them a link — they can confirm in under 3 minutes</p>
+                    <p className="text-muted-foreground">We'll send them a link. They can confirm in under 3 minutes</p>
                   </div>
                   <div className="space-y-4">
                     <div className="space-y-2">
