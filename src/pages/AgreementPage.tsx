@@ -350,7 +350,6 @@ const AgreementPage = () => {
           </div>
         )}
       </div>
-      <Footer />
     </div>
   );
 };

@@ -72,7 +72,6 @@ const TermsPage = () => {
           </section>
         </div>
       </div>
-      <Footer />
     </div>
   );
 };

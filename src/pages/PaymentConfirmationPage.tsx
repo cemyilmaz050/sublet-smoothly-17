@@ -167,7 +167,6 @@ const PaymentConfirmationPage = () => {
           </>
         )}
       </div>
-      <Footer />
     </div>
   );
 };

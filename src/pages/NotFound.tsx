@@ -29,7 +29,6 @@ const NotFound = () => {
           </Button>
         </Link>
       </div>
-      <Footer />
     </div>
   );
 };
