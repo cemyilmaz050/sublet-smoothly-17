@@ -172,7 +172,7 @@ const FriendSubletFlow = ({ open, onClose }: FriendSubletFlowProps) => {
           </p>
           <div className="w-full rounded-xl border bg-muted/30 p-4 text-left space-y-1">
             <p className="text-xs font-medium text-muted-foreground">What happens next</p>
-            <p className="text-sm text-foreground">Your friend signs in with Google, confirms the details, and pays the deposit — all from one page.</p>
+            <p className="text-sm text-foreground">Your friend signs in with Google, confirms the details, and pays the deposit, all from one page.</p>
           </div>
           <div className="flex flex-col gap-2 mt-4 w-full">
             <Button onClick={handleClose}>Done</Button>
