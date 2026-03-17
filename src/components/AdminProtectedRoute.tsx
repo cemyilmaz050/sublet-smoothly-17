@@ -85,11 +85,11 @@ const AdminProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Layer 1: Must be logged in
   if (!user) {
-    return <Navigate to="/listings" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Layer 2: Email whitelist — silent redirect, no indication admin exists
-  if (user.email?.toLowerCase() !== FOUNDER_EMAIL.toLowerCase()) {
+  if (user.email?.trim().toLowerCase() !== FOUNDER_EMAIL.toLowerCase()) {
     return <Navigate to="/listings" replace />;
   }
 
