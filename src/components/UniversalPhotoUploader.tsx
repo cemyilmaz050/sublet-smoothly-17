@@ -301,7 +301,7 @@ const UniversalPhotoUploader = ({
       return;
     }
     onPhotoUrlsChange(unique);
-    toast.success(`Removed ${dupeCount} duplicate photo${dupeCount > 1 ? "s" : ""} — your listing now has ${unique.length} unique photos`);
+    toast.success(`Removed ${dupeCount} duplicate photo${dupeCount > 1 ? "s" : ""}. Your listing now has ${unique.length} unique photos`);
   };
 
   const dismissSimilar = (index: number) => {
