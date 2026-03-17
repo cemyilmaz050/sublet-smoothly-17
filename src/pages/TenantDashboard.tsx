@@ -227,7 +227,7 @@ const TenantDashboard = () => {
               <p className="mt-1 text-sm text-muted-foreground">
                 List it in 3 minutes and find the perfect guest
               </p>
-              <Button className="mt-5" onClick={() => setShowSublet(true)}>
+              <Button className="mt-5" onClick={() => setShowPreScreen(true)}>
                 Sublet Your Apartment
               </Button>
             </div>
