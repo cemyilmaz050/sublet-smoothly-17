@@ -305,7 +305,110 @@ const AdminDashboard = () => {
   );
 };
 
-const ManualVerifyTool = () => {
+const PendingListingsSection = () => {
+  const [listings, setListings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [resending, setResending] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPending();
+  }, []);
+
+  const fetchPending = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-create-listing", {
+        body: { action: "list_pending" },
+      });
+      if (error) throw error;
+      setListings(data?.listings || []);
+    } catch (err: any) {
+      console.error("Failed to fetch pending listings:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async (listingId: string) => {
+    setResending(listingId);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-create-listing", {
+        body: { action: "resend_activation", listing_id: listingId },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Activation email resent!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to resend");
+    } finally {
+      setResending(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className="shadow-card">
+        <CardContent className="py-8 text-center">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="shadow-card">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Clock className="h-4 w-4 text-amber" />
+            Pending Listings ({listings.length})
+          </CardTitle>
+          <Button variant="ghost" size="sm" onClick={fetchPending}>
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {listings.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">No pending listings — all users have signed up</p>
+        ) : (
+          <div className="space-y-2">
+            {listings.map((l: any) => (
+              <div key={l.id} className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                    <p className="text-sm font-medium text-foreground truncate">{l.pending_email}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {l.address || "No address"} · Created {format(new Date(l.created_at), "MMM d, yyyy")}
+                    {l.monthly_rent ? ` · $${Number(l.monthly_rent).toLocaleString()}/mo` : ""}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <Badge variant="outline" className="text-xs text-amber-600 border-amber-300 bg-amber-50">
+                    Waiting for signup
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleResend(l.id)}
+                    disabled={resending === l.id}
+                    className="text-xs"
+                  >
+                    {resending === l.id ? <RefreshCw className="h-3 w-3 animate-spin" /> : "Resend"}
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
