@@ -472,7 +472,7 @@ const AdminCreateListing = () => {
                       <div className="flex items-center justify-between rounded-lg border p-3 bg-muted/50">
                         <div>
                           <p className="text-sm font-medium text-foreground">This person has not signed up yet</p>
-                          <p className="text-xs text-muted-foreground">Create a listing linked to their email — it will appear when they sign up</p>
+                          <p className="text-xs text-muted-foreground">Create a listing linked to their email. It will appear when they sign up</p>
                         </div>
                         <Switch
                           checked={isPendingUser}
