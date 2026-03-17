@@ -532,7 +532,7 @@ const AdminCreateListing = () => {
                             <Button size="sm" disabled={!newUserEmail.trim()} onClick={async () => {
                               const u = await lookupUser(newUserEmail);
                               if (u) { setSelectedUser(u); setCreateNewUser(false); }
-                              else toast.info("User not found — they'll need to sign up first, or look up an existing user.");
+                              else toast.info("User not found. They'll need to sign up first, or look up an existing user.");
                             }}>
                               Find / Create
                             </Button>
