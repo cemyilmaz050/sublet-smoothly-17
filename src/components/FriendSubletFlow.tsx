@@ -257,10 +257,10 @@ const FriendSubletFlow = ({ open, onClose }: FriendSubletFlowProps) => {
                       <Label>Add a photo (optional but recommended)</Label>
                       <UniversalPhotoUploader
                         maxPhotos={5}
-                        existingUrls={photoUrls}
-                        onPhotosChange={setPhotoUrls}
-                        bucketName="listing-photos"
-                        folderPath={`friend-sublet/${user?.id || "anon"}`}
+                        photoUrls={photoUrls}
+                        onPhotoUrlsChange={setPhotoUrls}
+                        bucket="listing-photos"
+                        storagePath={`friend-sublet/${user?.id || "anon"}`}
                       />
                     </div>
                   </div>
