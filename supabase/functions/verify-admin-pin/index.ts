@@ -16,7 +16,15 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = authHeader.replace("Bearer ", "").trim();
+    if (!token) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -25,14 +33,12 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser(token);
 
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -58,7 +64,7 @@ Deno.serve(async (req) => {
     }
 
     // Layer 2: PIN verification via SHA-256 hash comparison
-    const expectedHash = Deno.env.get("ADMIN_PIN_HASH");
+    const expectedHash = Deno.env.get("ADMIN_PIN_HASH")?.trim().toLowerCase();
     if (!expectedHash) {
       return new Response(JSON.stringify({ error: "Server misconfigured" }), {
         status: 500,
@@ -66,14 +72,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    const normalizedPin = pin.trim();
     const encoder = new TextEncoder();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(pin));
+    const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(normalizedPin));
     const hashHex = Array.from(new Uint8Array(hashBuffer))
       .map((b) => b.toString(16).padStart(2, "0"))
       .join("");
 
-
-    if (hashHex !== expectedHash.toLowerCase()) {
+    if (hashHex !== expectedHash) {
       return new Response(JSON.stringify({ error: "Invalid PIN" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
