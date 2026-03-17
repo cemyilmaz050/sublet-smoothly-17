@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AMENITIES_LIST, PROPERTY_TYPES, GUEST_POLICIES } from "@/types/listing";
+import UniversalPhotoUploader from "@/components/UniversalPhotoUploader";
 
 interface SelectedUser {
   id: string;
