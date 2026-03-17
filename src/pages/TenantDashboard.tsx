@@ -360,6 +360,13 @@ const TenantDashboard = () => {
         </section>
       </main>
 
+      {showPreScreen && (
+        <FriendSubletPreScreen
+          onFriend={() => { setShowPreScreen(false); setShowFriendFlow(true); }}
+          onMarketplace={() => { setShowPreScreen(false); setShowSublet(true); }}
+        />
+      )}
+      <FriendSubletFlow open={showFriendFlow} onClose={() => setShowFriendFlow(false)} />
       <SubletFlowOverlay open={showSublet} onClose={() => setShowSublet(false)} />
 
       {/* Delete Confirmation Dialog */}
