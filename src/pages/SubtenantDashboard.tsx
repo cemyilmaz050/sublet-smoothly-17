@@ -41,6 +41,7 @@ interface KnockedListing {
   created_at: string;
   listing_headline: string | null;
   listing_address: string | null;
+  management_group_id: string | null;
 }
 
 const SubtenantDashboard = () => {
