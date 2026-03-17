@@ -374,6 +374,7 @@ const AdminCreateListing = () => {
   const resetForm = () => {
     setForm(emptyForm); setSelectedUser(null); setUserSearch(""); setUserResults([]);
     setSavedId(null); setScrapeUrl(""); setStep(1); setCreateNewUser(false);
+    setIsPendingUser(false); setPendingEmail(""); setSavedPending(false);
   };
 
   const addLandmark = () => {
