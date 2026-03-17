@@ -79,7 +79,7 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
         </div>
         {data.management_type === "bbg" && (
           <p className="mt-2 text-xs text-muted-foreground">
-            Your listing will be reviewed by Boston Brokerage Group before going live — usually within 24 hours
+            Your listing will be reviewed by Boston Brokerage Group before going live, usually within 24 hours
           </p>
         )}
         {data.management_type === "self" && (
