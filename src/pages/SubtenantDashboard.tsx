@@ -93,6 +93,7 @@ const SubtenantDashboard = () => {
           ...k,
           listing_headline: listingMap[k.listing_id]?.headline || "Untitled",
           listing_address: listingMap[k.listing_id]?.address || "",
+          management_group_id: listingMap[k.listing_id]?.management_group_id || null,
         })));
       } else {
         setKnockedListings([]);
