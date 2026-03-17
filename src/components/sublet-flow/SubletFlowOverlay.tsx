@@ -352,7 +352,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated">
           {!mgmtSearch.trim() && (
             <div className="px-4 pt-3 pb-1">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested — Our verified partner</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-primary">Suggested · Our verified partner</span>
             </div>
           )}
 
