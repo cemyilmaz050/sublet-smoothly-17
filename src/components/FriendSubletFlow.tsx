@@ -304,8 +304,7 @@ const FriendSubletFlow = ({ open, onClose }: FriendSubletFlowProps) => {
                       <CalendarRangePicker
                         availableFrom={availableFrom}
                         availableUntil={availableUntil}
-                        onFromChange={setAvailableFrom}
-                        onUntilChange={setAvailableUntil}
+                        onSelect={(from, until) => { setAvailableFrom(from); setAvailableUntil(until); }}
                       />
                     </div>
                     <div className="space-y-2">
