@@ -412,7 +412,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">Good lighting, no glare</p>
-                <p className="text-xs text-muted-foreground">Natural light works best — avoid flash</p>
+                <p className="text-xs text-muted-foreground">Natural light works best. Avoid flash</p>
               </div>
             </div>
 
