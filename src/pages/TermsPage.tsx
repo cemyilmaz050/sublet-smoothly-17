@@ -1,6 +1,4 @@
 
-import Footer from "@/components/Footer";
-
 const TermsPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
