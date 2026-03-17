@@ -17,6 +17,8 @@ import { toast } from "sonner";
 
 
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
+import FriendSubletPreScreen from "@/components/FriendSubletPreScreen";
+import FriendSubletFlow from "@/components/FriendSubletFlow";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
 import KnocksSection from "@/components/tenant/KnocksSection";
@@ -57,6 +59,8 @@ const TenantDashboard = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [showSublet, setShowSublet] = useState(false);
+  const [showPreScreen, setShowPreScreen] = useState(false);
+  const [showFriendFlow, setShowFriendFlow] = useState(false);
   const [conversations, setConversations] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [idVerified, setIdVerified] = useState(false);
@@ -223,7 +227,7 @@ const TenantDashboard = () => {
               <p className="mt-1 text-sm text-muted-foreground">
                 List it in 3 minutes and find the perfect guest
               </p>
-              <Button className="mt-5" onClick={() => setShowSublet(true)}>
+              <Button className="mt-5" onClick={() => setShowPreScreen(true)}>
                 Sublet Your Apartment
               </Button>
             </div>
@@ -356,6 +360,13 @@ const TenantDashboard = () => {
         </section>
       </main>
 
+      {showPreScreen && (
+        <FriendSubletPreScreen
+          onFriend={() => { setShowPreScreen(false); setShowFriendFlow(true); }}
+          onMarketplace={() => { setShowPreScreen(false); setShowSublet(true); }}
+        />
+      )}
+      <FriendSubletFlow open={showFriendFlow} onClose={() => setShowFriendFlow(false)} />
       <SubletFlowOverlay open={showSublet} onClose={() => setShowSublet(false)} />
 
       {/* Delete Confirmation Dialog */}

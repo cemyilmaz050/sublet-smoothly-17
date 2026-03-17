@@ -35,6 +35,7 @@ import AgreementPage from "./pages/AgreementPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminCreateListing from "./pages/AdminCreateListing";
+import FriendSubletLanding from "./pages/FriendSubletLanding";
 import NotFound from "./pages/NotFound";
 import AIFinderPage from "./pages/AIFinderPage";
 
@@ -107,6 +108,7 @@ const App = () => (
                   <Route path="/managers/:slug" element={<ManagerProfilePage />} />
                   <Route path="/refer" element={<ReferPage />} />
                   <Route path="/find" element={<AIFinderPage />} />
+                  <Route path="/invite/friend" element={<FriendSubletLanding />} />
 
                   {/* Protected routes */}
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
