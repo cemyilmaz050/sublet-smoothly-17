@@ -555,6 +555,18 @@ const ListingsPage = () => {
                 )}
                 <ReviewSection listingId={selectedListing.id} tenantId={selectedListing.tenant_id} />
 
+                {selectedListing.management_group_id && !isOwnListing(selectedListing) && (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    variant="outline"
+                    onClick={() => navigate(`/documents/bbg?listing_id=${selectedListing.id}`)}
+                  >
+                    <Pencil className="mr-1 h-4 w-4" />
+                    Complete BBG Documents
+                  </Button>
+                )}
+
                 <div className="space-y-3 pt-2">
                   {!isOwnListing(selectedListing) && (
                     <SecureThisPlace listing={selectedListing} />
