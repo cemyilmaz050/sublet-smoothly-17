@@ -940,7 +940,7 @@ const AdminCreateListing = () => {
                         <div className="flex justify-between border-b pb-2">
                           <span className="text-muted-foreground">Dates</span>
                           <span className="font-medium">
-                            {form.instant_available ? "Available now" : `${form.available_from || "—"} → ${form.available_until || "—"}`}
+                            {form.instant_available ? "Available now" : `${form.available_from || "-"} → ${form.available_until || "-"}`}
                           </span>
                         </div>
                         <div className="flex justify-between border-b pb-2">
