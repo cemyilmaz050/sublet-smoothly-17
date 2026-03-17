@@ -81,7 +81,7 @@ const ManagerHome = () => {
         <img src={bbgLogo} alt="Boston Brokerage Group" className="h-14 w-14 rounded-xl object-contain border bg-card p-1" />
         <div>
           <h1 className="text-2xl font-bold text-foreground">Boston Brokerage Group</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Staff Dashboard — Property Management Portal</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Staff Dashboard · Property Management Portal</p>
         </div>
       </div>
 

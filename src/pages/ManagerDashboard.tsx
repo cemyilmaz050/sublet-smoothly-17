@@ -73,8 +73,8 @@ const ManagerDashboard = () => {
   ];
 
   const pendingActions = [
-    { label: "Review sublet request — Apt 4B", link: "/dashboard/manager/requests", urgent: true },
-    { label: "Co-approve applicant — Unit 2C", link: "/dashboard/manager/applicants", urgent: true },
+    { label: "Review sublet request: Apt 4B", link: "/dashboard/manager/requests", urgent: true },
+    { label: "Co-approve applicant: Unit 2C", link: "/dashboard/manager/applicants", urgent: true },
     { label: "Review uploaded documents (3)", link: "/dashboard/manager/requests", urgent: false },
   ];
 

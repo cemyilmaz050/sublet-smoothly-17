@@ -177,9 +177,9 @@ const ManagerPropertiesPage = () => {
                           <p className="text-sm text-muted-foreground">{listing.address}</p>
                         </div>
                       </TableCell>
-                      <TableCell className="capitalize">{listing.property_type || "—"}</TableCell>
+                      <TableCell className="capitalize">{listing.property_type || "-"}</TableCell>
                       <TableCell>{listing.bedrooms || 0} / {listing.bathrooms || 0}</TableCell>
-                      <TableCell>{listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}` : "—"}</TableCell>
+                      <TableCell>{listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}` : "-"}</TableCell>
                       <TableCell>
                         <Badge variant={statusVariant(listing.status) as any}>
                           {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}

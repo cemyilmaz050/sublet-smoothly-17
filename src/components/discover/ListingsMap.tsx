@@ -384,7 +384,7 @@ export default function ListingsMap({ listings, hoveredId, onSelect, selectedId 
                 </div>
 
                 <p className="text-2xl font-bold" style={{ color: "#4845D2" }}>
-                  ${bottomSheetListing.monthly_rent?.toLocaleString() ?? "—"}
+                  ${bottomSheetListing.monthly_rent?.toLocaleString() ?? "-"}
                   <span className="text-sm font-normal text-muted-foreground">/mo</span>
                 </p>
 
