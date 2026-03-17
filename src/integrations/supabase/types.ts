@@ -1466,6 +1466,34 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_invite_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          accepted_at: string | null
+          address: string | null
+          available_from: string | null
+          available_until: string | null
+          created_at: string
+          deposit_amount: number | null
+          friend_email: string
+          friend_name: string | null
+          friend_user_id: string | null
+          id: string
+          inviter_id: string
+          listing_id: string | null
+          monthly_rent: number | null
+          photo_url: string | null
+          status: string
+          token: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "friend_sublet_invites"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       is_bbg_staff: { Args: { _user_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
