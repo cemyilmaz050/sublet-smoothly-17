@@ -294,7 +294,7 @@ const ManagerApplications = () => {
                       <p className="text-sm text-muted-foreground truncate mt-0.5">{app.listing_headline || app.listing_address || "Listing"}</p>
                       <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                         <Calendar className="h-3 w-3" />
-                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "—"}
+                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "-"}
                       </div>
                       {app.message && <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>}
                       {/* Renter verification badge */}
