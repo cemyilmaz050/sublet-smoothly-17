@@ -99,7 +99,7 @@ const CreateListingPage = () => {
       if (form.bedrooms === "") e.bedrooms = "Required";
       if (form.bathrooms === "") e.bathrooms = "Required";
     } else if (s === 1) {
-      const totalPhotos = form.photoUrls.length + form.photos.length;
+      const totalPhotos = form.photoUrls.length;
       if (totalPhotos < 3) e.photos = `At least 3 photos required (${totalPhotos} uploaded)`;
       if (!form.headline.trim()) e.headline = "Headline is required";
       if (!form.description.trim()) e.description = "Description is required";
@@ -117,18 +117,8 @@ const CreateListingPage = () => {
     return Object.keys(e).length === 0;
   };
 
-  const uploadPhotos = async (listingId: string): Promise<string[]> => {
-    const urls: string[] = [...form.photoUrls];
-    for (const file of form.photos) {
-      const ext = file.name.split(".").pop();
-      const path = `${listingId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("listing-photos").upload(path, file);
-      if (error) { console.error("Upload error:", error); continue; }
-      const { data: urlData } = supabase.storage.from("listing-photos").getPublicUrl(path);
-      urls.push(urlData.publicUrl);
-    }
-    return urls;
-  };
+  // Photos are now uploaded directly via UniversalPhotoUploader
+  const getPhotoUrls = (): string[] => form.photoUrls;
 
   const saveDraft = async () => {
     if (!user) return;
@@ -156,17 +146,14 @@ const CreateListingPage = () => {
     };
 
     if (draftId) {
-      let photos = form.photoUrls;
-      if (form.photos.length > 0) photos = await uploadPhotos(draftId);
+      const photos = getPhotoUrls();
       await supabase.from("listings").update({ ...payload, photos }).eq("id", draftId);
     } else {
       const { data } = await supabase.from("listings").insert(payload).select("id").single();
       if (data) {
         setDraftId(data.id);
-        if (form.photos.length > 0) {
-          const photos = await uploadPhotos(data.id);
-          await supabase.from("listings").update({ photos }).eq("id", data.id);
-        }
+        const photos = getPhotoUrls();
+        await supabase.from("listings").update({ photos }).eq("id", data.id);
       }
     }
   };
@@ -185,8 +172,7 @@ const CreateListingPage = () => {
     setLoading(true);
     try {
       const id = draftId || crypto.randomUUID();
-      let photos = form.photoUrls;
-      if (form.photos.length > 0) photos = await uploadPhotos(id);
+      const photos = getPhotoUrls();
 
       const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
       const BBG_MANAGER_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";

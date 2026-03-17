@@ -11,8 +11,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  ArrowLeft, Save, Loader2, X, Plus, Upload, MapPin, Link as LinkIcon,
+  ArrowLeft, Save, Loader2, X, Plus, MapPin, Link as LinkIcon,
 } from "lucide-react";
+import UniversalPhotoUploader from "@/components/UniversalPhotoUploader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -56,7 +57,6 @@ const ManagerCatalogEditor = () => {
   const [property, setProperty] = useState<any>(null);
   
   const [existingUnitId, setExistingUnitId] = useState<string | null>(null);
-  const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [importUrl, setImportUrl] = useState("");
 
   const [form, setForm] = useState({
@@ -150,30 +150,6 @@ const ManagerCatalogEditor = () => {
     load();
   }, [propertyId, isNew, navigate]);
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
-    setUploadingPhotos(true);
-    const newUrls = [...form.photos];
-    const uploadId = propertyId === "new" ? crypto.randomUUID() : propertyId;
-
-    for (const file of Array.from(files)) {
-      const ext = file.name.split(".").pop();
-      const path = `catalog/${uploadId}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("listing-photos").upload(path, file);
-      if (error) {
-        console.error("Upload error:", error);
-        continue;
-      }
-      const { data: urlData } = supabase.storage.from("listing-photos").getPublicUrl(path);
-      newUrls.push(urlData.publicUrl);
-    }
-
-    setForm((prev) => ({ ...prev, photos: newUrls }));
-    setUploadingPhotos(false);
-    toast.success(`${files.length} photo${files.length > 1 ? "s" : ""} uploaded`);
-  };
-
   const handleImportUrl = () => {
     if (!importUrl.trim()) return;
     const url = importUrl.trim();
@@ -184,10 +160,6 @@ const ManagerCatalogEditor = () => {
     setForm((prev) => ({ ...prev, photos: [...prev.photos, url] }));
     setImportUrl("");
     toast.success("Photo URL added");
-  };
-
-  const removePhoto = (idx: number) => {
-    setForm((prev) => ({ ...prev, photos: prev.photos.filter((_, i) => i !== idx) }));
   };
 
   const toggleAmenity = (amenity: string) => {
@@ -466,42 +438,15 @@ const ManagerCatalogEditor = () => {
       <Card className="shadow-card">
         <CardHeader><CardTitle className="text-lg">Photos</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-            {form.photos.map((url, i) => (
-              <div key={i} className="relative group aspect-square rounded-lg overflow-hidden bg-accent">
-                <img src={url} alt="" className="h-full w-full object-cover" />
-                {i === 0 && (
-                  <Badge className="absolute left-1.5 top-1.5 text-[10px]">Cover</Badge>
-                )}
-                <button
-                  onClick={() => removePhoto(i)}
-                  className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-            {form.photos.length < 20 && (
-              <label className="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-border text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors">
-                {uploadingPhotos ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <>
-                    <Upload className="h-5 w-5" />
-                    <span className="text-[10px]">Upload</span>
-                  </>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handlePhotoUpload}
-                  disabled={uploadingPhotos}
-                />
-              </label>
-            )}
-          </div>
+          <UniversalPhotoUploader
+            photoUrls={form.photos}
+            onPhotoUrlsChange={(urls) => setForm((prev) => ({ ...prev, photos: urls }))}
+            bucket="listing-photos"
+            storagePath={`catalog/${propertyId === "new" ? "new" : propertyId}`}
+            maxPhotos={20}
+            minPhotos={0}
+            showCoverBadge
+          />
 
           {/* Import from URL */}
           <div className="flex gap-2">

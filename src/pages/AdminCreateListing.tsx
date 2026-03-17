@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AMENITIES_LIST, PROPERTY_TYPES, GUEST_POLICIES } from "@/types/listing";
+import UniversalPhotoUploader from "@/components/UniversalPhotoUploader";
 
 interface SelectedUser {
   id: string;
@@ -602,24 +603,15 @@ const AdminCreateListing = () => {
                         </div>
                       </div>
 
-                      {form.photoUrls.length > 0 && (
-                        <div>
-                          <Label className="text-xs mb-2 block">Imported Photos ({form.photoUrls.length})</Label>
-                          <div className="grid grid-cols-4 gap-2">
-                            {form.photoUrls.map((url, i) => (
-                              <div key={i} className="relative group">
-                                <img src={url} alt="" className="w-full h-24 object-cover rounded-lg border" />
-                                <button
-                                  onClick={() => removePhoto(i)}
-                                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <X className="h-3 w-3" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      <UniversalPhotoUploader
+                        photoUrls={form.photoUrls}
+                        onPhotoUrlsChange={(urls) => updateForm({ photoUrls: urls })}
+                        bucket="listing-photos"
+                        storagePath={`admin/${selectedUser?.id || "temp"}`}
+                        maxPhotos={20}
+                        minPhotos={3}
+                        showCoverBadge
+                      />
 
                       <div>
                         <Label className="text-xs mb-1 block">Or add photo URLs manually</Label>
@@ -633,10 +625,6 @@ const AdminCreateListing = () => {
                           }}
                         />
                       </div>
-
-                      <p className={`text-xs ${form.photoUrls.length >= 3 ? "text-emerald" : "text-muted-foreground"}`}>
-                        {form.photoUrls.length}/3 minimum photos {form.photoUrls.length >= 3 ? "✓" : "required"}
-                      </p>
 
                       <div className="flex justify-between pt-2">
                         <Button variant="outline" onClick={() => setStep(2)}><ArrowLeft className="mr-1.5 h-4 w-4" /> Back</Button>
