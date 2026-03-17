@@ -195,7 +195,7 @@ const UniversalPhotoUploader = ({
       }
 
       if (remaining <= 0) {
-        toast.error(`You've reached the maximum of ${maxPhotos} photos — remove some before adding more`);
+        toast.error(`You've reached the maximum of ${maxPhotos} photos. Remove some before adding more`);
         return;
       }
 
