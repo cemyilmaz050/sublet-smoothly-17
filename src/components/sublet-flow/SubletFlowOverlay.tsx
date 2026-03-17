@@ -689,16 +689,19 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   );
 
   const renderPathBStep8 = () => {
-    const total = data.photos.length + data.photoUrls.length;
+    const total = data.photoUrls.length;
     return (
       <div ref={(el) => { stepRefs.current["own-photos"] = el; }} className="space-y-4">
         <h2 className="text-xl font-bold text-foreground">Add some photos of your place</h2>
         <p className="text-sm text-muted-foreground">Listings with great photos get significantly more interest. Add at least 3 photos.</p>
-        <PhotoUploader
-          photos={data.photos}
+        <UniversalPhotoUploader
           photoUrls={data.photoUrls}
-          onPhotosChange={(p) => update({ photos: p })}
           onPhotoUrlsChange={(u) => update({ photoUrls: u })}
+          bucket="listing-photos"
+          storagePath={`${user?.id || "anon"}/${crypto.randomUUID()}`}
+          maxPhotos={20}
+          minPhotos={3}
+          showCoverBadge
         />
         {total >= 3 && <Button variant="outline" size="sm" onClick={revealNext}>Continue</Button>}
       </div>
