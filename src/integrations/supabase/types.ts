@@ -102,6 +102,362 @@ export type Database = {
           },
         ]
       }
+      bbg_document_access_log: {
+        Row: {
+          accessed_by: string
+          action: string
+          created_at: string
+          document_id: string
+          document_type: string
+          id: string
+        }
+        Insert: {
+          accessed_by: string
+          action?: string
+          created_at?: string
+          document_id: string
+          document_type: string
+          id?: string
+        }
+        Update: {
+          accessed_by?: string
+          action?: string
+          created_at?: string
+          document_id?: string
+          document_type?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      bbg_document_packages: {
+        Row: {
+          applicant_id: string
+          application_id: string | null
+          created_at: string
+          guaranty_id: string | null
+          id: string
+          listing_id: string | null
+          manager_notes: string | null
+          overall_status: string
+          reminder_sent_at: string | null
+          sent_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          application_id?: string | null
+          created_at?: string
+          guaranty_id?: string | null
+          id?: string
+          listing_id?: string | null
+          manager_notes?: string | null
+          overall_status?: string
+          reminder_sent_at?: string | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          application_id?: string | null
+          created_at?: string
+          guaranty_id?: string | null
+          id?: string
+          listing_id?: string | null
+          manager_notes?: string | null
+          overall_status?: string
+          reminder_sent_at?: string | null
+          sent_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bbg_document_packages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "bbg_sublet_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bbg_document_packages_guaranty_id_fkey"
+            columns: ["guaranty_id"]
+            isOneToOne: false
+            referencedRelation: "bbg_guaranty_of_lease"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bbg_document_packages_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bbg_guaranty_of_lease: {
+        Row: {
+          agent_name: string | null
+          applicant_id: string
+          completed_at: string | null
+          created_at: string
+          guarantor_address: string | null
+          guarantor_annual_income: string | null
+          guarantor_dob: string | null
+          guarantor_email: string | null
+          guarantor_name: string | null
+          guarantor_phone: string | null
+          guarantor_signature_text: string | null
+          guarantor_ssn_encrypted: string | null
+          id: string
+          lessee_name: string | null
+          listing_id: string | null
+          notary_county: string | null
+          notary_date: string | null
+          notary_person_name: string | null
+          notary_state: string | null
+          premises_address: string | null
+          premises_city: string | null
+          premises_unit: string | null
+          signed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_name?: string | null
+          applicant_id: string
+          completed_at?: string | null
+          created_at?: string
+          guarantor_address?: string | null
+          guarantor_annual_income?: string | null
+          guarantor_dob?: string | null
+          guarantor_email?: string | null
+          guarantor_name?: string | null
+          guarantor_phone?: string | null
+          guarantor_signature_text?: string | null
+          guarantor_ssn_encrypted?: string | null
+          id?: string
+          lessee_name?: string | null
+          listing_id?: string | null
+          notary_county?: string | null
+          notary_date?: string | null
+          notary_person_name?: string | null
+          notary_state?: string | null
+          premises_address?: string | null
+          premises_city?: string | null
+          premises_unit?: string | null
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string | null
+          applicant_id?: string
+          completed_at?: string | null
+          created_at?: string
+          guarantor_address?: string | null
+          guarantor_annual_income?: string | null
+          guarantor_dob?: string | null
+          guarantor_email?: string | null
+          guarantor_name?: string | null
+          guarantor_phone?: string | null
+          guarantor_signature_text?: string | null
+          guarantor_ssn_encrypted?: string | null
+          id?: string
+          lessee_name?: string | null
+          listing_id?: string | null
+          notary_county?: string | null
+          notary_date?: string | null
+          notary_person_name?: string | null
+          notary_state?: string | null
+          premises_address?: string | null
+          premises_city?: string | null
+          premises_unit?: string | null
+          signed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bbg_guaranty_of_lease_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bbg_sublet_applications: {
+        Row: {
+          apartment_size: string | null
+          applicant_id: string
+          balance_due: number | null
+          co_tenant_names: string | null
+          completed_at: string | null
+          cosigner_address: string | null
+          cosigner_email: string | null
+          cosigner_name: string | null
+          cosigner_phone: string | null
+          created_at: string
+          current_address: string | null
+          current_city: string | null
+          current_landlord_name: string | null
+          current_landlord_phone: string | null
+          current_state: string | null
+          current_zip: string | null
+          dates_of_occupancy: string | null
+          email: string | null
+          employer: string | null
+          employer_contact: string | null
+          felony_details: string | null
+          first_month_rent: number | null
+          full_name: string | null
+          id: string
+          is_convicted_felon: boolean | null
+          last_month_rent: number | null
+          length_of_employment: string | null
+          listing_id: string | null
+          move_in_date: string | null
+          move_out_date: string | null
+          number_of_pets: number | null
+          occupation: string | null
+          phone: string | null
+          previous_address: string | null
+          previous_city: string | null
+          previous_state: string | null
+          previous_zip: string | null
+          prior_landlord_name: string | null
+          processing_fee: number | null
+          rental_address: string | null
+          rental_city: string | null
+          rental_unit: string | null
+          salary: string | null
+          security_deposit: number | null
+          signature_text: string | null
+          signed_at: string | null
+          ssn_encrypted: string | null
+          status: string
+          sublet_fee: number | null
+          term_months: number | null
+          total_tenants: number | null
+          updated_at: string
+        }
+        Insert: {
+          apartment_size?: string | null
+          applicant_id: string
+          balance_due?: number | null
+          co_tenant_names?: string | null
+          completed_at?: string | null
+          cosigner_address?: string | null
+          cosigner_email?: string | null
+          cosigner_name?: string | null
+          cosigner_phone?: string | null
+          created_at?: string
+          current_address?: string | null
+          current_city?: string | null
+          current_landlord_name?: string | null
+          current_landlord_phone?: string | null
+          current_state?: string | null
+          current_zip?: string | null
+          dates_of_occupancy?: string | null
+          email?: string | null
+          employer?: string | null
+          employer_contact?: string | null
+          felony_details?: string | null
+          first_month_rent?: number | null
+          full_name?: string | null
+          id?: string
+          is_convicted_felon?: boolean | null
+          last_month_rent?: number | null
+          length_of_employment?: string | null
+          listing_id?: string | null
+          move_in_date?: string | null
+          move_out_date?: string | null
+          number_of_pets?: number | null
+          occupation?: string | null
+          phone?: string | null
+          previous_address?: string | null
+          previous_city?: string | null
+          previous_state?: string | null
+          previous_zip?: string | null
+          prior_landlord_name?: string | null
+          processing_fee?: number | null
+          rental_address?: string | null
+          rental_city?: string | null
+          rental_unit?: string | null
+          salary?: string | null
+          security_deposit?: number | null
+          signature_text?: string | null
+          signed_at?: string | null
+          ssn_encrypted?: string | null
+          status?: string
+          sublet_fee?: number | null
+          term_months?: number | null
+          total_tenants?: number | null
+          updated_at?: string
+        }
+        Update: {
+          apartment_size?: string | null
+          applicant_id?: string
+          balance_due?: number | null
+          co_tenant_names?: string | null
+          completed_at?: string | null
+          cosigner_address?: string | null
+          cosigner_email?: string | null
+          cosigner_name?: string | null
+          cosigner_phone?: string | null
+          created_at?: string
+          current_address?: string | null
+          current_city?: string | null
+          current_landlord_name?: string | null
+          current_landlord_phone?: string | null
+          current_state?: string | null
+          current_zip?: string | null
+          dates_of_occupancy?: string | null
+          email?: string | null
+          employer?: string | null
+          employer_contact?: string | null
+          felony_details?: string | null
+          first_month_rent?: number | null
+          full_name?: string | null
+          id?: string
+          is_convicted_felon?: boolean | null
+          last_month_rent?: number | null
+          length_of_employment?: string | null
+          listing_id?: string | null
+          move_in_date?: string | null
+          move_out_date?: string | null
+          number_of_pets?: number | null
+          occupation?: string | null
+          phone?: string | null
+          previous_address?: string | null
+          previous_city?: string | null
+          previous_state?: string | null
+          previous_zip?: string | null
+          prior_landlord_name?: string | null
+          processing_fee?: number | null
+          rental_address?: string | null
+          rental_city?: string | null
+          rental_unit?: string | null
+          salary?: string | null
+          security_deposit?: number | null
+          signature_text?: string | null
+          signed_at?: string | null
+          ssn_encrypted?: string | null
+          status?: string
+          sublet_fee?: number | null
+          term_months?: number | null
+          total_tenants?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bbg_sublet_applications_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bookings: {
         Row: {
           created_at: string
