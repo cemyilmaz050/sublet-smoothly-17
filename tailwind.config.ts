@@ -134,6 +134,10 @@ export default {
           "50%": { transform: "scaleY(0.95) scaleX(1.05)" },
           "75%": { transform: "scaleY(1.08) scaleX(0.97)" },
         },
+        "fade-out": {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
