@@ -1,7 +1,6 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 
-import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
 import logo from "@/assets/subin-logo.png";
