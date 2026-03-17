@@ -237,10 +237,11 @@ const UniversalPhotoUploader = ({
         fingerprint: fileFingerprint(file),
       }));
 
+      flushedRef.current = false;
       setUploading((prev) => [...prev, ...newUploads]);
       newUploads.forEach((u) => uploadFile(u.file, u.id));
     },
-    [remaining, uploadFile, sessionFingerprints, maxPhotos]
+    [remaining, uploadFile, maxPhotos]
   );
 
   const handleDrop = useCallback(
