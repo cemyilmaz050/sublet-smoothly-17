@@ -34,6 +34,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import AgreementPage from "./pages/AgreementPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminCreateListing from "./pages/AdminCreateListing";
 import NotFound from "./pages/NotFound";
 import AIFinderPage from "./pages/AIFinderPage";
 
@@ -115,6 +116,7 @@ const App = () => (
                   <Route path="/agreement" element={<ProtectedRoute><AgreementPage /></ProtectedRoute>} />
                   <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
                   <Route path="/s-admin-console" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
+                  <Route path="/s-admin-console/create-listing" element={<AdminProtectedRoute><AdminCreateListing /></AdminProtectedRoute>} />
 
                   {/* Manager Dashboard — unified layout */}
                   <Route path="/portal-mgmt-bbg" element={<ManagerProtectedRoute><ManagerLayout /></ManagerProtectedRoute>}>

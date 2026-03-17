@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search, CheckCircle2 } from "lucide-react";
+import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search, CheckCircle2, Plus } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
@@ -148,9 +148,17 @@ const AdminDashboard = () => {
       
 
       <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Founder Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Platform metrics & insights</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Founder Dashboard</h1>
+            <p className="text-sm text-muted-foreground">Platform metrics & insights</p>
+          </div>
+          <Link to="/s-admin-console/create-listing">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create Listing for User
+            </Button>
+          </Link>
         </div>
 
         {/* Stat Cards */}
