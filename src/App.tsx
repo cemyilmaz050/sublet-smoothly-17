@@ -34,6 +34,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import AgreementPage from "./pages/AgreementPage";
 import PaymentConfirmationPage from "./pages/PaymentConfirmationPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminCreateListing from "./pages/AdminCreateListing";
 import NotFound from "./pages/NotFound";
 import AIFinderPage from "./pages/AIFinderPage";
 
