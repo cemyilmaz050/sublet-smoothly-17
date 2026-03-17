@@ -104,6 +104,11 @@ const AdminCreateListing = () => {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [newLandmark, setNewLandmark] = useState("");
 
+  // Pending (not signed up) user state
+  const [isPendingUser, setIsPendingUser] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [savedPending, setSavedPending] = useState(false);
+
   // New user creation
   const [createNewUser, setCreateNewUser] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
