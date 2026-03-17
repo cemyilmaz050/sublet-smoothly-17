@@ -290,7 +290,7 @@ const AdminDashboard = () => {
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <ShieldCheck className="h-4 w-4 text-emerald" />
-              Manual Verification (Test Mode)
+              Manual Verification
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -300,6 +300,9 @@ const AdminDashboard = () => {
             <ManualVerifyTool />
           </CardContent>
         </Card>
+
+        {/* Test Mode Toggle */}
+        <TestModeToggle />
       </main>
     </div>
   );
