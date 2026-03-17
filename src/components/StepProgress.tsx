@@ -18,7 +18,7 @@ const StepProgress = ({ steps, currentStep }: StepProgressProps) => {
     return (
       <div className="w-full px-4 py-3">
         <p className="text-center text-sm font-semibold text-foreground">
-          Step {currentStep + 1} of {steps.length} — {labels[currentStep]}
+          Step {currentStep + 1} of {steps.length}: {labels[currentStep]}
         </p>
         <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted">
           <div

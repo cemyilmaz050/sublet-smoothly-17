@@ -160,7 +160,7 @@ const LandingPage = () => {
             className="text-center"
           >
             <h2 className="text-3xl font-bold text-foreground">How it works</h2>
-            <p className="mt-3 text-muted-foreground">Three simple steps — takes about 3 minutes</p>
+            <p className="mt-3 text-muted-foreground">Three simple steps, takes about 3 minutes</p>
           </motion.div>
 
           <div className="mt-16 grid gap-8 md:grid-cols-3">

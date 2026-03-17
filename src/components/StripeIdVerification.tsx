@@ -449,7 +449,7 @@ const StripeIdVerification = ({ idVerified, onVerified }: StripeIdVerificationPr
           <div>
             <p className="text-sm font-semibold text-foreground">Verify Your Identity</p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Quick ID scan and selfie — takes under 60 seconds. You'll need a government-issued ID.
+              Quick ID scan and selfie. Takes under 60 seconds. You'll need a government-issued ID.
             </p>
           </div>
         </div>

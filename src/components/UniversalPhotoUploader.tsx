@@ -184,7 +184,7 @@ const UniversalPhotoUploader = ({
 
       for (const f of fileArr) {
         if (f.size > MAX_FILE_SIZE) {
-          toast.error(`"${f.name}" is too large — please use a photo under 10MB`);
+          toast.error(`"${f.name}" is too large. Please use a photo under 10MB`);
           continue;
         }
         if (!f.type.startsWith("image/") && !ACCEPTED_EXTENSIONS.test(f.name)) {
