@@ -290,7 +290,7 @@ const AuthModal = () => {
                   {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
                 </Button>
                 <Button variant="outline" className="h-12" onClick={() => { setEmailSent(false); setTab("login"); setLoginEmail(signupEmail); }}>
-                  I've verified — Log in
+                  I've verified - Log in
                 </Button>
               </div>
             </div>

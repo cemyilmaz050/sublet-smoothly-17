@@ -36,7 +36,7 @@ const VerificationPendingBanner = () => {
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
             </div>
             <span className="text-foreground font-medium">
-              Verification in progress — we'll notify you the moment it's confirmed
+              Verification in progress. We'll notify you the moment it's confirmed
             </span>
           </div>
           <div className="flex items-center gap-2">
