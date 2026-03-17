@@ -627,7 +627,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <span className="text-sm font-medium text-foreground">{label}</span>
       <div className="flex items-center gap-3">
         <button onClick={() => onChange(Math.max(min, (Number(value) || 0) - step))} className="flex h-8 w-8 items-center justify-center rounded-full border hover:bg-muted"><Minus className="h-4 w-4" /></button>
-        <span className="w-8 text-center text-sm font-semibold">{value === "" ? "—" : value}</span>
+        <span className="w-8 text-center text-sm font-semibold">{value === "" ? "-" : value}</span>
         <button onClick={() => onChange(Math.min(max, (Number(value) || 0) + step))} className="flex h-8 w-8 items-center justify-center rounded-full border hover:bg-muted"><Plus className="h-4 w-4" /></button>
       </div>
     </div>

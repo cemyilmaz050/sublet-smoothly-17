@@ -223,7 +223,7 @@ const AgreementPage = () => {
                 <div>
                   <p className="text-xs text-muted-foreground">Sublet Period</p>
                   <p className="text-sm font-medium text-foreground">
-                    {format(new Date(agreement.start_date), "MMM d, yyyy")} — {format(new Date(agreement.end_date), "MMM d, yyyy")}
+                    {format(new Date(agreement.start_date), "MMM d, yyyy")} to {format(new Date(agreement.end_date), "MMM d, yyyy")}
                   </p>
                 </div>
               </div>

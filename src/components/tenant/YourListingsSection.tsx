@@ -256,7 +256,7 @@ const YourListingsSection = ({ listings, loading, onOpenOnboarding, onRefresh }:
                     <div className="mt-2 space-y-1.5">
                       <div className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1.5">
                         <AlertTriangle className="h-3 w-3 text-destructive shrink-0" />
-                        <p className="text-[11px] text-destructive">Changes needed — check your notifications for details</p>
+                        <p className="text-[11px] text-destructive">Changes needed. Check your notifications for details</p>
                       </div>
                       <Button
                         size="sm"

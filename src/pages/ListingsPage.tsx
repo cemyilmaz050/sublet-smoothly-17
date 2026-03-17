@@ -522,10 +522,10 @@ const ListingsPage = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Monthly Rent", value: `$${selectedListing.monthly_rent?.toLocaleString() ?? "—"}`, sub: selectedListing.monthly_rent ? `~$${Math.round(selectedListing.monthly_rent / 4).toLocaleString()}/week` : undefined, primary: true },
-                    { label: "Bedrooms", value: selectedListing.bedrooms ?? "—" },
-                    { label: "Bathrooms", value: selectedListing.bathrooms ?? "—" },
-                    { label: "Sq. Ft.", value: selectedListing.sqft ?? "—" },
+                    { label: "Monthly Rent", value: `$${selectedListing.monthly_rent?.toLocaleString() ?? "-"}`, sub: selectedListing.monthly_rent ? `~$${Math.round(selectedListing.monthly_rent / 4).toLocaleString()}/week` : undefined, primary: true },
+                    { label: "Bedrooms", value: selectedListing.bedrooms ?? "-" },
+                    { label: "Bathrooms", value: selectedListing.bathrooms ?? "-" },
+                    { label: "Sq. Ft.", value: selectedListing.sqft ?? "-" },
                   ].map((item) => (
                     <div key={item.label} className="rounded-lg border p-3">
                       <p className="text-xs text-muted-foreground">{item.label}</p>

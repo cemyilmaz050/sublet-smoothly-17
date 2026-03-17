@@ -97,13 +97,13 @@ const ManagerBackgroundChecks = () => {
                   </div>
                   <div className="flex gap-4 text-xs text-muted-foreground pl-14">
                     <span className={`flex items-center gap-1 ${bc.identity_verified ? "text-emerald" : ""}`}>
-                      <Fingerprint className="h-3 w-3" /> ID {bc.identity_verified ? "✓" : "—"}
+                      <Fingerprint className="h-3 w-3" /> ID {bc.identity_verified ? "✓" : "✗"}
                     </span>
                     <span className={`flex items-center gap-1 ${bc.rental_history_verified ? "text-emerald" : ""}`}>
-                      <Home className="h-3 w-3" /> Rental {bc.rental_history_verified ? "✓" : "—"}
+                      <Home className="h-3 w-3" /> Rental {bc.rental_history_verified ? "✓" : "✗"}
                     </span>
                     <span className={`flex items-center gap-1 ${bc.employment_verified ? "text-emerald" : ""}`}>
-                      <Briefcase className="h-3 w-3" /> Employment {bc.employment_verified ? "✓" : "—"}
+                      <Briefcase className="h-3 w-3" /> Employment {bc.employment_verified ? "✓" : "✗"}
                     </span>
                   </div>
                   {bc.notes && (
