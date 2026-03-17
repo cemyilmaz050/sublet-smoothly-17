@@ -452,7 +452,7 @@ const ManualVerifyTool = () => {
         </Button>
       </div>
       <Textarea
-        placeholder="Reason for manual verification (optional) — e.g. 'Demo user', 'Stripe timeout'"
+        placeholder="Reason for manual verification (optional), e.g. 'Demo user', 'Stripe timeout'"
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={2}

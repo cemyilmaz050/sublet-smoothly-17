@@ -176,10 +176,10 @@ const ManagerListings = () => {
                     </TableCell>
                     <TableCell className="text-sm">{listing.tenant_name}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {listing.created_at ? format(new Date(listing.created_at), "MMM d, yyyy") : "—"}
+                      {listing.created_at ? format(new Date(listing.created_at), "MMM d, yyyy") : "-"}
                     </TableCell>
                     <TableCell className="font-medium">
-                      {listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}/mo` : "—"}
+                      {listing.monthly_rent ? `$${Number(listing.monthly_rent).toLocaleString()}/mo` : "-"}
                     </TableCell>
                     <TableCell>
                       <Badge variant={statusVariant(listing.status) as any} className="text-xs">

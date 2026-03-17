@@ -8,8 +8,8 @@ import type { PaymentStatus } from "@/components/PaymentStatusBadge";
 import { Link } from "react-router-dom";
 
 const payments: { date: string; description: string; amount: string; status: PaymentStatus }[] = [
-  { date: "Mar 1, 2026", description: "Monthly Rent — March", amount: "$2,650.00", status: "paid" },
-  { date: "Feb 1, 2026", description: "Monthly Rent — February", amount: "$2,650.00", status: "paid" },
+  { date: "Mar 1, 2026", description: "Monthly Rent - March", amount: "$2,650.00", status: "paid" },
+  { date: "Feb 1, 2026", description: "Monthly Rent - February", amount: "$2,650.00", status: "paid" },
   { date: "Jan 15, 2026", description: "Security Deposit", amount: "$2,500.00", status: "deposit_held" },
   { date: "Jan 15, 2026", description: "First Month + Service Fee", amount: "$2,650.00", status: "paid" },
 ];

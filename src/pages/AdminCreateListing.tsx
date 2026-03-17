@@ -414,9 +414,9 @@ const AdminCreateListing = () => {
                   <CheckCircle2 className="h-12 w-12 text-emerald" />
                   {savedPending ? (
                     <>
-                      <h2 className="text-lg font-bold text-foreground">Listing Created — Waiting for Signup</h2>
+                      <h2 className="text-lg font-bold text-foreground">Listing Created - Waiting for Signup</h2>
                       <p className="text-sm text-muted-foreground text-center max-w-md">
-                        Listing created and waiting for <strong>{pendingEmail}</strong> — they will see it automatically when they sign up. An activation email has been sent.
+                        Listing created and waiting for <strong>{pendingEmail}</strong>. They will see it automatically when they sign up. An activation email has been sent.
                       </p>
                     </>
                   ) : (
