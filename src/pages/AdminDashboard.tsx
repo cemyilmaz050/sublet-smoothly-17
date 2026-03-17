@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search, CheckCircle2, Plus } from "lucide-react";
+import { Users, Home, DollarSign, FileText, TrendingUp, BarChart3, Shield, ShieldCheck, Search, CheckCircle2, Plus, Clock, RefreshCw, Mail } from "lucide-react";
 import { format, subDays, startOfDay } from "date-fns";
 import { toast } from "sonner";
 
