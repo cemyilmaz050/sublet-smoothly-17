@@ -224,16 +224,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     if (!user) { toast.error("Please sign in first."); return; }
     setSaving(true);
     try {
-      // Upload photos
+      // Photos are already uploaded via UniversalPhotoUploader
       const uploadedUrls: string[] = [...data.photoUrls];
-      for (const file of data.photos) {
-        const ext = file.name.split(".").pop();
-        const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("listing-photos").upload(path, file);
-        if (upErr) throw upErr;
-        const { data: urlData } = supabase.storage.from("listing-photos").getPublicUrl(path);
-        uploadedUrls.push(urlData.publicUrl);
-      }
 
       const propertyTypeMap: Record<string, string> = { house: "house", apartment: "apartment", condo: "condo", studio: "studio" };
       const guestPolicyMap: Record<string, string> = { no_guests: "no_guests", occasional: "occasional_guests", welcome: "guests_allowed" };
