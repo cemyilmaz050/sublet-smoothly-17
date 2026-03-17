@@ -60,7 +60,22 @@ function SidebarNav() {
     },
   });
 
-  const badges: Record<string, number> = { pendingApprovals: pendingCount };
+  const { data: docNotifCount = 0 } = useQuery({
+    queryKey: ["manager-doc-notif-count", user?.id],
+    enabled: !!user,
+    refetchInterval: 15000,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id)
+        .eq("type", "document")
+        .eq("read", false);
+      return count ?? 0;
+    },
+  });
+
+  const badges: Record<string, number> = { pendingApprovals: pendingCount, documents: docNotifCount };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
