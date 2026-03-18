@@ -24,7 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
-const STEPS = ["Property Basics", "Photos & Description", "Pricing & Availability", "House Rules", "Review & Submit"];
+const STEPS = ["Property Basics", "Photos & Description", "Meet the Host", "Pricing & Availability", "House Rules", "Review & Submit"];
 
 const CreateListingPage = () => {
   const navigate = useNavigate();
