@@ -77,6 +77,7 @@ const CreateListingPage = () => {
           house_rules: data.house_rules || "",
           guest_policy: (data.guest_policy as any) || "",
         });
+        setIntroVideoUrl((data as any).intro_video_url || null);
       }
     };
     load();
