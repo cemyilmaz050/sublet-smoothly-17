@@ -16,8 +16,8 @@ import {
 } from "@/components/ui/sidebar";
 import { NavLink } from "@/components/NavLink";
 import {
-  LayoutDashboard, Building2, Users, MessageSquare, Bell,
-  ShieldCheck, DollarSign, Settings, LogOut, ClipboardCheck, FileText,
+  LayoutDashboard, Building2, Users, Bell,
+  Settings, LogOut, ClipboardCheck, FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import bbgLogo from "@/assets/bbg-logo.png";
@@ -33,10 +33,6 @@ const navItems = [
   { title: "Active Sublet Listings", url: `${PORTAL_BASE}/listings`, icon: Building2 },
   { title: "Documents", url: `${PORTAL_BASE}/documents`, icon: FileText, badgeKey: "documents" as const },
   { title: "Applications", url: `${PORTAL_BASE}/applications`, icon: Users },
-  { title: "Background Checks", url: `${PORTAL_BASE}/checks`, icon: ShieldCheck },
-  { title: "Messages", url: `${PORTAL_BASE}/messages`, icon: MessageSquare },
-  { title: "Notifications", url: `${PORTAL_BASE}/notifications`, icon: Bell },
-  { title: "Payments & Earnings", url: `${PORTAL_BASE}/payments`, icon: DollarSign },
   { title: "Settings", url: `${PORTAL_BASE}/settings`, icon: Settings },
 ];
 
@@ -159,6 +155,21 @@ export default function ManagerLayout() {
 function ManagerHeaderUser() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["manager-bell-count", user?.id],
+    enabled: !!user,
+    refetchInterval: 15000,
+    queryFn: async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user!.id)
+        .eq("read", false);
+      return count ?? 0;
+    },
+  });
+
   if (!user) return null;
 
   const handleSignOut = async () => {
@@ -168,6 +179,18 @@ function ManagerHeaderUser() {
 
   return (
     <div className="flex items-center gap-3">
+      <button
+        onClick={() => navigate("/portal-mgmt-bbg/notifications-bell")}
+        className="relative flex h-8 w-8 items-center justify-center rounded-full hover:bg-accent transition-colors"
+        title="Notifications"
+      >
+        <Bell className="h-4 w-4 text-muted-foreground" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
       <span className="text-xs text-muted-foreground hidden sm:block">Boston Brokerage Group · Staff</span>
       <button
         onClick={handleSignOut}

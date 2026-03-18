@@ -3,8 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -13,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search, User, Calendar, CheckCircle2, XCircle,
-  MessageSquare, ShieldCheck, Eye, Clock, Fingerprint, Home, Briefcase, StickyNote,
+  MessageSquare, ShieldCheck, Eye, FileText,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,30 +27,20 @@ interface AppWithDetails {
   status: string | null;
   created_at: string | null;
   applicant_name: string;
-  applicant_email?: string;
   listing_headline: string | null;
   listing_address: string | null;
   listing_monthly_rent: number | null;
   renter_verified?: boolean;
+  doc_status?: string;
 }
 
 const ManagerApplications = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filterStatus, setFilterStatus] = useState("all");
-  const [filterListing, setFilterListing] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedApp, setSelectedApp] = useState<AppWithDetails | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
-
-  // Background check panel state
-  const [bgCheckOpen, setBgCheckOpen] = useState(false);
-  const [bgCheckApp, setBgCheckApp] = useState<AppWithDetails | null>(null);
-  const [bgIdentity, setBgIdentity] = useState(false);
-  const [bgRental, setBgRental] = useState(false);
-  const [bgEmployment, setBgEmployment] = useState(false);
-  const [bgNotes, setBgNotes] = useState("");
-  const [bgSaving, setBgSaving] = useState(false);
 
   const { data: applications = [], isLoading } = useQuery({
     queryKey: ["mgr-apps", user?.id],
@@ -73,12 +61,12 @@ const ManagerApplications = () => {
       if (!apps?.length) return [];
 
       const applicantIds = [...new Set(apps.map(a => a.applicant_id))];
-      const { data: profiles } = await supabase.from("profiles_public" as any).select("id, first_name, last_name").in("id", applicantIds) as { data: { id: string; first_name: string | null; last_name: string | null }[] | null };
-      const profileMap = Object.fromEntries((profiles || []).map(p => [p.id, p]));
+      const { data: profiles } = await supabase.from("profiles_public" as any).select("id, first_name, last_name").in("id", applicantIds) as any;
+      const profileMap = Object.fromEntries((profiles || []).map((p: any) => [p.id, p]));
 
-      // Fetch renter verification status
-      const { data: renterApps } = await supabase.from("renter_applications" as any).select("renter_id").in("renter_id", applicantIds) as any;
-      const renterAppSet = new Set((renterApps || []).map((r: any) => r.renter_id));
+      // Fetch document completion status
+      const { data: docPkgs } = await supabase.from("bbg_document_packages").select("applicant_id, overall_status").in("applicant_id", applicantIds);
+      const docMap = Object.fromEntries((docPkgs || []).map((d: any) => [d.applicant_id, d.overall_status]));
 
       return apps.map(app => {
         const p = profileMap[app.applicant_id];
@@ -89,38 +77,10 @@ const ManagerApplications = () => {
           listing_headline: l?.headline ?? null,
           listing_address: l?.address ?? null,
           listing_monthly_rent: l?.monthly_rent ?? null,
-          renter_verified: renterAppSet.has(app.applicant_id),
+          doc_status: docMap[app.applicant_id] || "not_sent",
         } as AppWithDetails;
       });
     },
-  });
-
-  // Fetch existing background checks
-  const { data: bgChecks = {} } = useQuery({
-    queryKey: ["mgr-bg-checks-map", user?.id],
-    enabled: !!user && applications.length > 0,
-    queryFn: async () => {
-      const appIds = applications.map(a => a.id);
-      const { data } = await supabase
-        .from("background_checks")
-        .select("*")
-        .in("application_id", appIds);
-      return Object.fromEntries((data || []).map((bc: any) => [bc.application_id, bc]));
-    },
-  });
-
-  // Realtime
-  useQuery({
-    queryKey: ["mgr-apps-rt", user?.id],
-    enabled: !!user,
-    queryFn: () => {
-      const ch = supabase.channel("mgr-app-rt")
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user!.id}` }, () => {
-          queryClient.invalidateQueries({ queryKey: ["mgr-apps"] });
-        }).subscribe();
-      return () => { supabase.removeChannel(ch); };
-    },
-    staleTime: Infinity,
   });
 
   const updateMut = useMutation({
@@ -132,11 +92,6 @@ const ManagerApplications = () => {
   });
 
   const handleDecision = async (app: AppWithDetails, decision: "approved" | "declined") => {
-    // Block approving unverified renters
-    if (decision === "approved" && !app.renter_verified) {
-      toast.error("This renter has not completed all 3 verification steps yet. You can only confirm fully verified renters.");
-      return;
-    }
     await updateMut.mutateAsync({ id: app.id, status: decision });
     await supabase.from("notifications").insert({
       user_id: app.applicant_id,
@@ -152,67 +107,8 @@ const ManagerApplications = () => {
     setSelectedApp(null);
   };
 
-  const openBgCheck = (app: AppWithDetails) => {
-    const existing = (bgChecks as any)[app.id];
-    setBgCheckApp(app);
-    setBgIdentity(existing?.identity_verified ?? false);
-    setBgRental(existing?.rental_history_verified ?? false);
-    setBgEmployment(existing?.employment_verified ?? false);
-    setBgNotes(existing?.notes ?? "");
-    setBgCheckOpen(true);
-  };
-
-  const handleBgCheckSave = async (finalStatus: string) => {
-    if (!bgCheckApp || !user) return;
-    setBgSaving(true);
-    try {
-      const existing = (bgChecks as any)[bgCheckApp.id];
-      const payload = {
-        identity_verified: bgIdentity,
-        rental_history_verified: bgRental,
-        employment_verified: bgEmployment,
-        notes: bgNotes,
-        status: finalStatus,
-        updated_at: new Date().toISOString(),
-      };
-
-      if (existing) {
-        await supabase.from("background_checks").update(payload).eq("id", existing.id);
-      } else {
-        await supabase.from("background_checks").insert({
-          ...payload,
-          application_id: bgCheckApp.id,
-          applicant_id: bgCheckApp.applicant_id,
-          reviewer_id: user.id,
-        });
-      }
-
-      // If verified, approve the application
-      if (finalStatus === "verified") {
-        await handleDecision(bgCheckApp, "approved");
-      } else if (finalStatus === "declined") {
-        await handleDecision(bgCheckApp, "declined");
-      }
-
-      queryClient.invalidateQueries({ queryKey: ["mgr-bg-checks-map"] });
-      toast.success(
-        finalStatus === "verified" ? "Applicant verified and approved!" :
-        finalStatus === "declined" ? "Applicant declined." :
-        "Background check saved, needs more info."
-      );
-      setBgCheckOpen(false);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to save");
-    } finally {
-      setBgSaving(false);
-    }
-  };
-
-  const uniqueListings = [...new Map(applications.map(a => [a.listing_id, { id: a.listing_id, label: a.listing_headline || a.listing_address || "Listing" }])).values()];
-
   const filtered = applications.filter(app => {
     if (filterStatus !== "all" && app.status !== filterStatus) return false;
-    if (filterListing !== "all" && app.listing_id !== filterListing) return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return app.applicant_name.toLowerCase().includes(q) || (app.listing_headline?.toLowerCase().includes(q) ?? false);
@@ -222,13 +118,8 @@ const ManagerApplications = () => {
 
   const statusVariant = (s: string | null) => s === "approved" ? "emerald" : s === "declined" ? "destructive" : "secondary";
   const statusLabel = (s: string | null) => s === "approved" ? "Approved" : s === "declined" ? "Declined" : "Pending";
+  const docLabel = (s: string) => s === "fully_complete" ? "Complete" : s === "not_sent" ? "Not Started" : "Incomplete";
   const pendingCount = applications.filter(a => a.status === "pending").length;
-
-  const getBgStatus = (appId: string) => {
-    const bc = (bgChecks as any)[appId];
-    if (!bc) return null;
-    return bc.status;
-  };
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl">
@@ -246,15 +137,6 @@ const ManagerApplications = () => {
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Search by name or listing..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
-        <Select value={filterListing} onValueChange={setFilterListing}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="All Listings" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Listings</SelectItem>
-            {uniqueListings.map(l => <SelectItem key={l.id} value={l.id}>{l.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Status" />
@@ -268,7 +150,7 @@ const ManagerApplications = () => {
         </Select>
       </div>
 
-      {/* Cards */}
+      {/* List */}
       {isLoading ? (
         <p className="py-12 text-center text-muted-foreground">Loading...</p>
       ) : filtered.length === 0 ? (
@@ -276,65 +158,40 @@ const ManagerApplications = () => {
           {applications.length === 0 ? "No applications yet." : "No applications match your filters."}
         </CardContent></Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filtered.map(app => {
-            const bgStatus = getBgStatus(app.id);
-            return (
-              <Card key={app.id} className="shadow-card transition-all hover:shadow-elevated">
-                <CardContent className="p-5">
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent">
-                      <User className="h-5 w-5 text-accent-foreground" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-semibold text-foreground truncate">{app.applicant_name}</p>
-                        <Badge variant={statusVariant(app.status) as any} className="shrink-0 text-xs">{statusLabel(app.status)}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground truncate mt-0.5">{app.listing_headline || app.listing_address || "Listing"}</p>
-                      <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
-                        <Calendar className="h-3 w-3" />
-                        {app.created_at ? format(new Date(app.created_at), "MMM d, yyyy") : "-"}
-                      </div>
-                      {app.message && <p className="mt-2 text-sm text-muted-foreground line-clamp-2 italic">"{app.message}"</p>}
-                      {/* Renter verification badge */}
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {app.renter_verified ? (
-                          <Badge variant="emerald" className="text-[10px] gap-0.5">
-                            <ShieldCheck className="h-3 w-3" /> Fully Verified
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary" className="text-[10px] gap-0.5 border-amber/30 text-amber">
-                            ⏳ Verification In Progress
-                          </Badge>
-                        )}
-                        {bgStatus && (
-                          <Badge variant={bgStatus === "verified" ? "emerald" : bgStatus === "declined" ? "destructive" : "secondary"} className="text-[10px] gap-0.5">
-                            <ShieldCheck className="h-3 w-3" />
-                            {bgStatus === "verified" ? "BG Verified" : bgStatus === "declined" ? "BG Declined" : "Needs Info"}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedApp(app); setDetailOpen(true); }}>
-                      <Eye className="mr-1 h-3.5 w-3.5" /> Review
+        <Card className="shadow-card">
+          <CardContent className="p-0 divide-y">
+            {filtered.map(app => (
+              <div key={app.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent/30 transition-colors">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent">
+                  <User className="h-5 w-5 text-accent-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-sm text-foreground truncate">{app.applicant_name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{app.listing_headline || app.listing_address || "Listing"}</p>
+                </div>
+                <div className="hidden sm:block text-center">
+                  <Badge variant={app.doc_status === "fully_complete" ? "emerald" : "secondary"} className="text-[10px]">
+                    <FileText className="mr-1 h-3 w-3" /> {docLabel(app.doc_status || "not_sent")}
+                  </Badge>
+                </div>
+                <Badge variant={statusVariant(app.status) as any} className="shrink-0 text-xs">{statusLabel(app.status)}</Badge>
+                {app.status === "pending" && (
+                  <div className="flex gap-1.5">
+                    <Button size="sm" className="bg-emerald hover:bg-emerald/90 text-white h-8 px-3" onClick={() => handleDecision(app, "approved")}>
+                      <CheckCircle2 className="h-3.5 w-3.5" />
                     </Button>
-                    {app.status === "pending" && (
-                      <>
-                        <Button variant="outline" size="sm" className="text-xs" onClick={() => openBgCheck(app)}>
-                          <ShieldCheck className="mr-1 h-3.5 w-3.5" /> Run Background Check
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDecision(app, "declined")}><XCircle className="h-3.5 w-3.5" /></Button>
-                      </>
-                    )}
+                    <Button size="sm" variant="destructive" className="h-8 px-3" onClick={() => handleDecision(app, "declined")}>
+                      <XCircle className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                )}
+                <Button variant="ghost" size="sm" className="h-8" onClick={() => { setSelectedApp(app); setDetailOpen(true); }}>
+                  <Eye className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       )}
 
       {/* Detail Dialog */}
@@ -368,103 +225,12 @@ const ManagerApplications = () => {
                 </div>
                 {selectedApp.status === "pending" && (
                   <div className="flex gap-3 pt-2">
-                    <Button className="flex-1" onClick={() => { setDetailOpen(false); openBgCheck(selectedApp); }}>
-                      <ShieldCheck className="mr-1 h-4 w-4" /> Run Background Check
+                    <Button className="flex-1 bg-emerald hover:bg-emerald/90 text-white" onClick={() => handleDecision(selectedApp, "approved")}>
+                      <CheckCircle2 className="mr-1 h-4 w-4" /> Approve
                     </Button>
                     <Button className="flex-1" variant="destructive" onClick={() => handleDecision(selectedApp, "declined")}><XCircle className="mr-1 h-4 w-4" />Decline</Button>
                   </div>
                 )}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Background Check Panel */}
-      <Dialog open={bgCheckOpen} onOpenChange={(o) => { if (!o) setBgCheckOpen(false); }}>
-        <DialogContent className="sm:max-w-lg">
-          {bgCheckApp && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-primary" />
-                  Background Check — {bgCheckApp.applicant_name}
-                </DialogTitle>
-                <DialogDescription>
-                  Reviewing for {bgCheckApp.listing_headline || bgCheckApp.listing_address || "a listing"}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-5 py-3">
-                {/* Checklist */}
-                <div className="space-y-3">
-                  <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
-                    <Checkbox checked={bgIdentity} onCheckedChange={(v) => setBgIdentity(!!v)} />
-                    <Fingerprint className="h-4 w-4 text-primary shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Identity Verification</p>
-                      <p className="text-xs text-muted-foreground">Government-issued ID verified</p>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
-                    <Checkbox checked={bgRental} onCheckedChange={(v) => setBgRental(!!v)} />
-                    <Home className="h-4 w-4 text-primary shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Rental History</p>
-                      <p className="text-xs text-muted-foreground">Previous landlord references checked</p>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-accent/30 transition-colors">
-                    <Checkbox checked={bgEmployment} onCheckedChange={(v) => setBgEmployment(!!v)} />
-                    <Briefcase className="h-4 w-4 text-primary shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Employment Status</p>
-                      <p className="text-xs text-muted-foreground">Current employment or income verified</p>
-                    </div>
-                  </label>
-                </div>
-
-                {/* Notes */}
-                <div>
-                  <label className="flex items-center gap-1.5 text-sm font-medium text-foreground mb-1.5">
-                    <StickyNote className="h-3.5 w-3.5" /> Notes
-                  </label>
-                  <Textarea
-                    placeholder="Add any notes about this applicant..."
-                    value={bgNotes}
-                    onChange={(e) => setBgNotes(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-col gap-2 pt-1">
-                  <Button
-                    variant="emerald"
-                    className="w-full"
-                    disabled={bgSaving}
-                    onClick={() => handleBgCheckSave("verified")}
-                  >
-                    <CheckCircle2 className="mr-1.5 h-4 w-4" /> Verified & Approved
-                  </Button>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      disabled={bgSaving}
-                      onClick={() => handleBgCheckSave("needs_info")}
-                    >
-                      <Clock className="mr-1.5 h-4 w-4" /> Needs More Info
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="flex-1"
-                      disabled={bgSaving}
-                      onClick={() => handleBgCheckSave("declined")}
-                    >
-                      <XCircle className="mr-1.5 h-4 w-4" /> Declined
-                    </Button>
-                  </div>
-                </div>
               </div>
             </>
           )}

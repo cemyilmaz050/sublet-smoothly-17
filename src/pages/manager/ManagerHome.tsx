@@ -1,78 +1,127 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Users, Clock, CheckCircle2, ArrowRight, AlertTriangle, FileText, ClipboardCheck } from "lucide-react";
+import { Building2, ClipboardCheck, FileText, ArrowRight, MapPin, User, Calendar, Send } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import bbgLogo from "@/assets/bbg-logo.png";
+import { format } from "date-fns";
+import { toast } from "sonner";
+
+const P = "/portal-mgmt-bbg";
 
 const ManagerHome = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const { data: stats } = useQuery({
     queryKey: ["manager-home-stats", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const [listingsRes, requestsRes] = await Promise.all([
+      const [listingsRes, docsRes] = await Promise.all([
         supabase.from("listings").select("id, status").eq("manager_id", user!.id),
-        supabase.from("sublet_requests").select("id, status").eq("manager_id", user!.id),
+        supabase.from("bbg_document_packages").select("id, overall_status"),
       ]);
       const listings = listingsRes.data || [];
-      const requests = requestsRes.data || [];
-
-      let pendingApps = 0;
-      let totalApps = 0;
-      const listingIds = listings.map(l => l.id);
-      if (listingIds.length > 0) {
-        const [pendingRes, totalRes] = await Promise.all([
-          supabase.from("applications").select("id", { count: "exact", head: true }).in("listing_id", listingIds).eq("status", "pending"),
-          supabase.from("applications").select("id", { count: "exact", head: true }).in("listing_id", listingIds),
-        ]);
-        pendingApps = pendingRes.count ?? 0;
-        totalApps = totalRes.count ?? 0;
-      }
+      const docs = docsRes.data || [];
 
       return {
         pendingApprovals: listings.filter(l => l.status === "pending").length,
         activeListings: listings.filter(l => l.status === "active").length,
-        totalApplications: totalApps,
-        pendingApplications: pendingApps,
-        completedSublets: requests.filter(r => r.status === "approved").length,
+        documentsPending: docs.filter(d => d.overall_status !== "fully_complete" && d.overall_status !== "not_sent").length,
       };
     },
   });
 
-  const { data: recentNotifications = [] } = useQuery({
-    queryKey: ["manager-recent-notifs", user?.id],
+  // Recent pending approvals (top 3)
+  const { data: recentPending = [] } = useQuery({
+    queryKey: ["manager-recent-pending", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", user!.id)
+        .from("listings")
+        .select("id, address, tenant_id, created_at")
+        .eq("manager_id", user!.id)
+        .eq("status", "pending")
         .order("created_at", { ascending: false })
-        .limit(5);
-      return data || [];
+        .limit(3);
+      if (!data?.length) return [];
+
+      const tenantIds = [...new Set(data.map(l => l.tenant_id))];
+      const { data: profiles } = await supabase
+        .from("profiles_public" as any)
+        .select("id, first_name, last_name")
+        .in("id", tenantIds) as any;
+      const pm = Object.fromEntries((profiles || []).map((p: any) => [p.id, p]));
+
+      return data.map(l => ({
+        ...l,
+        tenant_name: [pm[l.tenant_id]?.first_name, pm[l.tenant_id]?.last_name].filter(Boolean).join(" ") || "Unknown Tenant",
+      }));
     },
   });
 
-  const P = "/portal-mgmt-bbg";
-  const tiles = [
-    { label: "Pending Approvals", value: stats?.pendingApprovals ?? 0, icon: ClipboardCheck, color: "text-destructive", link: `${P}/approvals`, badge: true },
-    { label: "Active Listings", value: stats?.activeListings ?? 0, icon: Building2, color: "text-primary", link: `${P}/listings` },
-    { label: "Total Applications", value: stats?.totalApplications ?? 0, icon: Users, color: "text-cyan", link: `${P}/applications` },
-    { label: "Pending Review", value: stats?.pendingApplications ?? 0, icon: Clock, color: "text-amber", link: `${P}/applications`, badge: true },
-    { label: "Completed Sublets", value: stats?.completedSublets ?? 0, icon: CheckCircle2, color: "text-emerald", link: `${P}/checks` },
-  ];
+  // Recent incomplete documents (top 3)
+  const { data: recentDocs = [] } = useQuery({
+    queryKey: ["manager-recent-docs-pending", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: pkgs } = await supabase
+        .from("bbg_document_packages")
+        .select("*")
+        .neq("overall_status", "fully_complete")
+        .neq("overall_status", "not_sent")
+        .order("updated_at", { ascending: false })
+        .limit(3);
+      if (!pkgs?.length) return [];
 
-  const notifIcon = (type: string) => {
-    if (type === "application") return <Users className="h-4 w-4 text-primary" />;
-    if (type === "approval") return <CheckCircle2 className="h-4 w-4 text-emerald" />;
-    if (type === "rejection") return <AlertTriangle className="h-4 w-4 text-destructive" />;
-    return <FileText className="h-4 w-4 text-muted-foreground" />;
-  };
+      const enriched = await Promise.all(
+        pkgs.map(async (pkg: any) => {
+          const [profileRes, listingRes, appRes, guarantyRes] = await Promise.all([
+            supabase.from("profiles_public").select("first_name, last_name").eq("id", pkg.applicant_id).single(),
+            pkg.listing_id ? supabase.from("listings").select("address").eq("id", pkg.listing_id).single() : { data: null },
+            pkg.application_id ? supabase.from("bbg_sublet_applications").select("status").eq("id", pkg.application_id).single() : { data: null },
+            pkg.guaranty_id ? supabase.from("bbg_guaranty_of_lease").select("status").eq("id", pkg.guaranty_id).single() : { data: null },
+          ]);
+          const missing: string[] = [];
+          if (!appRes.data || appRes.data.status !== "completed") missing.push("Sublet Application");
+          if (!guarantyRes.data || guarantyRes.data.status !== "completed") missing.push("Guaranty of Lease");
+          return {
+            ...pkg,
+            applicant_name: [profileRes.data?.first_name, profileRes.data?.last_name].filter(Boolean).join(" ") || "Unknown",
+            address: listingRes.data?.address || "—",
+            missing_docs: missing.join(", ") || "Unknown",
+          };
+        })
+      );
+      return enriched;
+    },
+  });
+
+  const sendReminderMutation = useMutation({
+    mutationFn: async (pkg: any) => {
+      await supabase.from("notifications").insert({
+        user_id: pkg.applicant_id,
+        title: "Document Reminder",
+        message: `Please complete your BBG subletting documents for ${pkg.address}.`,
+        type: "document_reminder",
+        link: `/documents/bbg?listing_id=${pkg.listing_id}`,
+      });
+      await supabase.from("bbg_document_packages").update({ reminder_sent_at: new Date().toISOString() }).eq("id", pkg.id);
+    },
+    onSuccess: () => {
+      toast.success("Reminder sent");
+      queryClient.invalidateQueries({ queryKey: ["manager-recent-docs-pending"] });
+    },
+  });
+
+  const tiles = [
+    { label: "Pending Approvals", value: stats?.pendingApprovals ?? 0, icon: ClipboardCheck, color: "text-amber-600", link: `${P}/approvals` },
+    { label: "Active Listings", value: stats?.activeListings ?? 0, icon: Building2, color: "text-primary", link: `${P}/listings` },
+    { label: "Documents Pending", value: stats?.documentsPending ?? 0, icon: FileText, color: "text-destructive", link: `${P}/documents` },
+  ];
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-6xl">
@@ -85,8 +134,8 @@ const ManagerHome = () => {
         </div>
       </div>
 
-      {/* Stat tiles */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 3 Stat tiles */}
+      <div className="grid gap-4 sm:grid-cols-3">
         {tiles.map((tile) => (
           <Link key={tile.label} to={tile.link}>
             <Card className="shadow-card transition-all hover:shadow-elevated hover:-translate-y-0.5 cursor-pointer">
@@ -96,14 +145,7 @@ const ManagerHome = () => {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">{tile.label}</p>
-                  <div className="flex items-center gap-2">
-                    <p className="text-xl font-bold text-foreground">{tile.value}</p>
-                    {tile.badge && (tile.value as number) > 0 && (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                        {tile.value}
-                      </span>
-                    )}
-                  </div>
+                  <p className="text-xl font-bold text-foreground">{tile.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -111,33 +153,72 @@ const ManagerHome = () => {
         ))}
       </div>
 
-      {/* Recent Activity */}
+      {/* Pending Approvals Section */}
       <Card className="shadow-card">
         <div className="flex items-center justify-between px-6 pt-5 pb-3">
-          <h2 className="text-base font-semibold text-foreground">Recent Activity</h2>
-          <Link to={`${P}/notifications`}>
+          <h2 className="text-base font-semibold text-foreground">Pending Approvals</h2>
+          <Link to={`${P}/approvals`}>
             <Button variant="ghost" size="sm" className="text-xs">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
           </Link>
         </div>
         <CardContent className="pt-0 space-y-1">
-          {recentNotifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">No recent activity yet.</p>
+          {recentPending.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">No pending approvals right now.</p>
           ) : (
-            recentNotifications.map((n: any) => (
-              <Link key={n.id} to={n.link || `${P}/notifications`}>
-                <div className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-accent/50">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent">
-                    {notifIcon(n.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{n.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{n.message}</p>
-                  </div>
-                  <span className="text-[11px] text-muted-foreground shrink-0 mt-0.5">
-                    {new Date(n.created_at).toLocaleDateString()}
-                  </span>
+            recentPending.map((listing: any) => (
+              <div key={listing.id} className="flex items-center gap-3 rounded-lg p-3 hover:bg-accent/50 transition-colors">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
                 </div>
-              </Link>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{listing.address || "No address"}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <User className="h-3 w-3" /> {listing.tenant_name}
+                    <span className="mx-1">·</span>
+                    <Calendar className="h-3 w-3" /> {listing.created_at ? format(new Date(listing.created_at), "MMM d, yyyy") : "—"}
+                  </p>
+                </div>
+                <Link to={`${P}/approvals`}>
+                  <Button size="sm" variant="outline">Review</Button>
+                </Link>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Documents Pending Section */}
+      <Card className="shadow-card">
+        <div className="flex items-center justify-between px-6 pt-5 pb-3">
+          <h2 className="text-base font-semibold text-foreground">Documents Pending</h2>
+          <Link to={`${P}/documents`}>
+            <Button variant="ghost" size="sm" className="text-xs">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
+          </Link>
+        </div>
+        <CardContent className="pt-0 space-y-1">
+          {recentDocs.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-6 text-center">All documents are complete.</p>
+          ) : (
+            recentDocs.map((doc: any) => (
+              <div key={doc.id} className="flex items-center gap-3 rounded-lg p-3 hover:bg-accent/50 transition-colors">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{doc.applicant_name}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {doc.address} · Missing: {doc.missing_docs}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => sendReminderMutation.mutate(doc)}
+                  disabled={sendReminderMutation.isPending}
+                >
+                  <Send className="mr-1 h-3.5 w-3.5" /> Remind
+                </Button>
+              </div>
             ))
           )}
         </CardContent>

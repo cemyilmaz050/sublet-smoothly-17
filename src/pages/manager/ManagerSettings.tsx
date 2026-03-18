@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { User, Mail, Phone, Bell, CreditCard, Save, Loader2 } from "lucide-react";
+import { User, Bell, Save, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -106,19 +106,6 @@ const ManagerSettings = () => {
         </CardContent>
       </Card>
 
-      {/* Payment Details */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2"><CreditCard className="h-4 w-4" /> Payment Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-lg border-2 border-dashed border-muted p-6 text-center">
-            <CreditCard className="mx-auto mb-2 h-8 w-8 text-muted-foreground/30" />
-            <p className="text-sm text-muted-foreground">Payment configuration coming soon</p>
-            <p className="text-xs text-muted-foreground mt-1">Connect your bank account to receive sublet payments</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
