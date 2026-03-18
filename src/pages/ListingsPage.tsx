@@ -75,15 +75,19 @@ const ListingsPage = () => {
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude, intro_video_url")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
       if (data && data.length > 0) {
         const tenantIds = [...new Set(data.map((l: any) => l.tenant_id))];
-        const { data: profiles } = await supabase.from("profiles").select("id, id_verified").in("id", tenantIds) as any;
+        const { data: profiles } = await supabase.from("profiles").select("id, id_verified, first_name, last_name").in("id", tenantIds) as any;
         const verifiedMap: Record<string, boolean> = {};
-        (profiles || []).forEach((p: any) => { verifiedMap[p.id] = p.id_verified; });
+        const nameMap: Record<string, string> = {};
+        (profiles || []).forEach((p: any) => {
+          verifiedMap[p.id] = p.id_verified;
+          nameMap[p.id] = [p.first_name, p.last_name].filter(Boolean).join(" ") || "Host";
+        });
 
         const listingIds = data.map((l: any) => l.id);
         const { data: reviews } = await supabase.from("reviews").select("listing_id, rating").in("listing_id", listingIds) as any;
@@ -97,6 +101,7 @@ const ListingsPage = () => {
         const enriched = data.map((l: any) => ({
           ...l,
           tenant_verified: verifiedMap[l.tenant_id] || false,
+          tenant_name: nameMap[l.tenant_id] || "Host",
           avg_rating: ratingMap[l.id] ? ratingMap[l.id].sum / ratingMap[l.id].count : 0,
           review_count: ratingMap[l.id]?.count || 0,
         }));
