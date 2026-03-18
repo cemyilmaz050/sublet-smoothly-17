@@ -326,7 +326,7 @@ const CreateListingPage = () => {
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {step === 0 ? "Cancel" : "Back"}
               </Button>
-              {step < 4 ? (
+              {step < 5 ? (
                 <Button onClick={nextStep}>
                   Next
                   <ArrowRight className="ml-1 h-4 w-4" />
