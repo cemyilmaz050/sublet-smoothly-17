@@ -14,8 +14,8 @@ import AdminProtectedRoute from "@/components/AdminProtectedRoute";
 import Navbar from "@/components/Navbar";
 import VerificationPendingBanner from "@/components/VerificationPendingBanner";
 import Footer from "@/components/Footer";
-import LandingPage from "./pages/LandingPage";
 import HomePage from "./pages/HomePage";
+import LandingPage from "./pages/LandingPage";
 import ListingsPage from "./pages/ListingsPage";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -28,7 +28,6 @@ import AuthCallbackPage from "./pages/AuthCallbackPage";
 import ManagerProfilePage from "./pages/ManagerProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 import CreateListingPage from "./pages/CreateListingPage";
-import ReferPage from "./pages/ReferPage";
 import TermsPage from "./pages/TermsPage";
 import PrivacyPage from "./pages/PrivacyPage";
 import AgreementPage from "./pages/AgreementPage";
@@ -37,7 +36,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminCreateListing from "./pages/AdminCreateListing";
 import FriendSubletLanding from "./pages/FriendSubletLanding";
 import NotFound from "./pages/NotFound";
-import AIFinderPage from "./pages/AIFinderPage";
+import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
 
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";
@@ -53,29 +52,21 @@ import ManagerBackgroundChecks from "./pages/manager/ManagerBackgroundChecks";
 import ManagerPayments from "./pages/manager/ManagerPayments";
 import ManagerSettings from "./pages/manager/ManagerSettings";
 import ManagerDocuments from "./pages/manager/ManagerDocuments";
-import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
 
 const queryClient = new QueryClient();
 
-/** Persistent navbar shown on all routes except the manager portal, AI finder, and home hero */
 function PersistentNavbar() {
   const location = useLocation();
   const isManagerRoute = location.pathname.startsWith("/manager") || location.pathname.startsWith("/portal-mgmt-bbg");
-  const isFinderRoute = location.pathname === "/find";
-  // Hide navbar on admin routes
   const isAdminRoute = location.pathname.startsWith("/admin-subin-2026");
-  if (isManagerRoute || isFinderRoute || isAdminRoute) return null;
+  if (isManagerRoute || isAdminRoute) return null;
   return <Navbar />;
 }
 
-/** Hide footer on full-screen pages */
 function PersistentFooter() {
   const location = useLocation();
   if (location.pathname.startsWith("/manager") || location.pathname.startsWith("/portal-mgmt-bbg")) return null;
   if (location.pathname.startsWith("/messages")) return null;
-  if (location.pathname === "/find") return null;
-  if (location.pathname === "/") return null;
-  // Hide footer on admin routes
   if (location.pathname.startsWith("/admin-subin-2026")) return null;
   return <Footer />;
 }
@@ -108,9 +99,11 @@ const App = () => (
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/managers/:slug" element={<ManagerProfilePage />} />
-                  <Route path="/refer" element={<ReferPage />} />
-                  <Route path="/find" element={<AIFinderPage />} />
                   <Route path="/invite/friend" element={<FriendSubletLanding />} />
+
+                  {/* Redirect old AI finder route */}
+                  <Route path="/find" element={<Navigate to="/listings" replace />} />
+                  <Route path="/refer" element={<Navigate to="/" replace />} />
 
                   {/* Protected routes */}
                   <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
@@ -125,11 +118,11 @@ const App = () => (
                   <Route path="/payments/confirmation" element={<ProtectedRoute><PaymentConfirmationPage /></ProtectedRoute>} />
                   <Route path="/documents/bbg" element={<ProtectedRoute><BBGDocumentFillingPage /></ProtectedRoute>} />
 
-                  {/* Founder Admin — secret URL, email-gated, PIN-protected */}
+                  {/* Founder Admin */}
                   <Route path="/admin-subin-2026" element={<AdminProtectedRoute><AdminDashboard /></AdminProtectedRoute>} />
                   <Route path="/admin-subin-2026/create-listing" element={<AdminProtectedRoute><AdminCreateListing /></AdminProtectedRoute>} />
 
-                  {/* Manager Dashboard — unified layout */}
+                  {/* Manager Dashboard */}
                   <Route path="/portal-mgmt-bbg" element={<ManagerProtectedRoute><ManagerLayout /></ManagerProtectedRoute>}>
                     <Route index element={<ManagerHome />} />
                     <Route path="catalog" element={<ManagerCatalog />} />
@@ -145,16 +138,11 @@ const App = () => (
                     <Route path="settings" element={<ManagerSettings />} />
                   </Route>
 
-                  {/* Legacy /manager routes redirect silently to listings */}
                   <Route path="/manager/*" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
                   <Route path="/manager" element={<ManagerProtectedRoute><Navigate to="/portal-mgmt-bbg" replace /></ManagerProtectedRoute>} />
-
-                  {/* Admin aliases */}
                   <Route path="/admin" element={<Navigate to="/admin-subin-2026" replace />} />
                   <Route path="/s-admin-console" element={<Navigate to="/listings" replace />} />
                   <Route path="/s-admin-console/*" element={<Navigate to="/listings" replace />} />
-
-                  {/* Redirects from old manager routes */}
                   <Route path="/dashboard/manager" element={<Navigate to="/manager" replace />} />
                   <Route path="/dashboard/manager/*" element={<Navigate to="/manager" replace />} />
 

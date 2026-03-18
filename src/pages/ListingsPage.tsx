@@ -348,8 +348,8 @@ const ListingsPage = () => {
             mobileView === "map" && "hidden lg:block"
           )}>
             <div className="p-3 sm:p-4 lg:p-6">
-              <h2 className="text-base font-medium text-foreground mb-1">All available sublets in Boston</h2>
-              <p className="mb-4 text-sm text-muted-foreground">
+          <h2 className="text-lg font-semibold text-foreground mb-1">Available Listings</h2>
+              <p className="mb-4 text-sm text-muted-foreground">Browse manager-approved sublets in Boston · 
                 {filtered.length} place{filtered.length !== 1 ? "s" : ""} available
                 {calendarSelectedDate && viewMode === "calendar" && (
                   <span className="ml-2">
