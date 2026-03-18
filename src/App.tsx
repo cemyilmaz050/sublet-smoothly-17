@@ -46,10 +46,6 @@ import ManagerCatalogEditor from "./pages/manager/ManagerCatalogEditor";
 import ManagerListings from "./pages/manager/ManagerListings";
 import ManagerApplications from "./pages/manager/ManagerApplications";
 import ManagerApprovals from "./pages/manager/ManagerApprovals";
-import ManagerMessages from "./pages/manager/ManagerMessages";
-import ManagerNotifications from "./pages/manager/ManagerNotifications";
-import ManagerBackgroundChecks from "./pages/manager/ManagerBackgroundChecks";
-import ManagerPayments from "./pages/manager/ManagerPayments";
 import ManagerSettings from "./pages/manager/ManagerSettings";
 import ManagerDocuments from "./pages/manager/ManagerDocuments";
 
