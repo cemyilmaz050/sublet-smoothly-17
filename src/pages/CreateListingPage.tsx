@@ -151,13 +151,13 @@ const CreateListingPage = () => {
 
     if (draftId) {
       const photos = getPhotoUrls();
-      await supabase.from("listings").update({ ...payload, photos }).eq("id", draftId);
+      await supabase.from("listings").update({ ...payload, photos, intro_video_url: introVideoUrl || null } as any).eq("id", draftId);
     } else {
       const { data } = await supabase.from("listings").insert(payload).select("id").single();
       if (data) {
         setDraftId(data.id);
         const photos = getPhotoUrls();
-        await supabase.from("listings").update({ photos }).eq("id", data.id);
+        await supabase.from("listings").update({ photos, intro_video_url: introVideoUrl || null } as any).eq("id", data.id);
       }
     }
   };
