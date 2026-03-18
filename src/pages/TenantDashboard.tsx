@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Home, ExternalLink, Pencil, MoreVertical, Pause, Play, Trash2, Loader2, MessageSquare, ArrowRight, Users, FileText, Plus, Eye } from "lucide-react";
+import { Home, ExternalLink, Pencil, MoreVertical, Pause, Play, Trash2, Loader2, MessageSquare, ArrowRight, Users, FileText, Plus, Eye, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
