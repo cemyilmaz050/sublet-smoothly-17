@@ -238,7 +238,7 @@ const ListingsPage = () => {
 
     return (
     <div className="flex flex-col bg-background" style={{ height: "calc(100dvh - 4rem)" }}>
-      <WelcomePopup show={welcomePopup.show} returningMode={welcomePopup.returningMode} dismiss={welcomePopup.dismiss} />
+      
 
       {/* ===== LISTINGS SECTION ===== */}
       <div className="flex flex-col flex-1 overflow-hidden">
