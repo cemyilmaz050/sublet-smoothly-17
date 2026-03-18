@@ -44,7 +44,6 @@
     "@react-leaflet/core": "2.1.0",
     "@stripe/stripe-js": "^8.9.0",
     "@types/leaflet": "^1.9.21",
-    "@vitejs/plugin-react-swc": "3.11.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
