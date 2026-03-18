@@ -1,7 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload, ClipboardCheck } from "lucide-react";
-import heroImage from "@/assets/hero-apartment.jpg";
+import heroVideoAsset from "../../public/hero-process.mp4.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 
 const HomePage = () => {
