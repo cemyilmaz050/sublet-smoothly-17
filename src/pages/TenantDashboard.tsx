@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Home, ExternalLink, Pencil, MoreVertical, Pause, Play, Trash2, Loader2, MessageSquare, ArrowRight, Users, FileText, Plus, Eye } from "lucide-react";
+import { Home, ExternalLink, Pencil, MoreVertical, Pause, Play, Trash2, Loader2, MessageSquare, ArrowRight, Users, FileText, Plus, Eye, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
@@ -200,6 +200,22 @@ const TenantDashboard = () => {
         {/* Profile Completeness */}
         <ProfileCompleteness />
         <TenantIdVerification idVerified={idVerified} onVerified={() => setIdVerified(true)} />
+
+        {/* Video prompt for tenants without intro video */}
+        {listings.length > 0 && !listings.some(l => (l as any).intro_video_url) && (
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+              <Video className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Add a 30-second introduction video</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Get noticed faster — sub-lessees are 3x more likely to reach out when they can see your face</p>
+              <Button size="sm" className="mt-3 rounded-full" onClick={() => listings[0] && navigate(`/listings/edit/${listings[0].id}`)}>
+                Add Video
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Metric cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

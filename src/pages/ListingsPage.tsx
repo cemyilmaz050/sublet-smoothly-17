@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
-  MapPin, Calendar, ShieldCheck, Heart, Building2,
+  MapPin, Calendar, ShieldCheck, Heart, Building2, Video,
   Search, SlidersHorizontal, Pencil, Eye, X, Map,
   MessageSquare, Loader2, CalendarIcon, Home, Check,
 } from "lucide-react";
@@ -27,6 +27,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
+
+import VideoPlayer from "@/components/video/VideoPlayer";
 
 interface ListingItem {
   id: string;
@@ -48,6 +50,8 @@ interface ListingItem {
   tenant_verified?: boolean;
   avg_rating?: number;
   review_count?: number;
+  intro_video_url?: string | null;
+  tenant_name?: string | null;
 }
 
 const ListingsPage = () => {
@@ -71,15 +75,19 @@ const ListingsPage = () => {
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude, intro_video_url")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
       if (data && data.length > 0) {
         const tenantIds = [...new Set(data.map((l: any) => l.tenant_id))];
-        const { data: profiles } = await supabase.from("profiles").select("id, id_verified").in("id", tenantIds) as any;
+        const { data: profiles } = await supabase.from("profiles").select("id, id_verified, first_name, last_name").in("id", tenantIds) as any;
         const verifiedMap: Record<string, boolean> = {};
-        (profiles || []).forEach((p: any) => { verifiedMap[p.id] = p.id_verified; });
+        const nameMap: Record<string, string> = {};
+        (profiles || []).forEach((p: any) => {
+          verifiedMap[p.id] = p.id_verified;
+          nameMap[p.id] = [p.first_name, p.last_name].filter(Boolean).join(" ") || "Host";
+        });
 
         const listingIds = data.map((l: any) => l.id);
         const { data: reviews } = await supabase.from("reviews").select("listing_id, rating").in("listing_id", listingIds) as any;
@@ -93,6 +101,7 @@ const ListingsPage = () => {
         const enriched = data.map((l: any) => ({
           ...l,
           tenant_verified: verifiedMap[l.tenant_id] || false,
+          tenant_name: nameMap[l.tenant_id] || "Host",
           avg_rating: ratingMap[l.id] ? ratingMap[l.id].sum / ratingMap[l.id].count : 0,
           review_count: ratingMap[l.id]?.count || 0,
         }));
@@ -292,6 +301,20 @@ const ListingsPage = () => {
                       Manager Approved
                     </span>
                   </div>
+                  {/* Video avatar thumbnail */}
+                  {listing.intro_video_url && (
+                    <div className="absolute left-3 bottom-3" onClick={(e) => e.stopPropagation()}>
+                      <VideoPlayer videoUrl={listing.intro_video_url} compact />
+                    </div>
+                  )}
+                  {/* Video badge */}
+                  {listing.intro_video_url && (
+                    <div className="absolute right-3 top-3">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-[10px] font-medium text-white">
+                        <Video className="h-3 w-3" /> Video
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -331,6 +354,14 @@ const ListingsPage = () => {
                 </div>
               </SheetHeader>
               <div className="mt-4 space-y-5">
+                {/* Tenant intro video */}
+                {selectedListing.intro_video_url && (
+                  <VideoPlayer
+                    videoUrl={selectedListing.intro_video_url}
+                    tenantName={selectedListing.tenant_name || "Host"}
+                    verified={selectedListing.tenant_verified}
+                  />
+                )}
                 {selectedListing.photos && selectedListing.photos[0] && (
                   <div className="overflow-hidden rounded-xl">
                     <img src={selectedListing.photos[0]} alt={selectedListing.headline || ""} className="h-56 w-full object-cover" />

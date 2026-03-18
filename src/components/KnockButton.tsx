@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import VideoPrompt from "@/components/video/VideoPrompt";
 
 /* ─── Custom SVG Icons ─── */
 const FistIcon = ({ className }: { className?: string }) => (
@@ -47,12 +48,16 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
   const [showRipple, setShowRipple] = useState(false);
   const [shaking, setShaking] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [showVideoPrompt, setShowVideoPrompt] = useState(false);
+  const [hasIntroVideo, setHasIntroVideo] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!user) return;
     supabase.from("knocks" as any).select("id").eq("listing_id", listingId).eq("knocker_id", user.id).maybeSingle()
       .then(({ data }) => { if (data) setKnocked(true); });
+    supabase.from("profiles").select("intro_video_url").eq("id", user.id).single()
+      .then(({ data }) => { if ((data as any)?.intro_video_url) setHasIntroVideo(true); });
   }, [user, listingId]);
 
   useEffect(() => { setCount(knockCount); }, [knockCount]);
@@ -115,6 +120,7 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
       }).catch(() => {});
 
       toast.success("Knock sent! The host will be notified.");
+      if (!hasIntroVideo) setShowVideoPrompt(true);
     } catch (err) {
       console.error("Knock error:", err);
       toast.error("Couldn't send your knock. Try again!");
@@ -161,25 +167,40 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
   }
 
   return (
-    <div className={cn("relative", className)} onClick={(e) => e.stopPropagation()}>
-      <button ref={btnRef} onClick={handleKnock} disabled={knocked || loading}
-        className={cn(
-          "group/knock relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all duration-200 overflow-visible",
-          knocked ? "bg-muted text-muted-foreground cursor-default animate-knock-confirm" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg active:scale-[0.98]"
-        )}>
-        {showRipple && (
-          <>
-            <span className="absolute inset-0 rounded-xl border-2 border-primary animate-knock-ripple-1 pointer-events-none" />
-            <span className="absolute inset-0 rounded-xl border-2 border-primary animate-knock-ripple-2 pointer-events-none" />
-            <span className="absolute inset-0 rounded-xl border border-primary animate-knock-ripple-3 pointer-events-none" />
-          </>
-        )}
-        <FistIcon className={cn("h-5 w-5 shrink-0 transition-transform", !knocked && "group-hover/knock:animate-knock-shake", shaking && "animate-knock-shake")} />
-        <span>{knocked ? "Knocked ✓" : "Knock"}</span>
-        {!knocked && count > 0 && (
-          <span className="ml-1 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs font-semibold leading-none">{count}</span>
-        )}
-      </button>
+    <div className={cn("space-y-3", className)} onClick={(e) => e.stopPropagation()}>
+      <div className="relative">
+        <button ref={btnRef} onClick={handleKnock} disabled={knocked || loading}
+          className={cn(
+            "group/knock relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold transition-all duration-200 overflow-visible",
+            knocked ? "bg-muted text-muted-foreground cursor-default animate-knock-confirm" : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg active:scale-[0.98]"
+          )}>
+          {showRipple && (
+            <>
+              <span className="absolute inset-0 rounded-xl border-2 border-primary animate-knock-ripple-1 pointer-events-none" />
+              <span className="absolute inset-0 rounded-xl border-2 border-primary animate-knock-ripple-2 pointer-events-none" />
+              <span className="absolute inset-0 rounded-xl border border-primary animate-knock-ripple-3 pointer-events-none" />
+            </>
+          )}
+          <FistIcon className={cn("h-5 w-5 shrink-0 transition-transform", !knocked && "group-hover/knock:animate-knock-shake", shaking && "animate-knock-shake")} />
+          <span>{knocked ? "Knocked ✓" : "Knock"}</span>
+          {!knocked && count > 0 && (
+            <span className="ml-1 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs font-semibold leading-none">{count}</span>
+          )}
+        </button>
+      </div>
+      {showVideoPrompt && (
+        <VideoPrompt
+          message="Tenants with a face video get responses 2x faster — introduce yourself in 30 seconds"
+          onVideoUploaded={async (url) => {
+            if (user) {
+              await supabase.from("profiles").update({ intro_video_url: url } as any).eq("id", user.id);
+              setHasIntroVideo(true);
+            }
+            setShowVideoPrompt(false);
+          }}
+          onDismiss={() => setShowVideoPrompt(false)}
+        />
+      )}
     </div>
   );
 };

@@ -996,6 +996,7 @@ export type Database = {
           headline: string | null
           house_rules: string | null
           id: string
+          intro_video_url: string | null
           knock_count: number
           latitude: number | null
           longitude: number | null
@@ -1034,6 +1035,7 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
+          intro_video_url?: string | null
           knock_count?: number
           latitude?: number | null
           longitude?: number | null
@@ -1072,6 +1074,7 @@ export type Database = {
           headline?: string | null
           house_rules?: string | null
           id?: string
+          intro_video_url?: string | null
           knock_count?: number
           latitude?: number | null
           longitude?: number | null
@@ -1240,6 +1243,7 @@ export type Database = {
           id: string
           id_document_url: string | null
           id_verified: boolean
+          intro_video_url: string | null
           last_name: string | null
           onboarding_complete: boolean
           phone: string | null
@@ -1261,6 +1265,7 @@ export type Database = {
           id: string
           id_document_url?: string | null
           id_verified?: boolean
+          intro_video_url?: string | null
           last_name?: string | null
           onboarding_complete?: boolean
           phone?: string | null
@@ -1282,6 +1287,7 @@ export type Database = {
           id?: string
           id_document_url?: string | null
           id_verified?: boolean
+          intro_video_url?: string | null
           last_name?: string | null
           onboarding_complete?: boolean
           phone?: string | null

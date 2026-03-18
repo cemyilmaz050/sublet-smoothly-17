@@ -14,6 +14,7 @@ import ListingStep2 from "@/components/listing/ListingStep2";
 import ListingStep3 from "@/components/listing/ListingStep3";
 import ListingStep4 from "@/components/listing/ListingStep4";
 import ListingStep5 from "@/components/listing/ListingStep5";
+import ListingStepVideo from "@/components/listing/ListingStepVideo";
 import PublishChecklist from "@/components/listing/PublishChecklist";
 import PublishSuccess from "@/components/listing/PublishSuccess";
 import TenantIdVerification from "@/components/TenantIdVerification";
@@ -23,7 +24,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
-const STEPS = ["Property Basics", "Photos & Description", "Pricing & Availability", "House Rules", "Review & Submit"];
+const STEPS = ["Property Basics", "Photos & Description", "Meet the Host", "Pricing & Availability", "House Rules", "Review & Submit"];
 
 const CreateListingPage = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const CreateListingPage = () => {
   const [published, setPublished] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(editId || null);
   const [idVerified, setIdVerified] = useState<boolean | null>(null);
+  const [introVideoUrl, setIntroVideoUrl] = useState<string | null>(null);
 
   // Check ID verification status
   useEffect(() => {
@@ -75,6 +77,7 @@ const CreateListingPage = () => {
           house_rules: data.house_rules || "",
           guest_policy: (data.guest_policy as any) || "",
         });
+        setIntroVideoUrl((data as any).intro_video_url || null);
       }
     };
     load();
@@ -104,13 +107,15 @@ const CreateListingPage = () => {
       if (!form.headline.trim()) e.headline = "Headline is required";
       if (!form.description.trim()) e.description = "Description is required";
     } else if (s === 2) {
+      // Video step — optional, always passes
+    } else if (s === 3) {
       if (form.monthly_rent === "" || Number(form.monthly_rent) <= 0) e.monthly_rent = "Enter a valid rent amount";
       if (form.security_deposit === "" || Number(form.security_deposit) < 0) e.security_deposit = "Enter a valid deposit";
       if (!form.available_from) e.available_from = "Start date is required";
       if (!form.available_until) e.available_until = "End date is required";
       if (form.available_from && form.available_until && form.available_until <= form.available_from)
         e.available_until = "Must be after start date";
-    } else if (s === 3) {
+    } else if (s === 4) {
       if (!form.guest_policy) e.guest_policy = "Guest policy is required";
     }
     setErrors(e);
@@ -147,13 +152,13 @@ const CreateListingPage = () => {
 
     if (draftId) {
       const photos = getPhotoUrls();
-      await supabase.from("listings").update({ ...payload, photos }).eq("id", draftId);
+      await supabase.from("listings").update({ ...payload, photos, intro_video_url: introVideoUrl || null } as any).eq("id", draftId);
     } else {
       const { data } = await supabase.from("listings").insert(payload).select("id").single();
       if (data) {
         setDraftId(data.id);
         const photos = getPhotoUrls();
-        await supabase.from("listings").update({ photos }).eq("id", data.id);
+        await supabase.from("listings").update({ photos, intro_video_url: introVideoUrl || null } as any).eq("id", data.id);
       }
     }
   };
@@ -198,10 +203,11 @@ const CreateListingPage = () => {
         house_rules: form.house_rules || null,
         guest_policy: form.guest_policy || null,
         photos,
+        intro_video_url: introVideoUrl || null,
         status: newStatus as any,
         published_at: isManaged ? null : new Date().toISOString(),
         management_group_id: isManaged ? BBG_PM_ID : null,
-      };
+      } as any;
 
       if (draftId) {
         const { error } = await supabase.from("listings").update(payload).eq("id", draftId);
@@ -288,15 +294,21 @@ const CreateListingPage = () => {
           <CardContent className="p-6">
             {step === 0 && <ListingStep1 data={form} onChange={onChange} errors={errors} />}
             {step === 1 && <ListingStep2 data={form} onChange={onChange} errors={errors} />}
-            {step === 2 && <ListingStep3 data={form} onChange={onChange} errors={errors} />}
-            {step === 3 && <ListingStep4 data={form} onChange={onChange} errors={errors} />}
-            {step === 4 && (
+            {step === 2 && (
+              <ListingStepVideo
+                videoUrl={introVideoUrl}
+                onVideoUploaded={(url) => setIntroVideoUrl(url || null)}
+                onSkip={() => setStep((s) => s + 1)}
+              />
+            )}
+            {step === 3 && <ListingStep3 data={form} onChange={onChange} errors={errors} />}
+            {step === 4 && <ListingStep4 data={form} onChange={onChange} errors={errors} />}
+            {step === 5 && (
               <>
                 <ListingStep5 data={form} confirmed={confirmed} onConfirmChange={setConfirmed} onGoToStep={setStep} />
                 <div className="mt-6">
                   {checklist.ChecklistUI}
                 </div>
-                {/* Optional ID Verification — not required to publish */}
                 {idVerified === false && (
                   <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
                     <p className="text-sm font-medium text-foreground mb-1">
@@ -316,7 +328,7 @@ const CreateListingPage = () => {
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {step === 0 ? "Cancel" : "Back"}
               </Button>
-              {step < 4 ? (
+              {step < 5 ? (
                 <Button onClick={nextStep}>
                   Next
                   <ArrowRight className="ml-1 h-4 w-4" />
