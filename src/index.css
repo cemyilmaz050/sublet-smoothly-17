@@ -197,3 +197,8 @@ html {
 .leaflet-map-pane { z-index: 1 !important; }
 .leaflet-control { z-index: 10 !important; }
 .leaflet-top, .leaflet-bottom { z-index: 10 !important; }
+
+/* Mirror front-facing camera */
+video.mirror {
+  transform: scaleX(-1);
+}
