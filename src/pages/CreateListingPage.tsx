@@ -292,15 +292,21 @@ const CreateListingPage = () => {
           <CardContent className="p-6">
             {step === 0 && <ListingStep1 data={form} onChange={onChange} errors={errors} />}
             {step === 1 && <ListingStep2 data={form} onChange={onChange} errors={errors} />}
-            {step === 2 && <ListingStep3 data={form} onChange={onChange} errors={errors} />}
-            {step === 3 && <ListingStep4 data={form} onChange={onChange} errors={errors} />}
-            {step === 4 && (
+            {step === 2 && (
+              <ListingStepVideo
+                videoUrl={introVideoUrl}
+                onVideoUploaded={(url) => setIntroVideoUrl(url || null)}
+                onSkip={() => setStep((s) => s + 1)}
+              />
+            )}
+            {step === 3 && <ListingStep3 data={form} onChange={onChange} errors={errors} />}
+            {step === 4 && <ListingStep4 data={form} onChange={onChange} errors={errors} />}
+            {step === 5 && (
               <>
                 <ListingStep5 data={form} confirmed={confirmed} onConfirmChange={setConfirmed} onGoToStep={setStep} />
                 <div className="mt-6">
                   {checklist.ChecklistUI}
                 </div>
-                {/* Optional ID Verification — not required to publish */}
                 {idVerified === false && (
                   <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
                     <p className="text-sm font-medium text-foreground mb-1">
