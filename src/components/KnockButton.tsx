@@ -56,6 +56,8 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
     if (!user) return;
     supabase.from("knocks" as any).select("id").eq("listing_id", listingId).eq("knocker_id", user.id).maybeSingle()
       .then(({ data }) => { if (data) setKnocked(true); });
+    supabase.from("profiles").select("intro_video_url").eq("id", user.id).single()
+      .then(({ data }) => { if ((data as any)?.intro_video_url) setHasIntroVideo(true); });
   }, [user, listingId]);
 
   useEffect(() => { setCount(knockCount); }, [knockCount]);
