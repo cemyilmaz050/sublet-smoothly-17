@@ -28,6 +28,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 
+import VideoPlayer from "@/components/video/VideoPlayer";
+
 interface ListingItem {
   id: string;
   headline: string | null;
@@ -48,6 +50,8 @@ interface ListingItem {
   tenant_verified?: boolean;
   avg_rating?: number;
   review_count?: number;
+  intro_video_url?: string | null;
+  tenant_name?: string | null;
 }
 
 const ListingsPage = () => {
