@@ -8,7 +8,7 @@ import NotificationBell from "@/components/NotificationBell";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import FriendSubletPreScreen from "@/components/FriendSubletPreScreen";
 import FriendSubletFlow from "@/components/FriendSubletFlow";
-import NavLink from "@/components/NavLink";
+
 import logo from "@/assets/subin-logo.png";
 
 const Navbar = () => {
