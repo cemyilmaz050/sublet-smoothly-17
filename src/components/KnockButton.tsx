@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import VideoPrompt from "@/components/video/VideoPrompt";
 
 /* ─── Custom SVG Icons ─── */
 const FistIcon = ({ className }: { className?: string }) => (
