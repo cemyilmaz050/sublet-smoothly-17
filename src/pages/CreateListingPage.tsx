@@ -202,10 +202,11 @@ const CreateListingPage = () => {
         house_rules: form.house_rules || null,
         guest_policy: form.guest_policy || null,
         photos,
+        intro_video_url: introVideoUrl || null,
         status: newStatus as any,
         published_at: isManaged ? null : new Date().toISOString(),
         management_group_id: isManaged ? BBG_PM_ID : null,
-      };
+      } as any;
 
       if (draftId) {
         const { error } = await supabase.from("listings").update(payload).eq("id", draftId);
