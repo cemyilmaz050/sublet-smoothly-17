@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -128,12 +128,6 @@ export default {
           "0%": { transform: "translateY(-12px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
-        "flame-flicker": {
-          "0%, 100%": { transform: "scaleY(1) scaleX(1)" },
-          "25%": { transform: "scaleY(1.1) scaleX(0.95)" },
-          "50%": { transform: "scaleY(0.95) scaleX(1.05)" },
-          "75%": { transform: "scaleY(1.08) scaleX(0.97)" },
-        },
         "fade-out": {
           "0%": { opacity: "1" },
           "100%": { opacity: "0" },
@@ -149,7 +143,6 @@ export default {
         "knock-confirm": "knock-confirm 0.35s ease-out",
         "pulse-dot": "pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "slide-in-down": "slide-in-down 0.3s ease-out",
-        "flame-flicker": "flame-flicker 0.6s ease-in-out infinite",
         "fade-out": "fade-out 0.8s ease-out 0.5s forwards",
       },
     },
