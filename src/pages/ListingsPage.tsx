@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
-  MapPin, Calendar, ShieldCheck, Heart, Building2,
+  MapPin, Calendar, ShieldCheck, Heart, Building2, Video,
   Search, SlidersHorizontal, Pencil, Eye, X, Map,
   MessageSquare, Loader2, CalendarIcon, Home, Check,
 } from "lucide-react";
