@@ -106,13 +106,15 @@ const CreateListingPage = () => {
       if (!form.headline.trim()) e.headline = "Headline is required";
       if (!form.description.trim()) e.description = "Description is required";
     } else if (s === 2) {
+      // Video step — optional, always passes
+    } else if (s === 3) {
       if (form.monthly_rent === "" || Number(form.monthly_rent) <= 0) e.monthly_rent = "Enter a valid rent amount";
       if (form.security_deposit === "" || Number(form.security_deposit) < 0) e.security_deposit = "Enter a valid deposit";
       if (!form.available_from) e.available_from = "Start date is required";
       if (!form.available_until) e.available_until = "End date is required";
       if (form.available_from && form.available_until && form.available_until <= form.available_from)
         e.available_until = "Must be after start date";
-    } else if (s === 3) {
+    } else if (s === 4) {
       if (!form.guest_policy) e.guest_policy = "Guest policy is required";
     }
     setErrors(e);
