@@ -48,6 +48,8 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
   const [showRipple, setShowRipple] = useState(false);
   const [shaking, setShaking] = useState(false);
   const [confirming, setConfirming] = useState(false);
+  const [showVideoPrompt, setShowVideoPrompt] = useState(false);
+  const [hasIntroVideo, setHasIntroVideo] = useState(false);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
