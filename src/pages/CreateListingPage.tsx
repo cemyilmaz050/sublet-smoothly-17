@@ -38,6 +38,7 @@ const CreateListingPage = () => {
   const [published, setPublished] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(editId || null);
   const [idVerified, setIdVerified] = useState<boolean | null>(null);
+  const [introVideoUrl, setIntroVideoUrl] = useState<string | null>(null);
 
   // Check ID verification status
   useEffect(() => {
