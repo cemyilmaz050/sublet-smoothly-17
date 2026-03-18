@@ -354,6 +354,14 @@ const ListingsPage = () => {
                 </div>
               </SheetHeader>
               <div className="mt-4 space-y-5">
+                {/* Tenant intro video */}
+                {selectedListing.intro_video_url && (
+                  <VideoPlayer
+                    videoUrl={selectedListing.intro_video_url}
+                    tenantName={selectedListing.tenant_name || "Host"}
+                    verified={selectedListing.tenant_verified}
+                  />
+                )}
                 {selectedListing.photos && selectedListing.photos[0] && (
                   <div className="overflow-hidden rounded-xl">
                     <img src={selectedListing.photos[0]} alt={selectedListing.headline || ""} className="h-56 w-full object-cover" />
