@@ -301,6 +301,20 @@ const ListingsPage = () => {
                       Manager Approved
                     </span>
                   </div>
+                  {/* Video avatar thumbnail */}
+                  {listing.intro_video_url && (
+                    <div className="absolute left-3 bottom-3" onClick={(e) => e.stopPropagation()}>
+                      <VideoPlayer videoUrl={listing.intro_video_url} compact />
+                    </div>
+                  )}
+                  {/* Video badge */}
+                  {listing.intro_video_url && (
+                    <div className="absolute right-3 top-3">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-[10px] font-medium text-white">
+                        <Video className="h-3 w-3" /> Video
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
