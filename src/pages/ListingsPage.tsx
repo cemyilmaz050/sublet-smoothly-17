@@ -55,7 +55,7 @@ interface ListingItem {
 const ListingsPage = () => {
   const { user, role } = useAuth();
   const { requireAuth } = useAuthModal();
-  const welcomePopup = useWelcomePopup();
+  
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
