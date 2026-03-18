@@ -1,7 +1,7 @@
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload, ClipboardCheck } from "lucide-react";
-import heroImage from "@/assets/hero-apartment.jpg";
+import heroVideoAsset from "../../public/hero-process.mp4.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 
 const HomePage = () => {
@@ -15,9 +15,12 @@ const HomePage = () => {
     <div className="min-h-screen bg-background">
       {/* Hero — full screen with photo background */}
       <section className="relative flex min-h-[85vh] items-center">
-        <img
-          src={heroImage}
-          alt="Boston apartment interior"
+        <video
+          src={heroVideoAsset.url}
+          autoPlay
+          muted
+          loop
+          playsInline
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
