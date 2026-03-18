@@ -14,6 +14,7 @@ import ListingStep2 from "@/components/listing/ListingStep2";
 import ListingStep3 from "@/components/listing/ListingStep3";
 import ListingStep4 from "@/components/listing/ListingStep4";
 import ListingStep5 from "@/components/listing/ListingStep5";
+import ListingStepVideo from "@/components/listing/ListingStepVideo";
 import PublishChecklist from "@/components/listing/PublishChecklist";
 import PublishSuccess from "@/components/listing/PublishSuccess";
 import TenantIdVerification from "@/components/TenantIdVerification";
