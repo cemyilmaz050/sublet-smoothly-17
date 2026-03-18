@@ -126,10 +126,6 @@ const App = () => (
                     <Route path="approvals" element={<ManagerApprovals />} />
                     <Route path="listings" element={<ManagerListings />} />
                     <Route path="applications" element={<ManagerApplications />} />
-                    <Route path="messages" element={<ManagerMessages />} />
-                    <Route path="notifications" element={<ManagerNotifications />} />
-                    <Route path="checks" element={<ManagerBackgroundChecks />} />
-                    <Route path="payments" element={<ManagerPayments />} />
                     <Route path="documents" element={<ManagerDocuments />} />
                     <Route path="settings" element={<ManagerSettings />} />
                   </Route>
