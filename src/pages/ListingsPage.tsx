@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import WelcomePopup, { useWelcomePopup } from "@/components/WelcomePopup";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,7 +55,7 @@ interface ListingItem {
 const ListingsPage = () => {
   const { user, role } = useAuth();
   const { requireAuth } = useAuthModal();
-  const welcomePopup = useWelcomePopup();
+  
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
@@ -238,8 +237,6 @@ const ListingsPage = () => {
 
     return (
     <div className="flex flex-col bg-background" style={{ height: "calc(100dvh - 4rem)" }}>
-      <WelcomePopup show={welcomePopup.show} returningMode={welcomePopup.returningMode} dismiss={welcomePopup.dismiss} />
-
       {/* ===== LISTINGS SECTION ===== */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Search & Filter Bar */}
