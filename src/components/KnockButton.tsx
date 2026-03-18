@@ -120,6 +120,7 @@ const KnockButton = ({ listingId, tenantId, listingHeadline, listingAddress, kno
       }).catch(() => {});
 
       toast.success("Knock sent! The host will be notified.");
+      if (!hasIntroVideo) setShowVideoPrompt(true);
     } catch (err) {
       console.error("Knock error:", err);
       toast.error("Couldn't send your knock. Try again!");
