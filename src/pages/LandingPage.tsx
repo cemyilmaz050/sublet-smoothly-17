@@ -24,7 +24,7 @@ const LandingPage = () => {
             {[
               { step: "01", icon: Upload, title: "List Your Space", desc: "Upload your documents and create a detailed listing for your apartment." },
               { step: "02", icon: ShieldCheck, title: "Get Approved", desc: "Your property manager reviews and approves the sublet request." },
-              { step: "03", icon: Users, title: "Move In", desc: "Sign the digital agreement and welcome your verified subtenant." },
+              { step: "03", icon: Users, title: "Close the Deal", desc: "Sign the digital agreement and welcome your verified subtenant." },
             ].map((item) => (
               <div key={item.step} className="relative rounded-2xl border bg-card p-8 text-center shadow-card hover:shadow-elevated transition-shadow">
                 <span className="absolute top-4 right-5 text-sm font-medium text-muted-foreground/50">{item.step}</span>
