@@ -91,7 +91,7 @@ const HomePage = () => {
               {
                 step: "03",
                 icon: Users,
-                title: "Move In",
+                title: "Close the Deal",
                 desc: "Sign the digital agreement and welcome your verified subtenant.",
               },
             ].map((item) => (
