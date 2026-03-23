@@ -305,15 +305,28 @@ const SignUpPage = () => {
               </div>
             )}
             <p className="text-xs text-muted-foreground">Don't see it? Check your <strong>spam or junk folder</strong>.</p>
-            <div className="flex flex-col gap-3">
-              <Button onClick={() => handleResendVerification(email)} disabled={resending || resendCooldown > 0} variant="outline" size="lg">
-                {resending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
-                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Email"}
-              </Button>
-              <button onClick={() => { setEmailSent(false); setStep(2); }} className="text-sm text-muted-foreground hover:text-primary">
-                Wrong email? ← Go back
-              </button>
+
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Didn't receive the email?</p>
+              {resendCooldown > 0 ? (
+                <p className="text-sm font-medium text-muted-foreground">
+                  Resend in 0:{resendCooldown.toString().padStart(2, "0")}
+                </p>
+              ) : resending ? (
+                <p className="text-sm font-medium text-primary">Sending...</p>
+              ) : (
+                <button
+                  onClick={() => handleResendVerification(email)}
+                  className="text-sm font-medium text-[#7C3AED] hover:underline"
+                >
+                  Resend verification email
+                </button>
+              )}
             </div>
+
+            <button onClick={() => { setEmailSent(false); setStep(2); }} className="text-sm text-muted-foreground hover:text-primary">
+              Wrong email? ← Go back
+            </button>
           </motion.div>
         </div>
       </div>
