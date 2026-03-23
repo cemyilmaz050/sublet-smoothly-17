@@ -132,6 +132,10 @@ export default {
           "0%": { opacity: "1" },
           "100%": { opacity: "0" },
         },
+        "phone-scroll": {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
