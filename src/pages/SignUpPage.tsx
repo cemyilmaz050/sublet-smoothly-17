@@ -51,6 +51,7 @@ const SignUpPage = () => {
   const [duplicateEmail, setDuplicateEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [nonBbgManagerBlock, setNonBbgManagerBlock] = useState(false);
 
