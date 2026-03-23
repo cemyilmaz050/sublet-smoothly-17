@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarRangePickerProps {
   availableFrom: string;
@@ -8,6 +9,7 @@ interface CalendarRangePickerProps {
 }
 
 const CalendarRangePicker = ({ availableFrom, availableUntil, onSelect }: CalendarRangePickerProps) => {
+  const isMobile = useIsMobile();
   const [baseMonth, setBaseMonth] = useState(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
@@ -52,7 +54,7 @@ const CalendarRangePicker = ({ availableFrom, availableUntil, onSelect }: Calend
     };
 
     return (
-      <div className="flex-1 min-w-[260px]">
+      <div className="flex-1 min-w-0">
         <p className="mb-3 text-center text-sm font-semibold text-foreground">{monthName}</p>
         <div className="grid grid-cols-7 gap-0.5 text-center text-xs">
           {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
@@ -64,7 +66,7 @@ const CalendarRangePicker = ({ availableFrom, availableUntil, onSelect }: Calend
                 <button
                   disabled={isPast(day)}
                   onClick={() => handleDayClick(`${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`)}
-                  className={`w-full rounded-md py-1.5 text-sm transition-colors
+                  className={`w-full rounded-md py-2.5 text-sm transition-colors min-h-[44px]
                     ${isPast(day) ? "text-muted-foreground/40 cursor-not-allowed" : ""}
                     ${isStart(day) || isEnd(day) ? "bg-primary text-primary-foreground font-semibold" : ""}
                     ${isInRange(day) ? "bg-accent text-accent-foreground" : ""}
@@ -94,19 +96,23 @@ const CalendarRangePicker = ({ availableFrom, availableUntil, onSelect }: Calend
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <button onClick={() => setBaseMonth(new Date(baseMonth.getFullYear(), baseMonth.getMonth() - 1, 1))} className="rounded-full p-1 hover:bg-muted">
+        <button onClick={() => setBaseMonth(new Date(baseMonth.getFullYear(), baseMonth.getMonth() - 1, 1))} className="rounded-full p-2 hover:bg-muted min-h-[44px] min-w-[44px] flex items-center justify-center">
           <ChevronLeft className="h-5 w-5 text-muted-foreground" />
         </button>
-        <button onClick={() => setBaseMonth(new Date(baseMonth.getFullYear(), baseMonth.getMonth() + 1, 1))} className="rounded-full p-1 hover:bg-muted">
+        <button onClick={() => setBaseMonth(new Date(baseMonth.getFullYear(), baseMonth.getMonth() + 1, 1))} className="rounded-full p-2 hover:bg-muted min-h-[44px] min-w-[44px] flex items-center justify-center">
           <ChevronRight className="h-5 w-5 text-muted-foreground" />
         </button>
       </div>
-      <div className="flex gap-6 overflow-x-auto">
-        {renderMonth(baseMonth)}
-        {renderMonth(nextMonthDate)}
-      </div>
+      {isMobile ? (
+        <div>{renderMonth(baseMonth)}</div>
+      ) : (
+        <div className="flex gap-6">
+          {renderMonth(baseMonth)}
+          {renderMonth(nextMonthDate)}
+        </div>
+      )}
       {formatRange() && (
-        <p className="rounded-lg bg-accent px-4 py-2 text-center text-sm font-medium text-primary">{formatRange()}</p>
+        <p className="rounded-lg bg-accent px-4 py-3 text-center text-sm font-medium text-primary">{formatRange()}</p>
       )}
     </div>
   );
