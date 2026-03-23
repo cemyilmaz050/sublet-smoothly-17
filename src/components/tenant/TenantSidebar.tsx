@@ -1,5 +1,6 @@
-import { Building2, LayoutDashboard, List, MessageSquare, Users, CalendarDays, FileText, Settings } from "lucide-react";
+import { LayoutDashboard, List, MessageSquare, Users, CalendarDays, FileText, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import Logo from "@/components/Logo";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -32,10 +33,11 @@ const TenantSidebar = () => {
       <SidebarContent>
         {/* Logo */}
         <div className="flex items-center gap-2 px-4 py-4">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary">
-            <Building2 className="h-5 w-5 text-primary-foreground" />
-          </div>
-          {!collapsed && <span className="text-lg font-bold text-foreground">SubIn</span>}
+          {collapsed ? (
+            <Logo className="h-7 w-auto" />
+          ) : (
+            <Logo className="h-8 w-auto" />
+          )}
         </div>
 
         <SidebarGroup>

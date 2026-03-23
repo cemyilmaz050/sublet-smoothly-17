@@ -70,7 +70,7 @@ const HomePage = () => {
         />
 
         {/* Desktop hero content — bottom aligned */}
-        <div className="hidden sm:flex relative z-10 w-full flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 min-h-screen">
+        <div className="hidden sm:flex relative z-10 w-full flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-36 sm:pb-40 min-h-screen">
           {/* Left: Main heading */}
           <div className="mt-auto sm:max-w-[42%]">
             <h1
@@ -103,7 +103,7 @@ const HomePage = () => {
         </div>
 
         {/* === MOBILE LAYOUT (below sm) === */}
-        <div className="flex sm:hidden relative z-10 flex-col items-center justify-start w-full min-h-screen pt-20 pb-12 px-6">
+        <div className="flex sm:hidden relative z-10 flex-col items-center justify-start w-full min-h-screen pt-20 pb-32 px-6">
           {/* Phone mockup */}
           <div className="mb-8" style={{ filter: "drop-shadow(0 30px 50px rgba(0,0,0,0.6))" }}>
             <PhoneMock mobile />
@@ -137,6 +137,14 @@ const HomePage = () => {
             subtenants, and property managers.
           </p>
         </div>
+        {/* Hero-to-content gradient fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-[5] pointer-events-none"
+          style={{
+            height: 120,
+            background: "linear-gradient(to bottom, transparent 0%, #ffffff 100%)",
+          }}
+        />
       </section>
 
       {/* Trust signals bar */}
