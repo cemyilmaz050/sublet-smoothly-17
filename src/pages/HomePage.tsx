@@ -67,7 +67,7 @@ const HomePage = () => {
                 borderRadius: 24,
               }}
             >
-              <PhoneMock screenOnly />
+              <PhoneMock />
             </div>
           </div>
         </div>
