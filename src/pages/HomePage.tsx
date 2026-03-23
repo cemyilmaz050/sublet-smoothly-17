@@ -137,6 +137,14 @@ const HomePage = () => {
             subtenants, and property managers.
           </p>
         </div>
+        {/* Hero-to-content gradient fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-[5] pointer-events-none"
+          style={{
+            height: 120,
+            background: "linear-gradient(to bottom, transparent 0%, #ffffff 100%)",
+          }}
+        />
       </section>
 
       {/* Trust signals bar */}
