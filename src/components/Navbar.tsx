@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import useHasPublishedListing from "@/hooks/useHasPublishedListing";
@@ -8,7 +8,7 @@ import NotificationBell from "@/components/NotificationBell";
 import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import FriendSubletPreScreen from "@/components/FriendSubletPreScreen";
 import FriendSubletFlow from "@/components/FriendSubletFlow";
-import logo from "@/assets/subin-logo.png";
+import Logo from "@/components/Logo";
 
 const Navbar = () => {
   const location = useLocation();
@@ -19,9 +19,20 @@ const Navbar = () => {
   const [subletOpen, setSubletOpen] = useState(false);
   const [preScreenOpen, setPreScreenOpen] = useState(false);
   const [friendFlowOpen, setFriendFlowOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const isListingsActive = location.pathname === "/listings";
   const isHomePage = location.pathname === "/";
+
+  useEffect(() => {
+    if (!isHomePage) return;
+    const handleScroll = () => {
+      setScrolled(window.scrollY > window.innerHeight * 0.8);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHomePage]);
 
   const handleHowItWorks = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,26 +43,29 @@ const Navbar = () => {
     }
   };
 
+  // Determine navbar style
+  const isTransparent = isHomePage && !scrolled;
+  const logoVariant = isTransparent ? "light" : "dark";
+
   return (
     <>
       <nav
-        className={`${
-          isHomePage
-            ? "fixed top-0 left-0 right-0 z-[100] bg-transparent"
-            : "sticky top-0 z-[100] border-b bg-card/95 backdrop-blur-lg"
-        } w-full`}
+        className="fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ease-in-out"
+        style={
+          isTransparent
+            ? { background: "transparent" }
+            : {
+                background: "rgba(255,255,255,0.97)",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 1px 12px rgba(0,0,0,0.08)",
+              }
+        }
       >
         <div className="flex h-16 items-center justify-between px-6 w-full">
           {/* Left: Logo */}
           <div className="flex items-center">
             <Link to={user ? "/listings" : "/"} className="flex items-center">
-              {isHomePage ? (
-                <span className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "Inter, sans-serif" }}>
-                  SubIn
-                </span>
-              ) : (
-                <img src={logo} alt="SubIn" className="h-10" />
-              )}
+              <Logo variant={logoVariant} />
             </Link>
           </div>
 
@@ -82,7 +96,7 @@ const Navbar = () => {
                 <Link to="/login">
                   <button
                     className={`hidden sm:block rounded-full border px-5 py-2 text-sm font-semibold transition-colors ${
-                      isHomePage
+                      isTransparent
                         ? "border-white/40 text-white hover:bg-white/10"
                         : "border-border text-foreground hover:bg-muted"
                     }`}
@@ -93,7 +107,7 @@ const Navbar = () => {
                 <Link to="/signup">
                   <button
                     className={`hidden sm:block rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
-                      isHomePage
+                      isTransparent
                         ? "bg-white text-[#1a1008] hover:bg-white/90"
                         : "bg-primary text-primary-foreground hover:bg-primary/90"
                     }`}

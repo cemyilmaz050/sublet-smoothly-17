@@ -103,7 +103,7 @@ const HomePage = () => {
         </div>
 
         {/* === MOBILE LAYOUT (below sm) === */}
-        <div className="flex sm:hidden relative z-10 flex-col items-center justify-start w-full min-h-screen pt-20 pb-12 px-6">
+        <div className="flex sm:hidden relative z-10 flex-col items-center justify-start w-full min-h-screen pt-20 pb-32 px-6">
           {/* Phone mockup */}
           <div className="mb-8" style={{ filter: "drop-shadow(0 30px 50px rgba(0,0,0,0.6))" }}>
             <PhoneMock mobile />
