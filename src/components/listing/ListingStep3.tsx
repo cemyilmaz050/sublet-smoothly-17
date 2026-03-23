@@ -22,15 +22,17 @@ const ListingStep3 = ({ data, onChange, errors }: Props) => {
   return (
     <div className="space-y-5">
       <h2 className="text-xl font-semibold text-foreground">Pricing & Availability</h2>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="rent">Monthly Rent ($) *</Label>
           <Input
             id="rent"
             type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             min={0}
             placeholder="2500"
-            className="mt-1.5"
+            className="mt-1.5 text-base"
             value={data.monthly_rent}
             onChange={(e) => onChange({ monthly_rent: e.target.value ? Number(e.target.value) : "" })}
           />
@@ -41,16 +43,18 @@ const ListingStep3 = ({ data, onChange, errors }: Props) => {
           <Input
             id="deposit"
             type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             min={0}
             placeholder="2500"
-            className="mt-1.5"
+            className="mt-1.5 text-base"
             value={data.security_deposit}
             onChange={(e) => onChange({ security_deposit: e.target.value ? Number(e.target.value) : "" })}
           />
           {errors.security_deposit && <p className="mt-1 text-sm text-destructive">{errors.security_deposit}</p>}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <Label>Available From *</Label>
           <Popover>
