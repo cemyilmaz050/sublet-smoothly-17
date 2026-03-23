@@ -70,8 +70,8 @@ const ListingStep5 = ({ data, confirmed, onConfirmChange, onGoToStep }: Props) =
 
       <Separator />
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4">
-        <Checkbox checked={confirmed} onCheckedChange={(v) => onConfirmChange(!!v)} className="mt-0.5" />
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg border p-4 min-h-[56px]">
+        <Checkbox checked={confirmed} onCheckedChange={(v) => onConfirmChange(!!v)} className="mt-0.5 h-6 w-6" />
         <span className="text-sm text-foreground">
           I confirm everything looks good and I have approval to sublet this place. Let's go!
         </span>

@@ -45,7 +45,7 @@ const ListingStep4 = ({ data, onChange, errors }: Props) => {
           placeholder="e.g. No loud music after 10pm, take out trash on Tuesdays..."
           maxLength={300}
           rows={3}
-          className="mt-1.5"
+          className="mt-1.5 text-base"
           value={data.house_rules}
           onChange={(e) => onChange({ house_rules: e.target.value })}
         />

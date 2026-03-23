@@ -520,9 +520,9 @@ const UniversalPhotoUploader = ({
               <button
                 type="button"
                 onClick={() => removeUploading(u.id)}
-                className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-foreground/60 text-background opacity-0 transition-opacity group-hover:opacity-100"
+                className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-foreground/60 text-background opacity-100 sm:opacity-0 transition-opacity group-hover:opacity-100"
               >
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4" />
               </button>
             </div>
           ))}
