@@ -19,35 +19,70 @@ const HomePage = () => {
           }}
         />
 
-        {/* Warm cinematic overlay */}
+        {/* Layer 1 — warm amber color tint */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 z-[1]"
+          style={{ background: "rgba(100, 40, 5, 0.45)" }}
+        />
+
+        {/* Layer 2 — directional warm gradient */}
+        <div
+          className="absolute inset-0 z-[2]"
           style={{
             background:
-              "linear-gradient(135deg, rgba(15, 8, 3, 0.75) 0%, rgba(40, 20, 5, 0.65) 100%)",
+              "linear-gradient(to bottom right, rgba(15, 6, 1, 0.6) 0%, rgba(90, 38, 4, 0.4) 50%, rgba(15, 6, 1, 0.7) 100%)",
           }}
         />
 
         {/* Vignette */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 z-[3]"
           style={{
             background:
               "radial-gradient(ellipse at center, transparent 30%, rgba(10, 5, 2, 0.45) 100%)",
           }}
         />
 
-        {/* Phone — centered */}
+        {/* Phone — centered, slightly rotated with hand */}
         <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
-          <div className="opacity-95 drop-shadow-2xl" style={{ filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.5))" }}>
-            <PhoneMock />
+          <div
+            style={{
+              transform: "rotate(1.5deg)",
+              filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.7))",
+            }}
+          >
+            <div className="relative">
+              <PhoneMock />
+              {/* Hand shape */}
+              <div
+                className="absolute left-1/2"
+                style={{
+                  bottom: -120,
+                  transform: "translateX(-50%)",
+                  width: 320,
+                  height: 200,
+                  background:
+                    "linear-gradient(to top, rgba(180, 100, 50, 0.9) 0%, rgba(160, 85, 40, 0.7) 50%, transparent 100%)",
+                  borderRadius: "40% 40% 0 0",
+                  zIndex: 1,
+                }}
+              />
+            </div>
           </div>
         </div>
 
+        {/* Left text backing gradient for legibility */}
+        <div
+          className="absolute inset-0 z-[4] pointer-events-none"
+          style={{
+            background: "linear-gradient(to right, rgba(10,4,1,0.8) 0%, rgba(10,4,1,0.4) 35%, transparent 55%)",
+          }}
+        />
+
         {/* Hero content — bottom aligned */}
         <div className="relative z-10 w-full flex flex-col sm:flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 mt-auto">
-          {/* Left: Main heading */}
-          <div className="mb-8 sm:mb-0">
+          {/* Left: Main heading — constrained width */}
+          <div className="mb-8 sm:mb-0 sm:max-w-[45%]">
             <h1
               className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.05] tracking-tight"
               style={{ fontFamily: "Inter, sans-serif" }}
