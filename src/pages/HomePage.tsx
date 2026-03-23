@@ -119,6 +119,21 @@ const HomePage = () => {
             the right way
           </h1>
 
+          {/* Subtext */}
+          <p
+            className="mt-3 text-center max-w-[280px] leading-relaxed"
+            style={{
+              color: "rgba(255, 235, 210, 0.85)",
+              fontSize: 15,
+              fontWeight: 400,
+              textShadow: "0 1px 4px rgba(0,0,0,0.4)",
+            }}
+          >
+            The trusted platform for tenants,
+            <br />
+            subtenants, and property managers.
+          </p>
+
           {/* CTA button */}
           <Link to="/signup?role=tenant" className="mt-6">
             <Button
@@ -129,13 +144,6 @@ const HomePage = () => {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
-
-          {/* Subtext */}
-          <p className="mt-3 text-white/60 text-sm leading-relaxed text-center max-w-[260px]">
-            The trusted platform for tenants,
-            <br />
-            subtenants, and property managers.
-          </p>
         </div>
         {/* Hero-to-content gradient fade */}
         <div
