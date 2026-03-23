@@ -367,51 +367,76 @@ const UniversalPhotoUploader = ({
         </div>
       )}
 
-      {/* Drop zone */}
-      <label
-        className={cn(
-          "flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed transition-all duration-200",
-          compact ? "p-4" : "p-8",
-          dragOver
-            ? "border-primary bg-primary/5 scale-[1.01] shadow-lg"
-            : "border-border hover:border-primary/40 hover:bg-accent/30"
-        )}
-        onDragOver={handleDragOver}
-        onDragEnter={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div
+      {/* Mobile-friendly upload buttons */}
+      {typeof window !== "undefined" && window.innerWidth < 768 ? (
+        <div className="flex flex-col gap-3">
+          <label className="flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-4 text-base font-medium cursor-pointer min-h-[48px]">
+            📷 Add Photos from Camera Roll
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/heic,image/webp"
+              multiple
+              className="hidden"
+              onChange={handleFileInput}
+            />
+          </label>
+          <label className="flex items-center justify-center gap-2 bg-background border-2 border-primary text-primary rounded-xl px-4 py-4 text-base font-medium cursor-pointer min-h-[48px]">
+            🤳 Take a New Photo
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleFileInput}
+            />
+          </label>
+        </div>
+      ) : (
+        /* Desktop drop zone */
+        <label
           className={cn(
-            "flex items-center justify-center rounded-full transition-colors",
-            compact ? "h-10 w-10" : "h-14 w-14",
-            dragOver ? "bg-primary/10" : "bg-accent"
+            "flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed transition-all duration-200",
+            compact ? "p-4" : "p-8",
+            dragOver
+              ? "border-primary bg-primary/5 scale-[1.01] shadow-lg"
+              : "border-border hover:border-primary/40 hover:bg-accent/30"
           )}
+          onDragOver={handleDragOver}
+          onDragEnter={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
         >
-          {dragOver ? (
-            <Upload className={cn("text-primary", compact ? "h-5 w-5" : "h-7 w-7")} />
-          ) : (
-            <Camera className={cn("text-primary", compact ? "h-5 w-5" : "h-7 w-7")} />
-          )}
-        </div>
-        <div className="text-center">
-          <p className={cn("font-medium text-foreground", compact ? "text-xs" : "text-sm")}>
-            {dragOver ? "Drop photos here" : "Drag photos here or click to browse"}
-          </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            JPG, PNG, HEIC, WEBP · Max 10MB each · Up to {maxPhotos} photos
-          </p>
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/jpeg,image/png,image/heic,image/webp"
-          capture="environment"
-          className="hidden"
-          onChange={handleFileInput}
-        />
-      </label>
+          <div
+            className={cn(
+              "flex items-center justify-center rounded-full transition-colors",
+              compact ? "h-10 w-10" : "h-14 w-14",
+              dragOver ? "bg-primary/10" : "bg-accent"
+            )}
+          >
+            {dragOver ? (
+              <Upload className={cn("text-primary", compact ? "h-5 w-5" : "h-7 w-7")} />
+            ) : (
+              <Camera className={cn("text-primary", compact ? "h-5 w-5" : "h-7 w-7")} />
+            )}
+          </div>
+          <div className="text-center">
+            <p className={cn("font-medium text-foreground", compact ? "text-xs" : "text-sm")}>
+              {dragOver ? "Drop photos here" : "Drag photos here or click to browse"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              JPG, PNG, HEIC, WEBP · Max 10MB each · Up to {maxPhotos} photos
+            </p>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/heic,image/webp"
+            className="hidden"
+            onChange={handleFileInput}
+          />
+        </label>
+      )}
 
       {/* Photo grid */}
       {(photoUrls.length > 0 || uploading.length > 0) && (
