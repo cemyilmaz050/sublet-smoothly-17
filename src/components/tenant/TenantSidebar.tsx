@@ -1,5 +1,6 @@
-import { Building2, LayoutDashboard, List, MessageSquare, Users, CalendarDays, FileText, Settings } from "lucide-react";
+import { LayoutDashboard, List, MessageSquare, Users, CalendarDays, FileText, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import Logo from "@/components/Logo";
 import { useLocation } from "react-router-dom";
 import {
   Sidebar,
