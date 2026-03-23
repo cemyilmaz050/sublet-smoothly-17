@@ -12,7 +12,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
 
   const closeAndRun = (action: () => void) => {
     onClose();
-    setTimeout(action, 0);
+    action();
   };
 
   const handleNavigate = (path: string) => {

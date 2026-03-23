@@ -57,7 +57,7 @@ const UserMenu = () => {
 
   const closeAndNavigate = (path: string) => {
     closeMenu();
-    setTimeout(() => navigate(path), 0);
+    navigate(path);
   };
 
   const handleHelpCenter = () => {
