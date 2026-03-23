@@ -105,7 +105,7 @@ const HomePage = () => {
         {/* === MOBILE LAYOUT (below sm) === */}
         <div className="flex sm:hidden relative z-10 flex-col items-center justify-start w-full min-h-screen pt-20 pb-32 px-6">
           {/* Phone mockup */}
-          <div className="mb-8" style={{ filter: "drop-shadow(0 30px 50px rgba(0,0,0,0.6))" }}>
+          <div className="mb-8 max-h-[55vh] overflow-hidden" style={{ filter: "drop-shadow(0 30px 50px rgba(0,0,0,0.6))" }}>
             <PhoneMock mobile />
           </div>
 
@@ -118,21 +118,6 @@ const HomePage = () => {
             <br />
             the right way
           </h1>
-
-          {/* Subtext */}
-          <p
-            className="mt-3 text-center max-w-[280px] leading-relaxed"
-            style={{
-              color: "rgba(255, 235, 210, 0.85)",
-              fontSize: 15,
-              fontWeight: 400,
-              textShadow: "0 1px 4px rgba(0,0,0,0.4)",
-            }}
-          >
-            The trusted platform for tenants,
-            <br />
-            subtenants, and property managers.
-          </p>
 
           {/* CTA button */}
           <Link to="/signup?role=tenant" className="mt-6">
