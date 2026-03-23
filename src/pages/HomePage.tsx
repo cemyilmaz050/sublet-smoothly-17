@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload, UserCheck } from "lucide-react";
 import heroVideoAsset from "../../public/hero-process.mp4.asset.json";
 
-const PRESS_NAMES = ["Business Insider", "Forbes", "WSJ", "Entrepreneur", "Complex"];
 
 const HomePage = () => {
   return (
