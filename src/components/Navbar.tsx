@@ -22,52 +22,82 @@ const Navbar = () => {
 
   const isListingsActive = location.pathname === "/listings";
   const isHowItWorksActive = location.pathname === "/about";
+  const isHomePage = location.pathname === "/";
 
   return (
     <>
-      <nav className="sticky top-0 z-[100] border-b bg-card/95 backdrop-blur-lg w-full">
+      <nav
+        className={`${
+          isHomePage
+            ? "fixed top-0 left-0 right-0 z-[100] bg-transparent"
+            : "sticky top-0 z-[100] border-b bg-card/95 backdrop-blur-lg"
+        } w-full`}
+      >
         <div className="flex h-16 items-center justify-between px-6 w-full">
           {/* Left: Logo */}
           <div className="flex items-center">
             <Link to={user ? "/listings" : "/"} className="flex items-center">
-              <img src={logo} alt="SubIn" className="h-10" />
+              {isHomePage ? (
+                <span className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "Inter, sans-serif" }}>
+                  SubIn
+                </span>
+              ) : (
+                <img src={logo} alt="SubIn" className="h-10" />
+              )}
             </Link>
           </div>
 
-          {/* Center: Nav links (desktop) */}
-          <div className="hidden sm:flex items-center gap-8">
-            <Link
-              to="/listings"
-              className={`text-sm font-medium transition-colors ${isListingsActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              Listings
-            </Link>
-            <Link
-              to="/about"
-              className={`text-sm font-medium transition-colors ${isHowItWorksActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              How It Works
-            </Link>
-          </div>
+          {/* Center: Nav links (desktop) — hidden on homepage */}
+          {!isHomePage && (
+            <div className="hidden sm:flex items-center gap-8">
+              <Link
+                to="/listings"
+                className={`text-sm font-medium transition-colors ${isListingsActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Listings
+              </Link>
+              <Link
+                to="/about"
+                className={`text-sm font-medium transition-colors ${isHowItWorksActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                How It Works
+              </Link>
+            </div>
+          )}
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
-            <NotificationBell />
+            {!isHomePage && <NotificationBell />}
             {!user ? (
               <>
-                <Link to="/signup">
-                  <button className="hidden sm:block rounded-full border border-border px-5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted">
-                    Sign Up
+                <Link to="/login">
+                  <button
+                    className={`hidden sm:block rounded-full border px-5 py-2 text-sm font-semibold transition-colors ${
+                      isHomePage
+                        ? "border-white/40 text-white hover:bg-white/10"
+                        : "border-border text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    Login
                   </button>
                 </Link>
-                <Link to="/login">
-                  <button className="hidden sm:block rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90">
-                    Log In
+                <Link to="/signup">
+                  <button
+                    className={`hidden sm:block rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                      isHomePage
+                        ? "bg-white text-[#1a1008] hover:bg-white/90"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }`}
+                  >
+                    Sign up
                   </button>
                 </Link>
               </>
             ) : (
-              <UserMenu />
+              <>
+                {!isHomePage && <NotificationBell />}
+                <UserMenu />
+              </>
             )}
             {/* Mobile: show UserMenu for hamburger */}
             {!user && <div className="sm:hidden"><UserMenu /></div>}
