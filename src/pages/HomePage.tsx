@@ -70,7 +70,7 @@ const HomePage = () => {
         />
 
         {/* Desktop hero content — bottom aligned */}
-        <div className="hidden sm:flex relative z-10 w-full flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 min-h-screen">
+        <div className="hidden sm:flex relative z-10 w-full flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-36 sm:pb-40 min-h-screen">
           {/* Left: Main heading */}
           <div className="mt-auto sm:max-w-[42%]">
             <h1
