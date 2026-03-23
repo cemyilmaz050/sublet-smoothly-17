@@ -57,8 +57,21 @@ const UserMenu = () => {
   const menuItemClass =
     "flex items-center gap-2.5 px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent w-full text-left";
 
+  const handleHowItWorks = () => {
+    setOpen(false);
+    if (location.pathname !== "/") {
+      navigate("/#how-it-works");
+    } else {
+      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const guestMenuItems = (
     <div className="flex flex-col py-1">
+      <button onClick={handleHowItWorks} className={menuItemClass}>
+        <Info className="h-4 w-4 text-muted-foreground" /> How It Works
+      </button>
+      <div className="mx-4 border-t" />
       <button onClick={() => { setOpen(false); }} className={menuItemClass}>
         <HelpCircle className="h-4 w-4 text-muted-foreground" /> Help Center
       </button>
@@ -67,8 +80,12 @@ const UserMenu = () => {
         <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
       </button>
       <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); requireAuth(); }} className={menuItemClass}>
-        <LogIn className="h-4 w-4 text-muted-foreground" /> Log In or Sign Up
+      <button onClick={() => { setOpen(false); navigate("/login"); }} className={menuItemClass}>
+        <LogIn className="h-4 w-4 text-muted-foreground" /> Log In
+      </button>
+      <div className="mx-4 border-t" />
+      <button onClick={() => { setOpen(false); navigate("/signup"); }} className={menuItemClass}>
+        <User className="h-4 w-4 text-muted-foreground" /> Sign Up
       </button>
       <div className="mx-4 border-t" />
       <button onClick={() => { setOpen(false); navigate("/login"); }} className={menuItemClass}>
