@@ -37,9 +37,12 @@ const LISTINGS = [
   },
 ];
 
-const PhoneMock = () => {
+const PhoneMock = ({ mobile = false }: { mobile?: boolean }) => {
   return (
-    <div className="relative mx-auto" style={{ width: 280, height: 570 }}>
+    <div
+      className={mobile ? "relative mx-auto w-[65vw] max-w-[280px]" : "relative mx-auto"}
+      style={mobile ? { aspectRatio: "280 / 570" } : { width: 280, height: 570 }}
+    >
       {/* iPhone frame */}
       <div
         className="absolute inset-0 rounded-[44px] border-[3px] z-20 pointer-events-none"
