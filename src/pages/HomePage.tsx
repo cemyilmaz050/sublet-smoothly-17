@@ -17,7 +17,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero — full screen, warm cinematic */}
-      <section className="relative flex min-h-screen overflow-hidden">
+      <section className="relative w-screen min-h-screen overflow-hidden">
         {/* Warm background image */}
         <div
           className="absolute inset-0"
@@ -53,8 +53,9 @@ const HomePage = () => {
           }}
         />
 
+        {/* === DESKTOP LAYOUT (sm+) === */}
         {/* Phone — positioned center-right */}
-        <div className="absolute inset-0 z-[5] flex items-center justify-end pointer-events-none pr-[12%] lg:pr-[18%]">
+        <div className="hidden sm:flex absolute inset-0 z-[5] items-center justify-end pointer-events-none pr-[12%] lg:pr-[18%]">
           <div style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.7))" }}>
             <PhoneMock />
           </div>
@@ -62,16 +63,16 @@ const HomePage = () => {
 
         {/* Left text backing gradient for legibility */}
         <div
-          className="absolute inset-0 z-[4] pointer-events-none"
+          className="hidden sm:block absolute inset-0 z-[4] pointer-events-none"
           style={{
             background: "linear-gradient(to right, rgba(10,4,1,0.8) 0%, rgba(10,4,1,0.4) 35%, transparent 55%)",
           }}
         />
 
-        {/* Hero content — bottom aligned */}
-        <div className="relative z-10 w-full flex flex-col sm:flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 mt-auto">
-          {/* Left: Main heading — constrained width */}
-          <div className="mb-8 sm:mb-0 sm:max-w-[42%]">
+        {/* Desktop hero content — bottom aligned */}
+        <div className="hidden sm:flex relative z-10 w-full flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 min-h-screen">
+          {/* Left: Main heading */}
+          <div className="mt-auto sm:max-w-[42%]">
             <h1
               className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.05] tracking-tight"
               style={{ fontFamily: "Inter, sans-serif" }}
@@ -83,7 +84,7 @@ const HomePage = () => {
           </div>
 
           {/* Right: CTA */}
-          <div className="flex flex-col items-start sm:items-end">
+          <div className="mt-auto flex flex-col items-end">
             <Link to="/signup?role=tenant">
               <Button
                 size="lg"
@@ -93,12 +94,48 @@ const HomePage = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <p className="mt-4 text-white/60 text-sm leading-relaxed text-left sm:text-right max-w-[260px]">
+            <p className="mt-4 text-white/60 text-sm leading-relaxed text-right max-w-[260px]">
               The trusted platform for tenants,
               <br />
               subtenants, and property managers.
             </p>
           </div>
+        </div>
+
+        {/* === MOBILE LAYOUT (below sm) === */}
+        <div className="flex sm:hidden relative z-10 flex-col items-center justify-start w-full min-h-screen pt-20 pb-12 px-6">
+          {/* Phone mockup */}
+          <div className="mb-8" style={{ filter: "drop-shadow(0 30px 50px rgba(0,0,0,0.6))" }}>
+            <PhoneMock mobile />
+          </div>
+
+          {/* Heading */}
+          <h1
+            className="text-3xl font-bold text-white leading-[1.1] tracking-tight text-center"
+            style={{ fontFamily: "Inter, sans-serif" }}
+          >
+            Sublet your apartment
+            <br />
+            the right way
+          </h1>
+
+          {/* CTA button */}
+          <Link to="/signup?role=tenant" className="mt-6">
+            <Button
+              size="lg"
+              className="bg-white text-[#1a1008] hover:bg-white/90 rounded-full px-10 h-14 text-base font-semibold shadow-xl border-0"
+            >
+              I'm a Tenant
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
+
+          {/* Subtext */}
+          <p className="mt-3 text-white/60 text-sm leading-relaxed text-center max-w-[260px]">
+            The trusted platform for tenants,
+            <br />
+            subtenants, and property managers.
+          </p>
         </div>
       </section>
 

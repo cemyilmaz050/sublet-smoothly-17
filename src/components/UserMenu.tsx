@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, HelpCircle, Gift, LogIn, MessageSquare, LogOut, User } from "lucide-react";
+import { Menu, HelpCircle, Gift, LogIn, MessageSquare, LogOut, User, Info } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
