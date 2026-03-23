@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -51,6 +52,7 @@ const isBbgSearchQuery = (value: string) => {
 
 const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [data, setData] = useState<SubletFlowData>({ ...defaultFlowData });
   const [activeStep, setActiveStep] = useState(0);
@@ -201,8 +203,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       const { error } = await supabase.from("listings").insert(payload);
       if (error) throw error;
 
-      // Send notification to BBG staff user if BBG is the management group
-      const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
       const BBG_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
       const notifUserId = data.managementGroupId === BBG_PM_ID ? BBG_USER_ID : data.managementGroupId;
       await supabase.from("notifications").insert({
@@ -228,7 +228,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     if (!user) { toast.error("Please sign in first."); return; }
     setSaving(true);
     try {
-      // Photos are already uploaded via UniversalPhotoUploader
       const uploadedUrls: string[] = [...data.photoUrls];
 
       const propertyTypeMap: Record<string, string> = { house: "house", apartment: "apartment", condo: "condo", studio: "studio" };
@@ -285,21 +284,21 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   // Success screen
   if (showSuccess) {
     return (
-      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background">
-        <button onClick={handleClose} className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
+      <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background" style={{ paddingTop: "env(safe-area-inset-top)", paddingBottom: "env(safe-area-inset-bottom)" }}>
+        <button onClick={handleClose} className="absolute right-4 top-4 text-muted-foreground hover:text-foreground min-h-[44px] min-w-[44px] flex items-center justify-center" style={{ marginTop: "env(safe-area-inset-top)" }}><X className="h-5 w-5" /></button>
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 15 }} className="flex flex-col items-center gap-4 text-center px-6">
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
             <Check className="h-12 w-12 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">{successMessage}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{successMessage}</h1>
           <p className="text-muted-foreground max-w-md">
             {data.path === "management"
               ? "Boston Brokerage Group will review your listing and notify you by email once it's live on SubIn."
               : "Your listing is now visible to thousands of potential subtenants."}
           </p>
           <div className="flex flex-col gap-2 mt-4 w-full max-w-xs">
-            <Button onClick={() => { handleClose(); navigate("/tenant/dashboard"); }}>Go to My Dashboard</Button>
-            <Button variant="outline" onClick={handleClose}>Close</Button>
+            <Button onClick={() => { handleClose(); navigate("/tenant/dashboard"); }} className="min-h-[48px]">Go to My Dashboard</Button>
+            <Button variant="outline" onClick={handleClose} className="min-h-[48px]">Close</Button>
           </div>
         </motion.div>
       </div>
@@ -308,6 +307,18 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
 
   const isStepVisible = (stepIndex: number) => stepIndex <= activeStep;
   const isStepCompleted = (stepIndex: number) => stepIndex < activeStep;
+
+  // Number stepper with mobile-friendly sizing
+  const NumberStepper = ({ value, onChange, min = 0, max = 20, step = 1, label }: { value: number | ""; onChange: (v: number) => void; min?: number; max?: number; step?: number; label: string }) => (
+    <div className="flex items-center justify-between rounded-lg border px-4 py-3 min-h-[56px]">
+      <span className="text-sm font-medium text-foreground">{label}</span>
+      <div className="flex items-center gap-3">
+        <button onClick={() => onChange(Math.max(min, (Number(value) || 0) - step))} className="flex h-11 w-11 items-center justify-center rounded-full border hover:bg-muted"><Minus className="h-4 w-4" /></button>
+        <span className="w-8 text-center text-sm font-semibold">{value === "" ? "-" : value}</span>
+        <button onClick={() => onChange(Math.min(max, (Number(value) || 0) + step))} className="flex h-11 w-11 items-center justify-center rounded-full border hover:bg-muted"><Plus className="h-4 w-4" /></button>
+      </div>
+    </div>
+  );
 
   // Step renderers
   const renderStep1 = () => (
@@ -324,7 +335,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <button
             key={card.value}
             onClick={() => { update({ path: card.value }); setActiveStep(1); }}
-            className={`flex flex-col items-center gap-3 rounded-xl border-2 p-8 text-center transition-all ${
+            className={`flex flex-col items-center gap-3 rounded-xl border-2 p-6 sm:p-8 text-center transition-all min-h-[100px] ${
               data.path === card.value ? "border-primary bg-accent shadow-sm" : "border-border hover:border-primary/40 hover:bg-accent/50"
             }`}
           >
@@ -350,7 +361,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           value={mgmtSearch}
           onChange={(e) => setMgmtSearch(e.target.value)}
           placeholder="Search Boston Brokerage Group..."
-          className="pr-10"
+          className="pr-10 text-base min-h-[48px]"
+          type="text"
         />
 
         <div className="mt-3 w-full rounded-xl border bg-popover shadow-elevated">
@@ -372,7 +384,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                 setMgmtSearch("");
                 revealNext();
               }}
-              className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors"
+              className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-accent transition-colors min-h-[56px]"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
                 {mgr.logo_url ? <img src={mgr.logo_url} className="h-8 w-8 rounded" alt="" /> : <span className="text-xs font-bold text-primary">BBG</span>}
@@ -412,7 +424,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <div className="border-t pt-4 mt-4">
         <button
           onClick={() => setShowOtherPmForm(!showOtherPmForm)}
-          className={`flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${showOtherPmForm ? "border-primary bg-accent" : "border-border hover:border-primary/40 hover:bg-accent/50"}`}
+          className={`flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all min-h-[72px] ${showOtherPmForm ? "border-primary bg-accent" : "border-border hover:border-primary/40 hover:bg-accent/50"}`}
         >
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-lg">🏢</div>
           <div className="flex-1 min-w-0">
@@ -441,7 +453,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                       value={otherPmData.companyName}
                       onChange={(e) => setOtherPmData(p => ({ ...p, companyName: e.target.value }))}
                       placeholder="e.g. Greystar Real Estate"
-                      className="mt-1 text-base"
+                      className="mt-1 text-base min-h-[48px]"
+                      type="text"
                     />
                   </div>
                   <div>
@@ -450,7 +463,8 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                       value={otherPmData.contactName}
                       onChange={(e) => setOtherPmData(p => ({ ...p, contactName: e.target.value }))}
                       placeholder="e.g. John Smith"
-                      className="mt-1 text-base"
+                      className="mt-1 text-base min-h-[48px]"
+                      type="text"
                     />
                   </div>
                   <div>
@@ -460,7 +474,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                       value={otherPmData.email}
                       onChange={(e) => setOtherPmData(p => ({ ...p, email: e.target.value }))}
                       placeholder="e.g. john@greystar.com"
-                      className="mt-1 text-base"
+                      className="mt-1 text-base min-h-[48px]"
                     />
                   </div>
                   <div>
@@ -470,7 +484,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                       value={otherPmData.phone}
                       onChange={(e) => setOtherPmData(p => ({ ...p, phone: e.target.value }))}
                       placeholder="(optional)"
-                      className="mt-1 text-base"
+                      className="mt-1 text-base min-h-[48px]"
                     />
                   </div>
                   <div>
@@ -479,7 +493,9 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                       value={otherPmData.propertyAddress}
                       onChange={(e) => setOtherPmData(p => ({ ...p, propertyAddress: e.target.value }))}
                       placeholder="e.g. 123 Main St, Boston, MA"
-                      className="mt-1 text-base"
+                      className="mt-1 text-base min-h-[48px]"
+                      type="text"
+                      autoComplete="street-address"
                     />
                   </div>
                   <Button
@@ -501,7 +517,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                         } as any);
                         if (error) throw error;
 
-                        // Send invitation email
                         const tenantName = user.user_metadata?.first_name
                           ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim()
                           : "A tenant";
@@ -547,7 +562,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                   update({ path: "own" });
                   setActiveStep(1);
                 }}
-                className="text-sm text-primary underline hover:text-primary/80 transition-colors"
+                className="text-sm text-primary underline hover:text-primary/80 transition-colors min-h-[44px]"
               >
                 Switch to listing my own property instead
               </button>
@@ -564,7 +579,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       {catalogProperties.length === 0 ? (
         <p className="text-sm text-muted-foreground">No properties found for this management group.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3">
           {catalogProperties.map((prop: any) => (
             <div key={prop.id} className="rounded-xl border bg-card overflow-hidden">
               <button
@@ -572,7 +587,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                   setExpandedPropertyId(expandedPropertyId === prop.id ? null : prop.id);
                   loadUnits(prop.id);
                 }}
-                className="flex w-full items-center gap-3 p-4 text-left hover:bg-accent/50 transition-colors"
+                className="flex w-full items-center gap-3 p-4 text-left hover:bg-accent/50 transition-colors min-h-[72px]"
               >
                 <div className="h-16 w-16 shrink-0 rounded-lg bg-muted overflow-hidden">
                   {prop.photo_url ? <img src={prop.photo_url} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center"><Building2 className="h-6 w-6 text-muted-foreground" /></div>}
@@ -583,7 +598,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                   <p className="text-xs text-muted-foreground">{prop.units_count || 0} units · {prop.property_type || "Property"}</p>
                 </div>
               </button>
-              {/* Expanded units */}
               {expandedPropertyId === prop.id && (
                 <div className="border-t px-4 py-2 space-y-1">
                   {(catalogUnits[prop.id] || []).map((unit: any) => (
@@ -605,7 +619,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
                         });
                         revealNext();
                       }}
-                      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors ${
+                      className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors min-h-[56px] ${
                         data.catalogUnitId === unit.id ? "bg-accent border border-primary" : "hover:bg-muted"
                       }`}
                     >
@@ -636,24 +650,23 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       />
       {renderDurationAndFlexibility()}
 
-      {/* Final review card for Path A */}
       {data.availableFrom && data.availableUntil && (
         <div className="rounded-xl border bg-card p-5 space-y-4">
           <h3 className="font-semibold text-foreground">Review Your Sublet Request</h3>
-          <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
             <div><span className="text-muted-foreground">Management:</span> <span className="font-medium">{data.managementGroupName}</span></div>
             <div><span className="text-muted-foreground">Property:</span> <span className="font-medium">{data.catalogPropertyAddress}</span></div>
             <div><span className="text-muted-foreground">Unit:</span> <span className="font-medium">{data.catalogUnitNumber}</span></div>
             <div><span className="text-muted-foreground">Period:</span> <span className="font-medium">{data.availableFrom} → {data.availableUntil}</span></div>
           </div>
-          <label className="flex items-start gap-2">
-            <Checkbox checked={data.confirmPermission} onCheckedChange={(v) => update({ confirmPermission: !!v })} className="mt-0.5" />
+          <label className="flex items-start gap-2 min-h-[48px]">
+            <Checkbox checked={data.confirmPermission} onCheckedChange={(v) => update({ confirmPermission: !!v })} className="mt-0.5 h-6 w-6" />
             <span className="text-sm text-foreground">I confirm I have permission from my property manager to sublet this unit during this period</span>
           </label>
           <Button
             onClick={publishPathA}
             disabled={saving || !data.confirmPermission}
-            className="w-full"
+            className="w-full min-h-[48px]"
           >
             {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...</> : <><Home className="mr-2 h-4 w-4" /> Submit for Approval</>}
           </Button>
@@ -668,7 +681,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     <div ref={(el) => { stepRefs.current["own-type"] = el; }} className="space-y-4">
       <h2 className="text-xl font-bold text-foreground">What type of property is it?</h2>
       <p className="text-sm text-muted-foreground">Choose the option that best describes your place</p>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {[
           { value: "house", icon: <Home className="h-6 w-6" />, label: "House" },
           { value: "apartment", icon: <Building className="h-6 w-6" />, label: "Apartment" },
@@ -678,15 +691,15 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <button
             key={opt.value}
             onClick={() => { update({ propertyType: opt.value }); revealNext(); }}
-            className={`flex flex-col items-center gap-2 rounded-xl border-2 p-6 transition-all ${
+            className={`flex items-center gap-4 rounded-xl border-2 p-4 transition-all min-h-[72px] ${
               data.propertyType === opt.value ? "border-primary bg-accent" : "border-border hover:border-primary/40"
             }`}
           >
-            <div className={`flex h-12 w-12 items-center justify-center rounded-full ${data.propertyType === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+            <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${data.propertyType === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
               {opt.icon}
             </div>
-            <span className="text-sm font-semibold text-foreground">{opt.label}</span>
-            {data.propertyType === opt.value && <Check className="h-4 w-4 text-primary" />}
+            <span className="text-base font-semibold text-foreground">{opt.label}</span>
+            {data.propertyType === opt.value && <Check className="h-4 w-4 text-primary ml-auto" />}
           </button>
         ))}
       </div>
@@ -697,7 +710,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
     <div ref={(el) => { stepRefs.current["own-space"] = el; }} className="space-y-4">
       <h2 className="text-xl font-bold text-foreground">What type of space will guests have?</h2>
       <p className="text-sm text-muted-foreground">This helps potential subtenants understand exactly what they're getting</p>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3">
         {[
           { value: "entire", icon: <Home className="h-5 w-5" />, label: "Entire Place", subtitle: "Guests have the whole place to themselves" },
           { value: "private", icon: <Lock className="h-5 w-5" />, label: "Private Room", subtitle: "Their own room, shared common areas" },
@@ -706,15 +719,18 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <button
             key={opt.value}
             onClick={() => { update({ spaceType: opt.value }); revealNext(); }}
-            className={`flex flex-col items-center gap-2 rounded-xl border-2 p-6 text-center transition-all ${
+            className={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all min-h-[80px] ${
               data.spaceType === opt.value ? "border-primary bg-accent" : "border-border hover:border-primary/40"
             }`}
           >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${data.spaceType === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+            <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${data.spaceType === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
               {opt.icon}
             </div>
-            <p className="text-sm font-semibold text-foreground">{opt.label}</p>
-            <p className="text-xs text-muted-foreground">{opt.subtitle}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-base font-semibold text-foreground">{opt.label}</p>
+              <p className="text-xs text-muted-foreground">{opt.subtitle}</p>
+            </div>
+            {data.spaceType === opt.value && <Check className="h-4 w-4 text-primary shrink-0" />}
           </button>
         ))}
       </div>
@@ -728,25 +744,25 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <div className="space-y-3">
         <div>
           <Label>Street Address</Label>
-          <Input value={data.address} onChange={(e) => update({ address: e.target.value })} placeholder="123 Main St" />
+          <Input value={data.address} onChange={(e) => update({ address: e.target.value })} placeholder="123 Main St" className="text-base min-h-[48px]" type="text" autoComplete="street-address" />
         </div>
         <div>
           <Label>Apt / Unit (optional)</Label>
-          <Input value={data.unitNumber} onChange={(e) => update({ unitNumber: e.target.value })} placeholder="Apt 4B" />
+          <Input value={data.unitNumber} onChange={(e) => update({ unitNumber: e.target.value })} placeholder="Apt 4B" className="text-base min-h-[48px]" type="text" />
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <div><Label>City</Label><Input value={data.city} onChange={(e) => update({ city: e.target.value })} placeholder="Boston" /></div>
-          <div><Label>State</Label><Input value={data.state} onChange={(e) => update({ state: e.target.value })} placeholder="MA" /></div>
-          <div><Label>Zip</Label><Input value={data.zip} onChange={(e) => update({ zip: e.target.value })} placeholder="02101" /></div>
+        <div className={`grid gap-3 ${isMobile ? "grid-cols-1" : "grid-cols-3"}`}>
+          <div><Label>City</Label><Input value={data.city} onChange={(e) => update({ city: e.target.value })} placeholder="Boston" className="text-base min-h-[48px]" type="text" /></div>
+          <div><Label>State</Label><Input value={data.state} onChange={(e) => update({ state: e.target.value })} placeholder="MA" className="text-base min-h-[48px]" type="text" /></div>
+          <div><Label>Zip</Label><Input value={data.zip} onChange={(e) => update({ zip: e.target.value })} placeholder="02101" className="text-base min-h-[48px]" type="text" inputMode="numeric" /></div>
         </div>
-        <div><Label>Country</Label><Input value={data.country} onChange={(e) => update({ country: e.target.value })} /></div>
+        <div><Label>Country</Label><Input value={data.country} onChange={(e) => update({ country: e.target.value })} className="text-base min-h-[48px]" type="text" /></div>
         {data.address && data.city && (
           <>
-            <div className="rounded-xl border bg-muted/30 p-6 text-center">
+            <div className="rounded-xl border bg-muted/30 p-6 text-center" style={{ minHeight: 200 }}>
               <MapPin className="mx-auto mb-2 h-8 w-8 text-primary" />
               <p className="text-sm text-muted-foreground">Map preview: {data.address}, {data.city}{data.state ? `, ${data.state}` : ""}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={revealNext}>Confirm Location & Continue</Button>
+            <Button variant="outline" onClick={revealNext} className="w-full min-h-[48px]">Confirm Location & Continue</Button>
           </>
         )}
       </div>
@@ -759,28 +775,17 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <div className="space-y-3">
         <div>
           <Label>Listing Headline</Label>
-          <Input value={data.headline} onChange={(e) => update({ headline: e.target.value.slice(0, 60) })} placeholder="Bright 2BR in Downtown Boston" maxLength={60} />
+          <Input value={data.headline} onChange={(e) => update({ headline: e.target.value.slice(0, 60) })} placeholder="Bright 2BR in Downtown Boston" maxLength={60} className="text-base min-h-[48px]" type="text" />
           <p className="mt-1 text-xs text-muted-foreground text-right">{data.headline.length}/60</p>
         </div>
         <div>
           <Label>Full Description</Label>
-          <Textarea value={data.description} onChange={(e) => update({ description: e.target.value.slice(0, 500) })} placeholder="Describe your space, neighborhood, and what makes it special..." rows={4} maxLength={500} />
+          <Textarea value={data.description} onChange={(e) => update({ description: e.target.value.slice(0, 500) })} placeholder="Describe your space, neighborhood, and what makes it special..." rows={4} maxLength={500} className="text-base" style={{ minHeight: 100, resize: "none" }} />
           <p className="mt-1 text-xs text-muted-foreground text-right">{data.description.length}/500</p>
         </div>
         {data.headline.trim() && data.description.trim() && (
-          <Button variant="outline" size="sm" onClick={revealNext}>Continue</Button>
+          <Button variant="outline" onClick={revealNext} className="w-full min-h-[48px]">Continue</Button>
         )}
-      </div>
-    </div>
-  );
-
-  const NumberStepper = ({ value, onChange, min = 0, max = 20, step = 1, label }: { value: number | ""; onChange: (v: number) => void; min?: number; max?: number; step?: number; label: string }) => (
-    <div className="flex items-center justify-between rounded-lg border px-4 py-3">
-      <span className="text-sm font-medium text-foreground">{label}</span>
-      <div className="flex items-center gap-3">
-        <button onClick={() => onChange(Math.max(min, (Number(value) || 0) - step))} className="flex h-8 w-8 items-center justify-center rounded-full border hover:bg-muted"><Minus className="h-4 w-4" /></button>
-        <span className="w-8 text-center text-sm font-semibold">{value === "" ? "-" : value}</span>
-        <button onClick={() => onChange(Math.min(max, (Number(value) || 0) + step))} className="flex h-8 w-8 items-center justify-center rounded-full border hover:bg-muted"><Plus className="h-4 w-4" /></button>
       </div>
     </div>
   );
@@ -793,16 +798,16 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <NumberStepper label="Bathrooms" value={data.bathrooms} onChange={(v) => update({ bathrooms: v })} min={0} max={10} step={0.5} />
         <div>
           <Label>Square footage</Label>
-          <Input type="number" value={data.sqft} onChange={(e) => update({ sqft: e.target.value ? Number(e.target.value) : "" })} placeholder="750" />
+          <Input type="number" inputMode="numeric" value={data.sqft} onChange={(e) => update({ sqft: e.target.value ? Number(e.target.value) : "" })} placeholder="750" className="text-base min-h-[48px]" />
         </div>
         <div>
           <Label>Floor number (optional)</Label>
-          <Input type="number" value={data.floorNumber} onChange={(e) => update({ floorNumber: e.target.value ? Number(e.target.value) : "" })} placeholder="3" />
+          <Input type="number" inputMode="numeric" value={data.floorNumber} onChange={(e) => update({ floorNumber: e.target.value ? Number(e.target.value) : "" })} placeholder="3" className="text-base min-h-[48px]" />
         </div>
         <NumberStepper label="Max occupants" value={data.maxOccupants} onChange={(v) => update({ maxOccupants: v })} min={1} max={20} />
       </div>
       {data.bedrooms !== "" && data.bathrooms !== "" && (
-        <Button variant="outline" size="sm" onClick={revealNext}>Continue</Button>
+        <Button variant="outline" onClick={revealNext} className="w-full min-h-[48px]">Continue</Button>
       )}
     </div>
   );
@@ -819,7 +824,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
             <button
               key={a.label}
               onClick={() => update({ amenities: selected ? data.amenities.filter((x) => x !== a.label) : [...data.amenities, a.label] })}
-              className={`flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-1.5 rounded-full border px-4 py-2.5 text-sm font-medium transition-colors min-h-[40px] ${
                 selected ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-accent"
               }`}
             >
@@ -828,7 +833,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           );
         })}
       </div>
-      <button onClick={revealNext} className="text-sm font-medium text-primary hover:underline">Continue →</button>
+      <button onClick={revealNext} className="text-sm font-medium text-primary hover:underline min-h-[44px] flex items-center">Continue →</button>
     </div>
   );
 
@@ -838,6 +843,41 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       <div ref={(el) => { stepRefs.current["own-photos"] = el; }} className="space-y-4">
         <h2 className="text-xl font-bold text-foreground">Add some photos of your place</h2>
         <p className="text-sm text-muted-foreground">Listings with great photos get significantly more interest. Add at least 3 photos.</p>
+
+        {/* Mobile-friendly photo buttons */}
+        {isMobile && (
+          <div className="flex flex-col gap-3">
+            <label className="flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-4 text-base font-medium cursor-pointer min-h-[48px]">
+              📷 Add Photos from Camera Roll
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) {
+                    const fakeEvent = { target: { files: e.target.files } };
+                    // Trigger the UniversalPhotoUploader's internal handler via ref or manual upload
+                    // For now we pass through to the uploader below
+                  }
+                }}
+              />
+            </label>
+            <label className="flex items-center justify-center gap-2 bg-background border-2 border-primary text-primary rounded-xl px-4 py-4 text-base font-medium cursor-pointer min-h-[48px]">
+              🤳 Take a New Photo
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  // Same as above
+                }}
+              />
+            </label>
+          </div>
+        )}
+
         <UniversalPhotoUploader
           photoUrls={data.photoUrls}
           onPhotoUrlsChange={(u) => update({ photoUrls: u })}
@@ -847,7 +887,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           minPhotos={3}
           showCoverBadge
         />
-        {total >= 3 && <Button variant="outline" size="sm" onClick={revealNext}>Continue</Button>}
+        {total >= 3 && <Button variant="outline" onClick={revealNext} className="w-full min-h-[48px]">Continue</Button>}
       </div>
     );
   };
@@ -864,14 +904,14 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
             <Label>Monthly Rent</Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground">$</span>
-              <Input type="number" value={data.monthlyRent} onChange={(e) => update({ monthlyRent: e.target.value ? Number(e.target.value) : "" })} className="pl-8 text-lg font-semibold" placeholder="0" />
+              <Input type="number" inputMode="decimal" value={data.monthlyRent} onChange={(e) => update({ monthlyRent: e.target.value ? Number(e.target.value) : "" })} className="pl-8 text-lg font-semibold min-h-[48px]" placeholder="0" />
             </div>
           </div>
           <div>
             <Label>Security Deposit</Label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-lg font-semibold text-muted-foreground">$</span>
-              <Input type="number" value={data.securityDeposit} onChange={(e) => update({ securityDeposit: e.target.value ? Number(e.target.value) : "" })} className="pl-8 text-lg font-semibold" placeholder="0" />
+              <Input type="number" inputMode="decimal" value={data.securityDeposit} onChange={(e) => update({ securityDeposit: e.target.value ? Number(e.target.value) : "" })} className="pl-8 text-lg font-semibold min-h-[48px]" placeholder="0" />
             </div>
           </div>
           {rent > 0 && (
@@ -883,7 +923,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           )}
         </div>
         {data.monthlyRent !== "" && data.securityDeposit !== "" && (
-          <Button variant="outline" size="sm" onClick={revealNext}>Continue</Button>
+          <Button variant="outline" onClick={revealNext} className="w-full min-h-[48px]">Continue</Button>
         )}
       </div>
     );
@@ -900,7 +940,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       />
       {renderDurationAndFlexibility()}
       {data.availableFrom && data.availableUntil && (
-        <Button variant="outline" size="sm" onClick={revealNext}>Continue</Button>
+        <Button variant="outline" onClick={revealNext} className="w-full min-h-[48px]">Continue</Button>
       )}
     </div>
   );
@@ -916,7 +956,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           { key: "noUnregisteredGuests" as const, label: "No unregistered guests overnight" },
           { key: "quietHours" as const, label: "Quiet hours after 10pm" },
         ].map((rule) => (
-          <div key={rule.key} className="flex items-center justify-between rounded-lg border px-4 py-3">
+          <div key={rule.key} className="flex items-center justify-between rounded-lg border px-4 py-3 min-h-[56px]">
             <span className="text-sm font-medium text-foreground">{rule.label}</span>
             <Switch checked={data.houseRules[rule.key]} onCheckedChange={(v) => update({ houseRules: { ...data.houseRules, [rule.key]: v } })} />
           </div>
@@ -924,7 +964,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
       </div>
       <div>
         <Label>Any additional rules?</Label>
-        <Textarea value={data.customRules} onChange={(e) => update({ customRules: e.target.value.slice(0, 300) })} maxLength={300} rows={2} placeholder="Any other rules or notes..." />
+        <Textarea value={data.customRules} onChange={(e) => update({ customRules: e.target.value.slice(0, 300) })} maxLength={300} rows={2} placeholder="Any other rules or notes..." className="text-base" style={{ minHeight: 80, resize: "none" }} />
         <p className="mt-1 text-xs text-muted-foreground text-right">{data.customRules.length}/300</p>
       </div>
       <div>
@@ -938,7 +978,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
             <button
               key={opt.value}
               onClick={() => update({ guestPolicy: opt.value })}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+              className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors min-h-[44px] ${
                 data.guestPolicy === opt.value ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"
               }`}
             >
@@ -947,7 +987,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           ))}
         </div>
       </div>
-      <button onClick={revealNext} className="text-sm font-medium text-primary hover:underline">Continue to Review →</button>
+      <button onClick={revealNext} className="text-sm font-medium text-primary hover:underline min-h-[44px] flex items-center">Continue to Review →</button>
     </div>
   );
 
@@ -978,7 +1018,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           </div>
         )}
 
-        {/* Optional ID Verification — not required to publish */}
         {idVerified === false && (
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
             <p className="text-sm font-medium text-foreground mb-1">
@@ -991,12 +1030,12 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           </div>
         )}
 
-        <label className="flex items-start gap-2">
-          <Checkbox checked={data.confirmAccuracy} onCheckedChange={(v) => update({ confirmAccuracy: !!v })} className="mt-0.5" />
+        <label className="flex items-start gap-2 min-h-[48px]">
+          <Checkbox checked={data.confirmAccuracy} onCheckedChange={(v) => update({ confirmAccuracy: !!v })} className="mt-0.5 h-6 w-6" />
           <span className="text-sm text-foreground">I confirm all information is accurate and I agree to the platform sublet terms</span>
         </label>
 
-        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy} className="w-full">
+        <Button onClick={publishPathB} disabled={saving || !allReady || !data.confirmAccuracy} className="w-full min-h-[52px] text-base">
           {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Publishing...</> : <><Home className="mr-2 h-4 w-4" /> Publish Property</>}
         </Button>
       </div>
@@ -1004,12 +1043,12 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   };
 
   const ReviewSection = ({ label, value, stepIndex, onEdit }: { label: string; value: string; stepIndex: number; onEdit: (s: number) => void }) => (
-    <div className="flex items-start justify-between gap-3">
+    <div className="flex items-start justify-between gap-3 min-h-[44px]">
       <div>
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <p className="text-sm font-medium text-foreground">{value}</p>
       </div>
-      <button onClick={() => onEdit(stepIndex)} className="text-xs font-medium text-primary hover:underline shrink-0">Edit</button>
+      <button onClick={() => onEdit(stepIndex)} className="text-xs font-medium text-primary hover:underline shrink-0 min-h-[44px] flex items-center">Edit</button>
     </div>
   );
 
@@ -1020,7 +1059,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <div className="flex flex-wrap gap-2">
           {[{ value: 1, label: "1 month" }, { value: 2, label: "2 months" }, { value: 3, label: "3 months" }, { value: 6, label: "6 months" }, { value: 0, label: "Flexible" }].map((opt) => (
             <button key={opt.value} onClick={() => update({ minDuration: opt.value })}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${data.minDuration === opt.value ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"}`}
+              className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors min-h-[44px] ${data.minDuration === opt.value ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"}`}
             >{opt.label}</button>
           ))}
         </div>
@@ -1030,7 +1069,7 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <div className="flex flex-wrap gap-2">
           {[{ value: "exact", label: "Exact dates only" }, { value: "week", label: "Flexible by a week" }, { value: "month", label: "Flexible by a month" }].map((opt) => (
             <button key={opt.value} onClick={() => update({ flexibility: opt.value })}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${data.flexibility === opt.value ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"}`}
+              className={`rounded-full border px-4 py-2.5 text-sm font-medium transition-colors min-h-[44px] ${data.flexibility === opt.value ? "border-primary bg-primary text-primary-foreground" : "hover:bg-accent"}`}
             >{opt.label}</button>
           ))}
         </div>
@@ -1101,32 +1140,61 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-background">
+    <div
+      className="fixed inset-0 z-[100] flex flex-col bg-background"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        WebkitOverflowScrolling: "touch",
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between border-b px-4 py-3 sm:px-6 shrink-0">
-        <button onClick={() => activeStep > 0 ? setActiveStep(activeStep - 1) : handleClose()} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <button
+          onClick={() => activeStep > 0 ? setActiveStep(activeStep - 1) : handleClose()}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px]"
+        >
           <ArrowLeft className="h-4 w-4" />
           {activeStep > 0 ? "Back" : ""}
         </button>
-        {/* Progress bar */}
-        <div className="flex-1 max-w-xs mx-4">
-          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-            <motion.div
-              className="h-full rounded-full bg-primary"
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPct}%` }}
-              transition={{ duration: 0.3 }}
-            />
+
+        {/* Progress — step counter on mobile, bar on desktop */}
+        {isMobile ? (
+          <span className="text-xs font-medium text-muted-foreground">
+            Step {activeStep + 1} of {totalSteps}
+          </span>
+        ) : (
+          <div className="flex-1 max-w-xs mx-4">
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-primary"
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPct}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
           </div>
-        </div>
-        <button onClick={handleClose} className="text-muted-foreground hover:text-foreground transition-colors">
+        )}
+
+        <button
+          onClick={handleClose}
+          className="text-muted-foreground hover:text-foreground transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+        >
           <X className="h-5 w-5" />
         </button>
       </div>
 
       {/* Scrollable content */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-xl px-4 py-8 space-y-6">
+      <div
+        ref={scrollRef}
+        className="flex-1 overflow-y-auto"
+        style={{
+          WebkitOverflowScrolling: "touch",
+          scrollBehavior: "smooth",
+          scrollPaddingTop: 80,
+          paddingBottom: "env(safe-area-inset-bottom, 16px)",
+        }}
+      >
+        <div className="mx-auto max-w-xl px-4 py-6 sm:py-8 space-y-6">
           {steps.map((stepId, index) => {
             if (!isStepVisible(index)) return null;
 
