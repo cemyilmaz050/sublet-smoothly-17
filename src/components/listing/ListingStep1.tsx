@@ -126,7 +126,7 @@ const ListingStep1 = ({ data, onChange, errors }: Props) => {
           <Input
             id="address"
             placeholder="123 Main St, Boston, MA"
-            className="mt-1.5"
+            className="mt-1.5 text-base"
             value={data.address}
             onChange={(e) => onChange({ address: e.target.value })}
           />
