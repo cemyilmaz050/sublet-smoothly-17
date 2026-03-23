@@ -311,7 +311,9 @@ const SignUpPage = () => {
 
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Didn't receive the email?</p>
-              {resendCooldown > 0 ? (
+              {resendSuccess ? (
+                <p className="text-sm font-medium text-emerald-600">Email resent!</p>
+              ) : resendCooldown > 0 ? (
                 <p className="text-sm font-medium text-muted-foreground">
                   Resend in 0:{resendCooldown.toString().padStart(2, "0")}
                 </p>
