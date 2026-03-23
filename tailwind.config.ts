@@ -132,6 +132,10 @@ export default {
           "0%": { opacity: "1" },
           "100%": { opacity: "0" },
         },
+        "phone-scroll": {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -144,6 +148,7 @@ export default {
         "pulse-dot": "pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "slide-in-down": "slide-in-down 0.3s ease-out",
         "fade-out": "fade-out 0.8s ease-out 0.5s forwards",
+        "phone-scroll": "phone-scroll 12s linear infinite",
       },
     },
   },
