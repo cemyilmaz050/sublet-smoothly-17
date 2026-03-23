@@ -1,9 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload } from "lucide-react";
 import PhoneMock from "@/components/landing/PhoneMock";
 
 const HomePage = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#how-it-works") {
+      setTimeout(() => {
+        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [location.hash]);
   return (
     <div className="min-h-screen bg-background">
       {/* Hero — full screen, warm cinematic */}
