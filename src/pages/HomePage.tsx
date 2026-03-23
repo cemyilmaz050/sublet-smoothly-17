@@ -1,16 +1,9 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload, ClipboardCheck } from "lucide-react";
 import heroVideoAsset from "../../public/hero-process.mp4.asset.json";
-import { useAuth } from "@/hooks/useAuth";
 
 const HomePage = () => {
-  const { user, isReady } = useAuth();
-
-  if (isReady && user) {
-    return <Navigate to="/listings" replace />;
-  }
-
   return (
     <div className="min-h-screen bg-background">
       {/* Hero — full screen with photo background */}
