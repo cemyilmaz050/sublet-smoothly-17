@@ -280,9 +280,9 @@ const CreateListingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       
-      <div className="container max-w-2xl py-8">
-        <h1 className="mb-2 text-2xl font-bold text-foreground">{editId ? "Edit Listing" : "Create New Listing"}</h1>
-        <p className="mb-6 text-muted-foreground">Fill in the details about your property</p>
+        <div className="container max-w-2xl px-4 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-8">
+        <h1 className="mb-2 text-xl sm:text-2xl font-bold text-foreground">{editId ? "Edit Listing" : "Create New Listing"}</h1>
+        <p className="mb-4 sm:mb-6 text-sm sm:text-base text-muted-foreground">Fill in the details about your property</p>
 
         <Card className="mb-6 shadow-card">
           <CardContent className="py-6">
