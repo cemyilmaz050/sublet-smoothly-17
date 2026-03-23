@@ -66,6 +66,10 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [idVerified, setIdVerified] = useState<boolean | null>(null);
+  const [showOtherPmForm, setShowOtherPmForm] = useState(false);
+  const [otherPmData, setOtherPmData] = useState({ companyName: "", contactName: "", email: "", phone: "", propertyAddress: "" });
+  const [otherPmSubmitting, setOtherPmSubmitting] = useState(false);
+  const [otherPmSubmitted, setOtherPmSubmitted] = useState(false);
 
   // Check ID verification on mount
   useEffect(() => {
@@ -403,6 +407,154 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           <CheckCircle className="h-5 w-5 text-primary" />
         </div>
       )}
+
+      {/* Other PM option */}
+      <div className="border-t pt-4 mt-4">
+        <button
+          onClick={() => setShowOtherPmForm(!showOtherPmForm)}
+          className={`flex w-full items-center gap-3 rounded-xl border-2 p-4 text-left transition-all ${showOtherPmForm ? "border-primary bg-accent" : "border-border hover:border-primary/40 hover:bg-accent/50"}`}
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-lg">🏢</div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">I work with another property manager</p>
+            <p className="text-xs text-muted-foreground">Your property manager is not listed here yet — let us help you add them</p>
+          </div>
+        </button>
+
+        <AnimatePresence>
+          {showOtherPmForm && !otherPmSubmitted && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-4 rounded-xl border bg-card p-5 space-y-4">
+                <div>
+                  <h3 className="text-base font-semibold text-foreground">Tell us about your property manager</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Enter your property manager's details below. We will reach out to invite them to the platform so they can manage your sublet request directly.</p>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-sm">Property manager company name *</Label>
+                    <Input
+                      value={otherPmData.companyName}
+                      onChange={(e) => setOtherPmData(p => ({ ...p, companyName: e.target.value }))}
+                      placeholder="e.g. Greystar Real Estate"
+                      className="mt-1 text-base"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Property manager contact name *</Label>
+                    <Input
+                      value={otherPmData.contactName}
+                      onChange={(e) => setOtherPmData(p => ({ ...p, contactName: e.target.value }))}
+                      placeholder="e.g. John Smith"
+                      className="mt-1 text-base"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Property manager email address *</Label>
+                    <Input
+                      type="email"
+                      value={otherPmData.email}
+                      onChange={(e) => setOtherPmData(p => ({ ...p, email: e.target.value }))}
+                      placeholder="e.g. john@greystar.com"
+                      className="mt-1 text-base"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Property manager phone number</Label>
+                    <Input
+                      type="tel"
+                      value={otherPmData.phone}
+                      onChange={(e) => setOtherPmData(p => ({ ...p, phone: e.target.value }))}
+                      placeholder="(optional)"
+                      className="mt-1 text-base"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm">Your property address *</Label>
+                    <Input
+                      value={otherPmData.propertyAddress}
+                      onChange={(e) => setOtherPmData(p => ({ ...p, propertyAddress: e.target.value }))}
+                      placeholder="e.g. 123 Main St, Boston, MA"
+                      className="mt-1 text-base"
+                    />
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      if (!user) { toast.error("Please sign in first."); return; }
+                      if (!otherPmData.companyName || !otherPmData.contactName || !otherPmData.email || !otherPmData.propertyAddress) {
+                        toast.error("Please fill in all required fields.");
+                        return;
+                      }
+                      setOtherPmSubmitting(true);
+                      try {
+                        const { error } = await supabase.from("manager_invitations" as any).insert({
+                          tenant_id: user.id,
+                          company_name: otherPmData.companyName,
+                          contact_name: otherPmData.contactName,
+                          email: otherPmData.email,
+                          phone: otherPmData.phone || null,
+                          property_address: otherPmData.propertyAddress,
+                        } as any);
+                        if (error) throw error;
+
+                        // Send invitation email
+                        const tenantName = user.user_metadata?.first_name
+                          ? `${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim()
+                          : "A tenant";
+                        await supabase.functions.invoke("send-notification-email", {
+                          body: {
+                            to: otherPmData.email,
+                            subject: "Your tenant wants to sublet through SubIn",
+                            body: `${tenantName} is trying to sublet their apartment at ${otherPmData.propertyAddress} and has listed you as their property manager. Join SubIn to review and manage this request directly.`,
+                          },
+                        });
+
+                        setOtherPmSubmitted(true);
+                        toast.success("Invitation sent to your property manager!");
+                      } catch (err: any) {
+                        toast.error(err.message || "Failed to send invitation.");
+                      } finally {
+                        setOtherPmSubmitting(false);
+                      }
+                    }}
+                    disabled={otherPmSubmitting || !otherPmData.companyName || !otherPmData.contactName || !otherPmData.email || !otherPmData.propertyAddress}
+                    className="w-full min-h-[48px]"
+                  >
+                    {otherPmSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Submit & Notify My Property Manager
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {otherPmSubmitted && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 rounded-xl border-2 border-primary/30 bg-primary/5 p-5 text-center space-y-3"
+            >
+              <CheckCircle className="h-10 w-10 text-primary mx-auto" />
+              <p className="text-sm font-semibold text-foreground">We have sent an invitation to your property manager. We will notify you as soon as they join the platform.</p>
+              <button
+                onClick={() => {
+                  setShowOtherPmForm(false);
+                  setOtherPmSubmitted(false);
+                  update({ path: "own" });
+                  setActiveStep(1);
+                }}
+                className="text-sm text-primary underline hover:text-primary/80 transition-colors"
+              >
+                Switch to listing my own property instead
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 

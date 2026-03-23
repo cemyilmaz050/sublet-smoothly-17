@@ -1159,6 +1159,45 @@ export type Database = {
         }
         Relationships: []
       }
+      manager_invitations: {
+        Row: {
+          company_name: string
+          contact_name: string
+          created_at: string
+          email: string
+          id: string
+          phone: string | null
+          property_address: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          contact_name: string
+          created_at?: string
+          email: string
+          id?: string
+          phone?: string | null
+          property_address: string
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          phone?: string | null
+          property_address?: string
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           attachment_url: string | null
