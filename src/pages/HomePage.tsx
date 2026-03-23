@@ -61,7 +61,7 @@ const HomePage = () => {
         {/* Hero content — bottom aligned */}
         <div className="relative z-10 w-full flex flex-col sm:flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 mt-auto">
           {/* Left: Main heading — constrained width */}
-          <div className="mb-8 sm:mb-0 sm:max-w-[45%]">
+          <div className="mb-8 sm:mb-0 sm:max-w-[42%]">
             <h1
               className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.05] tracking-tight"
               style={{ fontFamily: "Inter, sans-serif" }}
