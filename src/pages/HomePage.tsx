@@ -43,10 +43,31 @@ const HomePage = () => {
           }}
         />
 
-        {/* Phone — centered */}
+        {/* Phone — centered, slightly rotated with hand */}
         <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
-          <div className="opacity-95 drop-shadow-2xl" style={{ filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.5))" }}>
-            <PhoneMock />
+          <div
+            style={{
+              transform: "rotate(1.5deg)",
+              filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.7))",
+            }}
+          >
+            <div className="relative">
+              <PhoneMock />
+              {/* Hand shape */}
+              <div
+                className="absolute left-1/2"
+                style={{
+                  bottom: -120,
+                  transform: "translateX(-50%)",
+                  width: 320,
+                  height: 200,
+                  background:
+                    "linear-gradient(to top, rgba(180, 100, 50, 0.9) 0%, rgba(160, 85, 40, 0.7) 50%, transparent 100%)",
+                  borderRadius: "40% 40% 0 0",
+                  zIndex: 1,
+                }}
+              />
+            </div>
           </div>
         </div>
 
