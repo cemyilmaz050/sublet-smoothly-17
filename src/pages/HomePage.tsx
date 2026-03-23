@@ -1,9 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload } from "lucide-react";
 import PhoneMock from "@/components/landing/PhoneMock";
 
 const HomePage = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#how-it-works") {
+      setTimeout(() => {
+        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [location.hash]);
   return (
     <div className="min-h-screen bg-background">
       {/* Hero — full screen, warm cinematic */}
@@ -109,7 +119,7 @@ const HomePage = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 bg-secondary/30">
+      <section id="how-it-works" className="py-24 bg-secondary/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground">How It Works</h2>

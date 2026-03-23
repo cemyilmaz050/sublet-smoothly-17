@@ -21,8 +21,16 @@ const Navbar = () => {
   const [friendFlowOpen, setFriendFlowOpen] = useState(false);
 
   const isListingsActive = location.pathname === "/listings";
-  const isHowItWorksActive = location.pathname === "/about";
   const isHomePage = location.pathname === "/";
+
+  const handleHowItWorks = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (location.pathname !== "/") {
+      navigate("/#how-it-works");
+    } else {
+      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <>
@@ -56,12 +64,13 @@ const Navbar = () => {
               >
                 Listings
               </Link>
-              <Link
-                to="/about"
-                className={`text-sm font-medium transition-colors ${isHowItWorksActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              <a
+                href="#how-it-works"
+                onClick={handleHowItWorks}
+                className="text-sm font-medium transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 How It Works
-              </Link>
+              </a>
             </div>
           )}
 
