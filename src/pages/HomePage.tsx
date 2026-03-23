@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload, UserCheck } from "lucide-react";
 import heroVideoAsset from "../../public/hero-process.mp4.asset.json";
 
-const PRESS_NAMES = ["Business Insider", "Forbes", "WSJ", "Entrepreneur", "Complex"];
 
 const HomePage = () => {
   return (
@@ -20,11 +19,11 @@ const HomePage = () => {
           className="absolute inset-0 h-full w-full object-cover"
         />
 
-        {/* Warm cinematic overlay */}
+        {/* Warm cinematic overlay — heavier to obscure phone screen text */}
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(to bottom right, rgba(60, 30, 10, 0.55), rgba(20, 10, 5, 0.75))",
+            background: "linear-gradient(to bottom right, rgba(60, 30, 10, 0.65), rgba(20, 10, 5, 0.82))",
           }}
         />
 
@@ -32,31 +31,18 @@ const HomePage = () => {
         <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse at center, transparent 30%, rgba(10, 5, 2, 0.4) 100%)",
+            background: "radial-gradient(ellipse at center, transparent 20%, rgba(10, 5, 2, 0.5) 100%)",
           }}
         />
 
-        {/* Press logos bar — center of nav area */}
-        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 sm:px-10 h-16">
-          {/* Left: Logo (hidden since navbar handles it, but we show on hero for transparent nav) */}
-          <div />
-
-          {/* Center: Press names */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-10">
-            {PRESS_NAMES.map((name) => (
-              <span
-                key={name}
-                className="text-white/40 text-xs sm:text-sm font-semibold tracking-wide uppercase"
-                style={{ fontFamily: "Inter, sans-serif" }}
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-
-          {/* Right: spacer */}
-          <div />
-        </div>
+        {/* Subtle blur to soften any remaining text on the phone screen */}
+        <div
+          className="absolute inset-0"
+          style={{
+            backdropFilter: "blur(1.5px)",
+            WebkitBackdropFilter: "blur(1.5px)",
+          }}
+        />
 
         {/* Hero content — bottom aligned */}
         <div className="relative z-10 w-full flex flex-col sm:flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 mt-auto">
