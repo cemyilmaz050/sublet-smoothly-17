@@ -844,40 +844,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
         <h2 className="text-xl font-bold text-foreground">Add some photos of your place</h2>
         <p className="text-sm text-muted-foreground">Listings with great photos get significantly more interest. Add at least 3 photos.</p>
 
-        {/* Mobile-friendly photo buttons */}
-        {isMobile && (
-          <div className="flex flex-col gap-3">
-            <label className="flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-4 text-base font-medium cursor-pointer min-h-[48px]">
-              📷 Add Photos from Camera Roll
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files) {
-                    const fakeEvent = { target: { files: e.target.files } };
-                    // Trigger the UniversalPhotoUploader's internal handler via ref or manual upload
-                    // For now we pass through to the uploader below
-                  }
-                }}
-              />
-            </label>
-            <label className="flex items-center justify-center gap-2 bg-background border-2 border-primary text-primary rounded-xl px-4 py-4 text-base font-medium cursor-pointer min-h-[48px]">
-              🤳 Take a New Photo
-              <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={(e) => {
-                  // Same as above
-                }}
-              />
-            </label>
-          </div>
-        )}
-
         <UniversalPhotoUploader
           photoUrls={data.photoUrls}
           onPhotoUrlsChange={(u) => update({ photoUrls: u })}

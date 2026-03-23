@@ -24,12 +24,13 @@ const ListingStep4 = ({ data, onChange, errors }: Props) => {
 
       <div>
         <Label>Amenities</Label>
-        <div className="mt-2 grid grid-cols-2 gap-3">
+        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {AMENITIES_LIST.map((amenity) => (
-            <label key={amenity} className="flex cursor-pointer items-center gap-2 rounded-lg border p-3 transition-colors hover:bg-accent/50">
+            <label key={amenity} className="flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-colors hover:bg-accent/50 min-h-[48px]">
               <Checkbox
                 checked={data.amenities.includes(amenity)}
                 onCheckedChange={() => toggleAmenity(amenity)}
+                className="h-5 w-5"
               />
               <span className="text-sm text-foreground">{amenity}</span>
             </label>
@@ -44,7 +45,7 @@ const ListingStep4 = ({ data, onChange, errors }: Props) => {
           placeholder="e.g. No loud music after 10pm, take out trash on Tuesdays..."
           maxLength={300}
           rows={3}
-          className="mt-1.5"
+          className="mt-1.5 text-base"
           value={data.house_rules}
           onChange={(e) => onChange({ house_rules: e.target.value })}
         />

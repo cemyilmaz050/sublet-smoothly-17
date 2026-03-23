@@ -37,7 +37,7 @@ const ListingStep2 = ({ data, onChange, errors }: Props) => {
           id="headline"
           placeholder="Sunny 2BR in Downtown"
           maxLength={60}
-          className="mt-1.5"
+          className="mt-1.5 text-base"
           value={data.headline}
           onChange={(e) => onChange({ headline: e.target.value })}
         />
@@ -51,7 +51,7 @@ const ListingStep2 = ({ data, onChange, errors }: Props) => {
           placeholder="Describe your space, neighborhood, and what makes it special..."
           maxLength={500}
           rows={4}
-          className="mt-1.5"
+          className="mt-1.5 text-base"
           value={data.description}
           onChange={(e) => onChange({ description: e.target.value })}
         />
