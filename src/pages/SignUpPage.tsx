@@ -209,11 +209,13 @@ const SignUpPage = () => {
   const handleResendVerification = async (targetEmail: string) => {
     if (resendCooldown > 0) return;
     setResending(true);
+    setResendSuccess(false);
     const { error } = await supabase.auth.resend({ type: "signup", email: targetEmail });
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Verification email resent! Check your inbox.");
+      setResendSuccess(true);
+      setTimeout(() => setResendSuccess(false), 3000);
       setResendCooldown(60);
       const interval = setInterval(() => {
         setResendCooldown((prev) => {
