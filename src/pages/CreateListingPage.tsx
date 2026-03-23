@@ -323,13 +323,13 @@ const CreateListingPage = () => {
               </>
             )}
 
-            <div className="mt-8 flex items-center justify-between">
-              <Button variant="outline" onClick={() => step === 0 ? navigate(-1) : setStep((s) => s - 1)}>
+            <div className="mt-8 flex items-center justify-between gap-3 sticky bottom-0 bg-card py-4 -mx-6 px-6 border-t border-border sm:static sm:border-0 sm:py-0 sm:mx-0 sm:px-0 z-10">
+              <Button variant="outline" size="lg" className="min-h-[48px]" onClick={() => step === 0 ? navigate(-1) : setStep((s) => s - 1)}>
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {step === 0 ? "Cancel" : "Back"}
               </Button>
               {step < 5 ? (
-                <Button onClick={nextStep}>
+                <Button size="lg" className="min-h-[48px]" onClick={nextStep}>
                   Next
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
