@@ -19,18 +19,24 @@ const HomePage = () => {
           }}
         />
 
-        {/* Warm cinematic overlay */}
+        {/* Layer 1 — warm amber color tint */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 z-[1]"
+          style={{ background: "rgba(100, 40, 5, 0.45)" }}
+        />
+
+        {/* Layer 2 — directional warm gradient */}
+        <div
+          className="absolute inset-0 z-[2]"
           style={{
             background:
-              "linear-gradient(135deg, rgba(15, 8, 3, 0.75) 0%, rgba(40, 20, 5, 0.65) 100%)",
+              "linear-gradient(to bottom right, rgba(15, 6, 1, 0.6) 0%, rgba(90, 38, 4, 0.4) 50%, rgba(15, 6, 1, 0.7) 100%)",
           }}
         />
 
         {/* Vignette */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 z-[3]"
           style={{
             background:
               "radial-gradient(ellipse at center, transparent 30%, rgba(10, 5, 2, 0.45) 100%)",
