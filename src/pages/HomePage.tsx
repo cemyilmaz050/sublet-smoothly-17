@@ -43,30 +43,31 @@ const HomePage = () => {
           }}
         />
 
-        {/* Phone — centered, slightly rotated with hand */}
-        <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
-          <div
-            style={{
-              transform: "rotate(1.5deg)",
-              filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.7))",
-            }}
-          >
-            <div className="relative">
-              <PhoneMock />
-              {/* Hand shape */}
-              <div
-                className="absolute left-1/2"
-                style={{
-                  bottom: -120,
-                  transform: "translateX(-50%)",
-                  width: 320,
-                  height: 200,
-                  background:
-                    "linear-gradient(to top, rgba(180, 100, 50, 0.9) 0%, rgba(160, 85, 40, 0.7) 50%, transparent 100%)",
-                  borderRadius: "40% 40% 0 0",
-                  zIndex: 1,
-                }}
-              />
+        {/* Phone with real hand — positioned right-center */}
+        <div className="absolute inset-0 z-[5] flex items-center justify-end pointer-events-none pr-[10%] lg:pr-[15%]">
+          <div className="relative" style={{ height: "80vh", maxHeight: 700 }}>
+            {/* Real hand holding phone image */}
+            <img
+              src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&q=80"
+              alt=""
+              className="h-full w-auto object-contain"
+              style={{
+                filter: "brightness(0.85) saturate(1.1) sepia(0.15) drop-shadow(0 40px 60px rgba(0,0,0,0.7))",
+              }}
+            />
+            {/* Phone screen overlay — positioned on top of the phone in the hand */}
+            <div
+              className="absolute overflow-hidden"
+              style={{
+                top: "12%",
+                left: "50%",
+                transform: "translateX(-50%)",
+                width: "62%",
+                height: "55%",
+                borderRadius: 24,
+              }}
+            >
+              <PhoneMock screenOnly />
             </div>
           </div>
         </div>
