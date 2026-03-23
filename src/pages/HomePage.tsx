@@ -1,48 +1,48 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload, UserCheck } from "lucide-react";
-import heroVideoAsset from "../../public/hero-process.mp4.asset.json";
-
+import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload } from "lucide-react";
+import PhoneMock from "@/components/landing/PhoneMock";
 
 const HomePage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero — full screen, warm cinematic */}
-      <section className="relative flex min-h-screen">
-        {/* Video background */}
-        <video
-          src={heroVideoAsset.url}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-
-        {/* Warm cinematic overlay — heavier to obscure phone screen text */}
+      <section className="relative flex min-h-screen overflow-hidden">
+        {/* Warm background image */}
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(to bottom right, rgba(60, 30, 10, 0.65), rgba(20, 10, 5, 0.82))",
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1554995207-c18c203602cb?w=1920&q=80')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         />
 
-        {/* Dark vignette for depth */}
+        {/* Warm cinematic overlay */}
         <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(ellipse at center, transparent 20%, rgba(10, 5, 2, 0.5) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(15, 8, 3, 0.75) 0%, rgba(40, 20, 5, 0.65) 100%)",
           }}
         />
 
-        {/* Subtle blur to soften any remaining text on the phone screen */}
+        {/* Vignette */}
         <div
           className="absolute inset-0"
           style={{
-            backdropFilter: "blur(1.5px)",
-            WebkitBackdropFilter: "blur(1.5px)",
+            background:
+              "radial-gradient(ellipse at center, transparent 30%, rgba(10, 5, 2, 0.45) 100%)",
           }}
         />
+
+        {/* Phone — centered */}
+        <div className="absolute inset-0 z-[5] flex items-center justify-center pointer-events-none">
+          <div className="opacity-95 drop-shadow-2xl" style={{ filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.5))" }}>
+            <PhoneMock />
+          </div>
+        </div>
 
         {/* Hero content — bottom aligned */}
         <div className="relative z-10 w-full flex flex-col sm:flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 mt-auto">
