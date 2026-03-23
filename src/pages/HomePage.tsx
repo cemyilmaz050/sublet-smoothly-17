@@ -71,10 +71,18 @@ const HomePage = () => {
           </div>
         </div>
 
+        {/* Left text backing gradient for legibility */}
+        <div
+          className="absolute inset-0 z-[4] pointer-events-none"
+          style={{
+            background: "linear-gradient(to right, rgba(10,4,1,0.8) 0%, rgba(10,4,1,0.4) 35%, transparent 55%)",
+          }}
+        />
+
         {/* Hero content — bottom aligned */}
         <div className="relative z-10 w-full flex flex-col sm:flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-16 sm:pb-20 mt-auto">
-          {/* Left: Main heading */}
-          <div className="mb-8 sm:mb-0">
+          {/* Left: Main heading — constrained width */}
+          <div className="mb-8 sm:mb-0 sm:max-w-[45%]">
             <h1
               className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.05] tracking-tight"
               style={{ fontFamily: "Inter, sans-serif" }}
