@@ -280,9 +280,9 @@ const CreateListingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       
-      <div className="container max-w-2xl py-8">
-        <h1 className="mb-2 text-2xl font-bold text-foreground">{editId ? "Edit Listing" : "Create New Listing"}</h1>
-        <p className="mb-6 text-muted-foreground">Fill in the details about your property</p>
+        <div className="container max-w-2xl px-4 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-8">
+        <h1 className="mb-2 text-xl sm:text-2xl font-bold text-foreground">{editId ? "Edit Listing" : "Create New Listing"}</h1>
+        <p className="mb-4 sm:mb-6 text-sm sm:text-base text-muted-foreground">Fill in the details about your property</p>
 
         <Card className="mb-6 shadow-card">
           <CardContent className="py-6">
@@ -323,13 +323,13 @@ const CreateListingPage = () => {
               </>
             )}
 
-            <div className="mt-8 flex items-center justify-between">
-              <Button variant="outline" onClick={() => step === 0 ? navigate(-1) : setStep((s) => s - 1)}>
+            <div className="mt-8 flex items-center justify-between gap-3 sticky bottom-0 bg-card py-4 -mx-6 px-6 border-t border-border sm:static sm:border-0 sm:py-0 sm:mx-0 sm:px-0 z-10">
+              <Button variant="outline" size="lg" className="min-h-[48px]" onClick={() => step === 0 ? navigate(-1) : setStep((s) => s - 1)}>
                 <ArrowLeft className="mr-1 h-4 w-4" />
                 {step === 0 ? "Cancel" : "Back"}
               </Button>
               {step < 5 ? (
-                <Button onClick={nextStep}>
+                <Button size="lg" className="min-h-[48px]" onClick={nextStep}>
                   Next
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
@@ -337,7 +337,7 @@ const CreateListingPage = () => {
                 <Button
                   onClick={handlePublish}
                   disabled={!confirmed || loading || !checklist.allDone}
-                  className="bg-primary text-primary-foreground"
+                  className="bg-primary text-primary-foreground min-h-[48px]"
                   size="lg"
                 >
                   {loading ? (
