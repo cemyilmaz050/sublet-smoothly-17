@@ -94,10 +94,7 @@ const Navbar = () => {
                 </Link>
               </>
             ) : (
-              <>
-                {!isHomePage && <NotificationBell />}
-                <UserMenu />
-              </>
+              <UserMenu />
             )}
             {/* Mobile: show UserMenu for hamburger */}
             {!user && <div className="sm:hidden"><UserMenu /></div>}
