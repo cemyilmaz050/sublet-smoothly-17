@@ -12,6 +12,7 @@ const UserMenu = () => {
   const { user, signOut } = useAuth();
   const { requireAuth } = useAuthModal();
   const navigate = useNavigate();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
