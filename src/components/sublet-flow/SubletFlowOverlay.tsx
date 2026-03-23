@@ -66,6 +66,10 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const stepRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [idVerified, setIdVerified] = useState<boolean | null>(null);
+  const [showOtherPmForm, setShowOtherPmForm] = useState(false);
+  const [otherPmData, setOtherPmData] = useState({ companyName: "", contactName: "", email: "", phone: "", propertyAddress: "" });
+  const [otherPmSubmitting, setOtherPmSubmitting] = useState(false);
+  const [otherPmSubmitted, setOtherPmSubmitted] = useState(false);
 
   // Check ID verification on mount
   useEffect(() => {
