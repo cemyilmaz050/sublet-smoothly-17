@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, HelpCircle, Gift, LogIn, MessageSquare, LogOut, User, Info } from "lucide-react";
+import { Menu, HelpCircle, Gift, LogIn, MessageSquare, LogOut, User, Info, UserPlus, Building2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const UserMenu = () => {
   const { user, signOut } = useAuth();
@@ -21,12 +22,10 @@ const UserMenu = () => {
 
   useEffect(() => {
     if (!user) { setAvatarUrl(null); setInitials(""); return; }
-    // Get initials from user metadata
     const meta = user.user_metadata || {};
     const first = (meta.first_name || meta.full_name?.split(" ")[0] || "").charAt(0).toUpperCase();
     const last = (meta.last_name || meta.full_name?.split(" ").slice(-1)[0] || "").charAt(0).toUpperCase();
     setInitials(first + last || user.email?.charAt(0).toUpperCase() || "U");
-    // Fetch avatar from profile
     supabase.from("profiles").select("avatar_url, first_name, last_name").eq("id", user.id).single().then(({ data }) => {
       if (data?.avatar_url) setAvatarUrl(data.avatar_url);
       if (data?.first_name || data?.last_name) {
@@ -43,9 +42,9 @@ const UserMenu = () => {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleNav = (path: string) => {
+  const closeAndNavigate = (path: string) => {
     setOpen(false);
-    navigate(path);
+    setTimeout(() => navigate(path), 50);
   };
 
   const handleSignOut = async () => {
@@ -55,65 +54,72 @@ const UserMenu = () => {
   };
 
   const menuItemClass =
-    "flex items-center gap-2.5 px-4 py-3 text-sm text-foreground transition-colors hover:bg-accent w-full text-left";
+    "flex items-center gap-3 px-5 min-h-[56px] text-sm font-medium text-foreground transition-colors hover:bg-accent active:bg-accent w-full text-left cursor-pointer";
 
   const handleHowItWorks = () => {
     setOpen(false);
-    if (location.pathname !== "/") {
-      navigate("/#how-it-works");
-    } else {
-      document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
-    }
+    setTimeout(() => {
+      if (location.pathname !== "/") {
+        navigate("/#how-it-works");
+      } else {
+        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+      }
+    }, 50);
+  };
+
+  const handleHelpCenter = () => {
+    setOpen(false);
+    toast("Help Center coming soon");
   };
 
   const guestMenuItems = (
     <div className="flex flex-col py-1">
       <button onClick={handleHowItWorks} className={menuItemClass}>
-        <Info className="h-4 w-4 text-muted-foreground" /> How It Works
+        <Info className="h-5 w-5 text-muted-foreground shrink-0" /> How It Works
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); }} className={menuItemClass}>
-        <HelpCircle className="h-4 w-4 text-muted-foreground" /> Help Center
+      <div className="mx-5 border-t" />
+      <button onClick={handleHelpCenter} className={menuItemClass}>
+        <HelpCircle className="h-5 w-5 text-muted-foreground shrink-0" /> Help Center
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); navigate("/refer"); }} className={menuItemClass}>
-        <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
+      <div className="mx-5 border-t" />
+      <button onClick={() => closeAndNavigate("/refer")} className={menuItemClass}>
+        <Gift className="h-5 w-5 text-muted-foreground shrink-0" /> Refer a Sublet
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); navigate("/login"); }} className={menuItemClass}>
-        <LogIn className="h-4 w-4 text-muted-foreground" /> Log In
+      <div className="mx-5 border-t" />
+      <button onClick={() => closeAndNavigate("/login")} className={menuItemClass}>
+        <LogIn className="h-5 w-5 text-muted-foreground shrink-0" /> Log In
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); navigate("/signup"); }} className={menuItemClass}>
-        <User className="h-4 w-4 text-muted-foreground" /> Sign Up
+      <div className="mx-5 border-t" />
+      <button onClick={() => closeAndNavigate("/signup")} className={menuItemClass}>
+        <UserPlus className="h-5 w-5 text-muted-foreground shrink-0" /> Sign Up
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); navigate("/login"); }} className={menuItemClass}>
-        <User className="h-4 w-4 text-muted-foreground" /> Are you a Property Manager?
+      <div className="mx-5 border-t" />
+      <button onClick={() => closeAndNavigate("/signup?role=manager")} className={menuItemClass}>
+        <Building2 className="h-5 w-5 text-muted-foreground shrink-0" /> Are you a Property Manager?
       </button>
     </div>
   );
 
   const authedMenuItems = (
     <div className="flex flex-col py-1">
-      <button onClick={() => handleNav("/dashboard")} className={menuItemClass}>
-        <User className="h-4 w-4 text-muted-foreground" /> My Dashboard
+      <button onClick={() => closeAndNavigate("/dashboard")} className={menuItemClass}>
+        <User className="h-5 w-5 text-muted-foreground shrink-0" /> My Dashboard
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => handleNav("/messages")} className={menuItemClass}>
-        <MessageSquare className="h-4 w-4 text-muted-foreground" /> Messages
+      <div className="mx-5 border-t" />
+      <button onClick={() => closeAndNavigate("/messages")} className={menuItemClass}>
+        <MessageSquare className="h-5 w-5 text-muted-foreground shrink-0" /> Messages
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); navigate("/refer"); }} className={menuItemClass}>
-        <Gift className="h-4 w-4 text-muted-foreground" /> Refer a Sublet
+      <div className="mx-5 border-t" />
+      <button onClick={() => closeAndNavigate("/refer")} className={menuItemClass}>
+        <Gift className="h-5 w-5 text-muted-foreground shrink-0" /> Refer a Sublet
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={() => { setOpen(false); }} className={menuItemClass}>
-        <HelpCircle className="h-4 w-4 text-muted-foreground" /> Help Center
+      <div className="mx-5 border-t" />
+      <button onClick={handleHelpCenter} className={menuItemClass}>
+        <HelpCircle className="h-5 w-5 text-muted-foreground shrink-0" /> Help Center
       </button>
-      <div className="mx-4 border-t" />
-      <button onClick={handleSignOut} className="flex items-center gap-2.5 px-4 py-3 text-sm text-destructive transition-colors hover:bg-destructive/10 w-full text-left">
-        <LogOut className="h-4 w-4" /> Sign Out
+      <div className="mx-5 border-t" />
+      <button onClick={handleSignOut} className="flex items-center gap-3 px-5 min-h-[56px] text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:bg-destructive/10 w-full text-left cursor-pointer">
+        <LogOut className="h-5 w-5 shrink-0" /> Sign Out
       </button>
     </div>
   );
