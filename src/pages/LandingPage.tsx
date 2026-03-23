@@ -13,7 +13,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* How It Works */}
-      <section className="py-24 bg-secondary/30">
+      <section id="how-it-works" className="py-24 bg-secondary/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground">How It Works</h1>
