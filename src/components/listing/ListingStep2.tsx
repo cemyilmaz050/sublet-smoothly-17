@@ -37,7 +37,7 @@ const ListingStep2 = ({ data, onChange, errors }: Props) => {
           id="headline"
           placeholder="Sunny 2BR in Downtown"
           maxLength={60}
-          className="mt-1.5"
+          className="mt-1.5 text-base"
           value={data.headline}
           onChange={(e) => onChange({ headline: e.target.value })}
         />
