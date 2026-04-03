@@ -10,7 +10,7 @@ import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   MapPin, Calendar, ShieldCheck, Heart, Building2, Video,
   Search, SlidersHorizontal, Pencil, Eye, X, Map,
-  MessageSquare, Loader2, CalendarIcon, Home, Check,
+  MessageSquare, Loader2, CalendarIcon, Home, Check, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
