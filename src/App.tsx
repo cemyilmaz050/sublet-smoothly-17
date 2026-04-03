@@ -37,6 +37,7 @@ import AdminCreateListing from "./pages/AdminCreateListing";
 import FriendSubletLanding from "./pages/FriendSubletLanding";
 import NotFound from "./pages/NotFound";
 import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
+import UrgentPage from "./pages/UrgentPage";
 
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";
