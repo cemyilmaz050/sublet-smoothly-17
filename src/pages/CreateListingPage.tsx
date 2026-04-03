@@ -217,6 +217,11 @@ const CreateListingPage = () => {
         status: newStatus as any,
         published_at: isManaged ? null : new Date().toISOString(),
         management_group_id: isManaged ? BBG_PM_ID : null,
+        is_urgent: form.is_urgent,
+        asking_price: form.is_urgent && form.asking_price !== "" ? Number(form.asking_price) : null,
+        minimum_price: form.is_urgent && form.minimum_price !== "" ? Number(form.minimum_price) : null,
+        urgency_deadline: form.is_urgent && form.urgency_deadline ? form.urgency_deadline : null,
+        urgency_reason: form.is_urgent && form.urgency_reason ? form.urgency_reason : null,
       } as any;
 
       if (draftId) {
