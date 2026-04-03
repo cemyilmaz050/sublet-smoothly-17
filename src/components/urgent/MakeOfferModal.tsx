@@ -24,8 +24,8 @@ interface Props {
     id: string;
     headline: string | null;
     address: string | null;
-    asking_price: number | null;
-    monthly_rent: number | null;
+    asking_price?: number | null;
+    monthly_rent?: number | null;
     tenant_id: string;
   };
 }
