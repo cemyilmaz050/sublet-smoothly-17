@@ -29,6 +29,8 @@ import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 
 import VideoPlayer from "@/components/video/VideoPlayer";
+import UrgentListingCard from "@/components/urgent/UrgentListingCard";
+import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 interface ListingItem {
   id: string;
