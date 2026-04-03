@@ -226,6 +226,15 @@ const ListingsPage = () => {
                 <Map className="mr-1 h-3.5 w-3.5" /> Map
               </Button>
             </div>
+            {/* Urgent filter toggle */}
+            <div className="hidden sm:flex items-center gap-1 rounded-full border p-0.5">
+              <Button variant={!urgentOnly ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs" onClick={() => setUrgentOnly(false)}>
+                All Listings
+              </Button>
+              <Button variant={urgentOnly ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs text-amber-600" onClick={() => setUrgentOnly(true)}>
+                <Zap className="mr-1 h-3 w-3" /> Urgent Only
+              </Button>
+            </div>
           </div>
 
           {showFilters && (
