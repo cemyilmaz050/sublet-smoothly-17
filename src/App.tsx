@@ -37,6 +37,7 @@ import AdminCreateListing from "./pages/AdminCreateListing";
 import FriendSubletLanding from "./pages/FriendSubletLanding";
 import NotFound from "./pages/NotFound";
 import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
+import UrgentPage from "./pages/UrgentPage";
 
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";
@@ -96,6 +97,7 @@ const App = () => (
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/managers/:slug" element={<ManagerProfilePage />} />
+                  <Route path="/urgent" element={<UrgentPage />} />
                   <Route path="/invite/friend" element={<FriendSubletLanding />} />
 
                   {/* Redirect old AI finder route */}

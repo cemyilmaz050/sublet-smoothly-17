@@ -10,7 +10,7 @@ import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
   MapPin, Calendar, ShieldCheck, Heart, Building2, Video,
   Search, SlidersHorizontal, Pencil, Eye, X, Map,
-  MessageSquare, Loader2, CalendarIcon, Home, Check,
+  MessageSquare, Loader2, CalendarIcon, Home, Check, Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -29,6 +29,8 @@ import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
 
 import VideoPlayer from "@/components/video/VideoPlayer";
+import UrgentListingCard from "@/components/urgent/UrgentListingCard";
+import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 interface ListingItem {
   id: string;
@@ -52,6 +54,9 @@ interface ListingItem {
   review_count?: number;
   intro_video_url?: string | null;
   tenant_name?: string | null;
+  is_urgent?: boolean;
+  asking_price?: number | null;
+  urgency_deadline?: string | null;
 }
 
 const ListingsPage = () => {
@@ -70,12 +75,14 @@ const ListingsPage = () => {
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [urgentOnly, setUrgentOnly] = useState(false);
+  const [offerListing, setOfferListing] = useState<ListingItem | null>(null);
 
   useEffect(() => {
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude, intro_video_url")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude, intro_video_url, is_urgent, asking_price, urgency_deadline")
         .eq("status", "active")
         .order("created_at", { ascending: false });
 
@@ -121,6 +128,7 @@ const ListingsPage = () => {
 
   const filtered = dbListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (urgentOnly && !l.is_urgent) return false;
     if (priceFilter && priceFilter !== "all") {
       const rent = l.monthly_rent ?? 0;
       if (priceFilter === "0-1500" && rent > 1500) return false;
@@ -137,6 +145,8 @@ const ListingsPage = () => {
     }
     return true;
   });
+
+  const urgentListings = dbListings.filter((l) => l.is_urgent);
 
   const formatDates = (from: string | null, until: string | null) => {
     if (!from) return "";
@@ -216,6 +226,15 @@ const ListingsPage = () => {
                 <Map className="mr-1 h-3.5 w-3.5" /> Map
               </Button>
             </div>
+            {/* Urgent filter toggle */}
+            <div className="hidden sm:flex items-center gap-1 rounded-full border p-0.5">
+              <Button variant={!urgentOnly ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs" onClick={() => setUrgentOnly(false)}>
+                All Listings
+              </Button>
+              <Button variant={urgentOnly ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs text-amber-600" onClick={() => setUrgentOnly(true)}>
+                <Zap className="mr-1 h-3 w-3" /> Urgent Only
+              </Button>
+            </div>
           </div>
 
           {showFilters && (
@@ -251,7 +270,22 @@ const ListingsPage = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* Urgent Sublets Section */}
+        {!urgentOnly && urgentListings.length > 0 && viewMode === "grid" && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="h-5 w-5 text-amber-500" />
+              <h2 className="text-lg font-bold text-foreground">Urgent Sublets</h2>
+              <Link to="/urgent" className="ml-auto text-sm text-amber-600 hover:underline font-medium">View all →</Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-hide">
+              {urgentListings.map((listing) => (
+                <UrgentListingCard key={listing.id} listing={listing as any} onMakeOffer={(l) => setOfferListing({ ...listing, ...l } as any)} />
+              ))}
+            </div>
+          </div>
+        )}
         {viewMode === "map" ? (
           <div className="rounded-2xl overflow-hidden border shadow-card" style={{ height: "calc(100vh - 280px)" }}>
             <ListingsMap
@@ -424,6 +458,15 @@ const ListingsPage = () => {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Make Offer Modal */}
+      {offerListing && (
+        <MakeOfferModal
+          open={!!offerListing}
+          onClose={() => setOfferListing(null)}
+          listing={offerListing}
+        />
+      )}
     </div>
   );
 };

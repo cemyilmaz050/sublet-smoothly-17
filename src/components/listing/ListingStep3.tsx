@@ -8,6 +8,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ListingFormData, MIN_DURATIONS } from "@/types/listing";
+import UrgentToggle from "@/components/urgent/UrgentToggle";
 
 interface Props {
   data: ListingFormData;
@@ -111,6 +112,9 @@ const ListingStep3 = ({ data, onChange, errors }: Props) => {
           </SelectContent>
         </Select>
       </div>
+
+      {/* Urgent Sublet Toggle */}
+      <UrgentToggle data={data} onChange={onChange} />
     </div>
   );
 };

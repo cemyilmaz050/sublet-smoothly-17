@@ -73,6 +73,11 @@ const CreateListingPage = () => {
           available_from: data.available_from || "",
           available_until: data.available_until || "",
           min_duration: data.min_duration || 1,
+          is_urgent: (data as any).is_urgent || false,
+          asking_price: (data as any).asking_price ?? "",
+          minimum_price: (data as any).minimum_price ?? "",
+          urgency_deadline: (data as any).urgency_deadline || "",
+          urgency_reason: (data as any).urgency_reason || "",
           amenities: (data.amenities as string[]) || [],
           house_rules: data.house_rules || "",
           guest_policy: (data.guest_policy as any) || "",
@@ -148,7 +153,12 @@ const CreateListingPage = () => {
       guest_policy: form.guest_policy || null,
       status: "draft" as const,
       management_group_id: form.management_type === "bbg" ? BBG_PM_ID : null,
-    };
+      is_urgent: form.is_urgent,
+      asking_price: form.is_urgent && form.asking_price !== "" ? Number(form.asking_price) : null,
+      minimum_price: form.is_urgent && form.minimum_price !== "" ? Number(form.minimum_price) : null,
+      urgency_deadline: form.is_urgent && form.urgency_deadline ? form.urgency_deadline : null,
+      urgency_reason: form.is_urgent && form.urgency_reason ? form.urgency_reason : null,
+    } as any;
 
     if (draftId) {
       const photos = getPhotoUrls();
@@ -207,6 +217,11 @@ const CreateListingPage = () => {
         status: newStatus as any,
         published_at: isManaged ? null : new Date().toISOString(),
         management_group_id: isManaged ? BBG_PM_ID : null,
+        is_urgent: form.is_urgent,
+        asking_price: form.is_urgent && form.asking_price !== "" ? Number(form.asking_price) : null,
+        minimum_price: form.is_urgent && form.minimum_price !== "" ? Number(form.minimum_price) : null,
+        urgency_deadline: form.is_urgent && form.urgency_deadline ? form.urgency_deadline : null,
+        urgency_reason: form.is_urgent && form.urgency_reason ? form.urgency_reason : null,
       } as any;
 
       if (draftId) {

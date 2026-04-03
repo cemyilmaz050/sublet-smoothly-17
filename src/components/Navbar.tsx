@@ -78,6 +78,12 @@ const Navbar = () => {
               >
                 Listings
               </Link>
+              <Link
+                to="/urgent"
+                className="text-sm font-semibold transition-colors text-amber-600 hover:text-amber-700 flex items-center gap-1"
+              >
+                ⚡ Urgent
+              </Link>
               <a
                 href="#how-it-works"
                 onClick={handleHowItWorks}

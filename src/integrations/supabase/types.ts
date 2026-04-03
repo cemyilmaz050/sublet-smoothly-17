@@ -749,6 +749,41 @@ export type Database = {
         }
         Relationships: []
       }
+      counter_offers: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          made_by: string
+          message: string | null
+          offer_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          made_by: string
+          message?: string | null
+          offer_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          made_by?: string
+          message?: string | null
+          offer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "counter_offers_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -985,6 +1020,7 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          asking_price: number | null
           available_from: string | null
           available_until: string | null
           bathrooms: number | null
@@ -997,12 +1033,14 @@ export type Database = {
           house_rules: string | null
           id: string
           intro_video_url: string | null
+          is_urgent: boolean
           knock_count: number
           latitude: number | null
           longitude: number | null
           management_group_id: string | null
           manager_id: string | null
           min_duration: number | null
+          minimum_price: number | null
           monthly_rent: number | null
           move_in_flexibility: string | null
           path: string | null
@@ -1019,11 +1057,14 @@ export type Database = {
           tenant_id: string
           unit_number: string | null
           updated_at: string
+          urgency_deadline: string | null
+          urgency_reason: string | null
           view_count: number
         }
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          asking_price?: number | null
           available_from?: string | null
           available_until?: string | null
           bathrooms?: number | null
@@ -1036,12 +1077,14 @@ export type Database = {
           house_rules?: string | null
           id?: string
           intro_video_url?: string | null
+          is_urgent?: boolean
           knock_count?: number
           latitude?: number | null
           longitude?: number | null
           management_group_id?: string | null
           manager_id?: string | null
           min_duration?: number | null
+          minimum_price?: number | null
           monthly_rent?: number | null
           move_in_flexibility?: string | null
           path?: string | null
@@ -1058,11 +1101,14 @@ export type Database = {
           tenant_id: string
           unit_number?: string | null
           updated_at?: string
+          urgency_deadline?: string | null
+          urgency_reason?: string | null
           view_count?: number
         }
         Update: {
           address?: string | null
           amenities?: string[] | null
+          asking_price?: number | null
           available_from?: string | null
           available_until?: string | null
           bathrooms?: number | null
@@ -1075,12 +1121,14 @@ export type Database = {
           house_rules?: string | null
           id?: string
           intro_video_url?: string | null
+          is_urgent?: boolean
           knock_count?: number
           latitude?: number | null
           longitude?: number | null
           management_group_id?: string | null
           manager_id?: string | null
           min_duration?: number | null
+          minimum_price?: number | null
           monthly_rent?: number | null
           move_in_flexibility?: string | null
           path?: string | null
@@ -1097,6 +1145,8 @@ export type Database = {
           tenant_id?: string
           unit_number?: string | null
           updated_at?: string
+          urgency_deadline?: string | null
+          urgency_reason?: string | null
           view_count?: number
         }
         Relationships: [
@@ -1265,6 +1315,92 @@ export type Database = {
           read?: boolean
           title?: string
           type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      offers: {
+        Row: {
+          asking_amount: number
+          created_at: string
+          duration_months: number
+          expires_at: string
+          id: string
+          listing_id: string
+          message: string | null
+          move_in_date: string | null
+          offer_amount: number
+          round: number
+          status: string
+          subtenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          asking_amount: number
+          created_at?: string
+          duration_months?: number
+          expires_at?: string
+          id?: string
+          listing_id: string
+          message?: string | null
+          move_in_date?: string | null
+          offer_amount: number
+          round?: number
+          status?: string
+          subtenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          asking_amount?: number
+          created_at?: string
+          duration_months?: number
+          expires_at?: string
+          id?: string
+          listing_id?: string
+          message?: string | null
+          move_in_date?: string | null
+          offer_amount?: number
+          round?: number
+          status?: string
+          subtenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      price_alerts: {
+        Row: {
+          city: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_budget: number
+          min_duration: number | null
+          user_id: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_budget: number
+          min_duration?: number | null
+          user_id: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_budget?: number
+          min_duration?: number | null
           user_id?: string
         }
         Relationships: []

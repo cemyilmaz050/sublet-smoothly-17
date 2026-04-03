@@ -21,6 +21,7 @@ import FriendSubletFlow from "@/components/FriendSubletFlow";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
 import KnocksSection from "@/components/tenant/KnocksSection";
+import OffersSection from "@/components/urgent/OffersSection";
 
 interface Listing {
   id: string;
@@ -237,6 +238,14 @@ const TenantDashboard = () => {
 
         {/* Knocks Section */}
         <KnocksSection />
+
+        {/* Offers Section (for urgent listings) */}
+        {listings.length > 0 && (
+          <OffersSection
+            listingIds={listings.map(l => l.id)}
+            minimumPrices={listings.reduce((acc, l) => ({ ...acc, [l.id]: (l as any).minimum_price || 0 }), {} as Record<string, number>)}
+          />
+        )}
 
         {/* Your Listing */}
         <section className="rounded-2xl border bg-card shadow-card overflow-hidden">
