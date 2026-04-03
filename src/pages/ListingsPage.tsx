@@ -270,7 +270,22 @@ const ListingsPage = () => {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-6 py-8 space-y-8">
+        {/* Urgent Sublets Section */}
+        {!urgentOnly && urgentListings.length > 0 && viewMode === "grid" && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="h-5 w-5 text-amber-500" />
+              <h2 className="text-lg font-bold text-foreground">Urgent Sublets</h2>
+              <Link to="/urgent" className="ml-auto text-sm text-amber-600 hover:underline font-medium">View all →</Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-hide">
+              {urgentListings.map((listing) => (
+                <UrgentListingCard key={listing.id} listing={listing as any} onMakeOffer={(l) => setOfferListing({ ...listing, ...l } as any)} />
+              ))}
+            </div>
+          </div>
+        )}
         {viewMode === "map" ? (
           <div className="rounded-2xl overflow-hidden border shadow-card" style={{ height: "calc(100vh - 280px)" }}>
             <ListingsMap
