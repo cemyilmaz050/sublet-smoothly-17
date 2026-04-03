@@ -153,7 +153,12 @@ const CreateListingPage = () => {
       guest_policy: form.guest_policy || null,
       status: "draft" as const,
       management_group_id: form.management_type === "bbg" ? BBG_PM_ID : null,
-    };
+      is_urgent: form.is_urgent,
+      asking_price: form.is_urgent && form.asking_price !== "" ? Number(form.asking_price) : null,
+      minimum_price: form.is_urgent && form.minimum_price !== "" ? Number(form.minimum_price) : null,
+      urgency_deadline: form.is_urgent && form.urgency_deadline ? form.urgency_deadline : null,
+      urgency_reason: form.is_urgent && form.urgency_reason ? form.urgency_reason : null,
+    } as any;
 
     if (draftId) {
       const photos = getPhotoUrls();
