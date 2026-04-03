@@ -21,6 +21,7 @@ import FriendSubletFlow from "@/components/FriendSubletFlow";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import TenantIdVerification from "@/components/TenantIdVerification";
 import KnocksSection from "@/components/tenant/KnocksSection";
+import OffersSection from "@/components/urgent/OffersSection";
 
 interface Listing {
   id: string;
