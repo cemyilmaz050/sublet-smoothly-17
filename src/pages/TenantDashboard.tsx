@@ -239,6 +239,14 @@ const TenantDashboard = () => {
         {/* Knocks Section */}
         <KnocksSection />
 
+        {/* Offers Section (for urgent listings) */}
+        {listings.length > 0 && (
+          <OffersSection
+            listingIds={listings.map(l => l.id)}
+            minimumPrices={listings.reduce((acc, l) => ({ ...acc, [l.id]: (l as any).minimum_price || 0 }), {} as Record<string, number>)}
+          />
+        )}
+
         {/* Your Listing */}
         <section className="rounded-2xl border bg-card shadow-card overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b">
