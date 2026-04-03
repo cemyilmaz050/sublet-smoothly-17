@@ -21,6 +21,13 @@ export interface ListingFormData {
   available_until: string;
   min_duration: number;
 
+  // Urgent Sublet
+  is_urgent: boolean;
+  asking_price: number | "";
+  minimum_price: number | "";
+  urgency_deadline: string;
+  urgency_reason: string;
+
   // Step 4: House Rules & Amenities
   amenities: string[];
   house_rules: string;
@@ -44,6 +51,11 @@ export const defaultListingForm: ListingFormData = {
   available_from: "",
   available_until: "",
   min_duration: 1,
+  is_urgent: false,
+  asking_price: "",
+  minimum_price: "",
+  urgency_deadline: "",
+  urgency_reason: "",
   amenities: [],
   house_rules: "",
   guest_policy: "",

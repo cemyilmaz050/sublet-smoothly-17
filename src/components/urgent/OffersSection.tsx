@@ -57,7 +57,7 @@ const OffersSection = ({ listingIds, minimumPrices }: Props) => {
       .order("created_at", { ascending: false }) as any;
 
     if (data && data.length > 0) {
-      const subIds = [...new Set(data.map((o: any) => o.subtenant_id))];
+      const subIds = [...new Set(data.map((o: any) => o.subtenant_id))] as string[];
       const { data: profiles } = await supabase.from("profiles").select("id, first_name, last_name").in("id", subIds) as any;
       const nameMap: Record<string, string> = {};
       (profiles || []).forEach((p: any) => { nameMap[p.id] = [p.first_name, p.last_name].filter(Boolean).join(" ") || "Subtenant"; });
