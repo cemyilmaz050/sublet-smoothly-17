@@ -54,6 +54,9 @@ interface ListingItem {
   review_count?: number;
   intro_video_url?: string | null;
   tenant_name?: string | null;
+  is_urgent?: boolean;
+  asking_price?: number | null;
+  urgency_deadline?: string | null;
 }
 
 const ListingsPage = () => {
