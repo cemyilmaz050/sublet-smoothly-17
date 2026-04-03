@@ -128,6 +128,7 @@ const ListingsPage = () => {
 
   const filtered = dbListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (urgentOnly && !l.is_urgent) return false;
     if (priceFilter && priceFilter !== "all") {
       const rent = l.monthly_rent ?? 0;
       if (priceFilter === "0-1500" && rent > 1500) return false;
@@ -144,6 +145,8 @@ const ListingsPage = () => {
     }
     return true;
   });
+
+  const urgentListings = dbListings.filter((l) => l.is_urgent);
 
   const formatDates = (from: string | null, until: string | null) => {
     if (!from) return "";
