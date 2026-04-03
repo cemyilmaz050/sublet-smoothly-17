@@ -1,4 +1,4 @@
-import { Building2, Info, LogIn, Search, UserPlus, X } from "lucide-react";
+import { Building2, Info, LogIn, Search, UserPlus, X, Zap } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 type MobileMenuProps = {
@@ -62,6 +62,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         {[
           { label: "How It Works", path: "#how-it-works", icon: Info },
           { label: "Browse Listings", path: "/discover", icon: Search },
+          { label: "⚡ Urgent Sublets", path: "/urgent", icon: Zap, amber: true },
           { label: "Log In", path: "/login", icon: LogIn },
           { label: "Sign Up", path: "/signup", icon: UserPlus },
           { label: "Property Manager", path: "/signup?role=manager", icon: Building2 },
@@ -70,9 +71,11 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
             key={item.label}
             type="button"
             onClick={() => handleNavigate(item.path)}
-            className="flex min-h-[56px] w-full items-center gap-4 border-b border-border px-6 text-left text-base font-medium text-foreground transition-colors hover:bg-accent active:bg-accent"
+            className={`flex min-h-[56px] w-full items-center gap-4 border-b border-border px-6 text-left text-base font-medium transition-colors hover:bg-accent active:bg-accent ${
+              (item as any).amber ? "text-amber-600" : "text-foreground"
+            }`}
           >
-            <item.icon className="h-5 w-5 shrink-0 text-muted-foreground" />
+            <item.icon className={`h-5 w-5 shrink-0 ${(item as any).amber ? "text-amber-500" : "text-muted-foreground"}`} />
             {item.label}
           </button>
         ))}
