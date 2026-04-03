@@ -75,6 +75,8 @@ const ListingsPage = () => {
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [urgentOnly, setUrgentOnly] = useState(false);
+  const [offerListing, setOfferListing] = useState<ListingItem | null>(null);
 
   useEffect(() => {
     const fetchListings = async () => {
