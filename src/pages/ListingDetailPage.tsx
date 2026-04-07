@@ -164,7 +164,8 @@ const ListingDetailPage = () => {
                 <img
                   src={photos[currentPhoto]}
                   alt={listing.headline || ""}
-                  className="h-full w-full object-cover object-center"
+                  className="h-full w-full object-cover"
+                  style={{ objectPosition: "center 60%" }}
                 />
                 {/* Back arrow */}
                 <button
@@ -229,31 +230,28 @@ const ListingDetailPage = () => {
             </div>
 
             {photos.length > 0 ? (
-              <div className="relative rounded-2xl overflow-hidden" style={{ height: 480 }}>
+              <div className="relative rounded-2xl overflow-hidden" style={{ height: 380 }}>
                 {photos.length === 1 ? (
-                  /* Single photo: full width */
                   <div className="h-full w-full cursor-pointer" onClick={() => { setCurrentPhoto(0); setLightboxOpen(true); }}>
-                    <img src={photos[0]} alt="" className="h-full w-full object-cover object-center" />
+                    <img src={photos[0]} alt="" className="h-full w-full object-cover block" style={{ objectPosition: "center 60%" }} />
                   </div>
                 ) : photos.length === 2 ? (
-                  /* Two photos: equal columns */
                   <div className="grid grid-cols-2 gap-1 h-full">
                     {photos.map((p, i) => (
                       <div key={i} className="cursor-pointer overflow-hidden" onClick={() => { setCurrentPhoto(i); setLightboxOpen(true); }}>
-                        <img src={p} alt="" className="h-full w-full object-cover object-center" />
+                        <img src={p} alt="" className="h-full w-full object-cover block" style={{ objectPosition: "center 60%" }} />
                       </div>
                     ))}
                   </div>
                 ) : (
-                  /* 3+ photos: 60/40 split */
                   <div className="grid h-full gap-1" style={{ gridTemplateColumns: "3fr 2fr" }}>
                     <div className="cursor-pointer overflow-hidden" onClick={() => { setCurrentPhoto(0); setLightboxOpen(true); }}>
-                      <img src={photos[0]} alt="" className="h-full w-full object-cover object-center" />
+                      <img src={photos[0]} alt="" className="h-full w-full object-cover block" style={{ objectPosition: "center 60%" }} />
                     </div>
-                    <div className="grid grid-rows-2 gap-1 h-full">
+                    <div className="grid grid-rows-2 gap-1 h-full overflow-hidden">
                       {photos.slice(1, 3).map((p, i) => (
                         <div key={i} className="cursor-pointer overflow-hidden" onClick={() => { setCurrentPhoto(i + 1); setLightboxOpen(true); }}>
-                          <img src={p} alt="" className="h-full w-full object-cover object-center" />
+                          <img src={p} alt="" className="h-full w-full object-cover block" style={{ objectPosition: "center 60%" }} />
                         </div>
                       ))}
                     </div>
