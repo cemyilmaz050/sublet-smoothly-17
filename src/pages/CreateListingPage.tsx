@@ -389,7 +389,7 @@ const CreateListingPage = () => {
 
               {/* Urgent toggle */}
               <div className="pt-4">
-                <UrgentToggle data={form} onChange={onChange} errors={errors} />
+                <UrgentToggle data={form} onChange={onChange} />
               </div>
             </div>
           </div>
