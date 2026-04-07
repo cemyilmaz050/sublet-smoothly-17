@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
@@ -67,7 +67,7 @@ const ListingsPage = () => {
   const [moveInDate, setMoveInDate] = useState<Date | undefined>();
   const [dbListings, setDbListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_selectedListing, _setSelectedListing] = useState<ListingItem | null>(null);
+  
   const [savedListings, setSavedListings] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
