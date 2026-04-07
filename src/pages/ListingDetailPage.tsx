@@ -160,11 +160,11 @@ const ListingDetailPage = () => {
           {/* Mobile: swipeable single photo */}
           <div className="md:hidden">
             {photos.length > 0 ? (
-              <div className="relative" style={{ height: "50vh" }}>
+              <div className="relative h-[320px]">
                 <img
                   src={photos[currentPhoto]}
                   alt={listing.headline || ""}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-center"
                 />
                 {/* Back arrow */}
                 <button
@@ -205,7 +205,7 @@ const ListingDetailPage = () => {
                 )}
               </div>
             ) : (
-              <div className="h-[40vh] bg-muted flex items-center justify-center">
+              <div className="h-[320px] bg-muted flex items-center justify-center">
                 <Home className="h-12 w-12 text-muted-foreground/30" />
               </div>
             )}
@@ -229,30 +229,42 @@ const ListingDetailPage = () => {
             </div>
 
             {photos.length > 0 ? (
-              <div className="grid grid-cols-3 gap-2 rounded-2xl overflow-hidden" style={{ height: 400 }}>
-                {/* Primary large photo */}
-                <div
-                  className="col-span-2 row-span-2 cursor-pointer relative"
-                  onClick={() => { setCurrentPhoto(0); setLightboxOpen(true); }}
-                >
-                  <img src={photos[0]} alt="" className="h-full w-full object-cover" />
-                </div>
-                {/* Secondary photos */}
-                {photos.slice(1, 3).map((p, i) => (
-                  <div
-                    key={i}
-                    className="cursor-pointer relative"
-                    onClick={() => { setCurrentPhoto(i + 1); setLightboxOpen(true); }}
-                  >
-                    <img src={p} alt="" className="h-full w-full object-cover" />
+              <div className="relative rounded-2xl overflow-hidden" style={{ height: 480 }}>
+                {photos.length === 1 ? (
+                  /* Single photo: full width */
+                  <div className="h-full w-full cursor-pointer" onClick={() => { setCurrentPhoto(0); setLightboxOpen(true); }}>
+                    <img src={photos[0]} alt="" className="h-full w-full object-cover object-center" />
                   </div>
-                ))}
-                {/* Show all button */}
+                ) : photos.length === 2 ? (
+                  /* Two photos: equal columns */
+                  <div className="grid grid-cols-2 gap-1 h-full">
+                    {photos.map((p, i) => (
+                      <div key={i} className="cursor-pointer overflow-hidden" onClick={() => { setCurrentPhoto(i); setLightboxOpen(true); }}>
+                        <img src={p} alt="" className="h-full w-full object-cover object-center" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* 3+ photos: 60/40 split */
+                  <div className="grid h-full gap-1" style={{ gridTemplateColumns: "3fr 2fr" }}>
+                    <div className="cursor-pointer overflow-hidden" onClick={() => { setCurrentPhoto(0); setLightboxOpen(true); }}>
+                      <img src={photos[0]} alt="" className="h-full w-full object-cover object-center" />
+                    </div>
+                    <div className="grid grid-rows-2 gap-1 h-full">
+                      {photos.slice(1, 3).map((p, i) => (
+                        <div key={i} className="cursor-pointer overflow-hidden" onClick={() => { setCurrentPhoto(i + 1); setLightboxOpen(true); }}>
+                          <img src={p} alt="" className="h-full w-full object-cover object-center" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Show all photos button */}
                 {photos.length > 3 && (
                   <button
                     onClick={() => { setCurrentPhoto(0); setLightboxOpen(true); }}
-                    className="absolute bottom-4 right-4 rounded-lg bg-white/90 backdrop-blur-sm px-4 py-2 text-[13px] font-medium text-foreground shadow-sm border hover:bg-white transition-colors"
-                    style={{ position: "absolute", bottom: 16, right: 16 }}
+                    className="absolute bottom-4 right-4 rounded-lg bg-white border border-border px-3.5 py-2 text-[13px] font-medium text-foreground shadow-sm hover:bg-white/90 transition-colors"
                   >
                     Show all {photos.length} photos
                   </button>
