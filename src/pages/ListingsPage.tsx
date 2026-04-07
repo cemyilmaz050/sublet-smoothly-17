@@ -1,27 +1,23 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
-  MapPin, Heart, Building2,
-  Search, X, Map,
-  Loader2, CalendarIcon, Home, Zap, Bed, Bath,
+  MapPin, Heart,
+  Search, X,
+  Loader2, CalendarIcon, Bed, Bath,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-import ListingsMap from "@/components/discover/ListingsMap";
 import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
-import { toast } from "sonner";
 
 interface ListingItem {
   id: string;
@@ -41,9 +37,6 @@ interface ListingItem {
   management_group_id: string | null;
   property_type?: string | null;
   tenant_verified?: boolean;
-  avg_rating?: number;
-  review_count?: number;
-  intro_video_url?: string | null;
   tenant_name?: string | null;
   is_urgent?: boolean;
   asking_price?: number | null;
@@ -51,7 +44,7 @@ interface ListingItem {
 }
 
 const ListingsPage = () => {
-  const { user, role } = useAuth();
+  const { user } = useAuth();
   const { requireAuth } = useAuthModal();
   const navigate = useNavigate();
 
@@ -61,23 +54,23 @@ const ListingsPage = () => {
   const [moveInDate, setMoveInDate] = useState<Date | undefined>();
   const [dbListings, setDbListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  
   const [savedListings, setSavedListings] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [offerListing, setOfferListing] = useState<ListingItem | null>(null);
-  const [contactingId, setContactingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchListings = async () => {
       const { data } = await supabase
         .from("listings")
-        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, latitude, longitude, intro_video_url, is_urgent, asking_price, urgency_deadline")
+        .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, intro_video_url, is_urgent, asking_price, urgency_deadline")
         .eq("status", "active")
+        .not("photos", "is", null)
         .order("created_at", { ascending: false });
 
       if (data && data.length > 0) {
-        const tenantIds = [...new Set(data.map((l: any) => l.tenant_id))];
+        // Filter out listings with empty photos arrays client-side as extra safety
+        const withPhotos = data.filter((l: any) => l.photos && Array.isArray(l.photos) && l.photos.length > 0);
+        
+        const tenantIds = [...new Set(withPhotos.map((l: any) => l.tenant_id))];
         const { data: profiles } = await supabase.from("profiles").select("id, id_verified, first_name, last_name").in("id", tenantIds) as any;
         const verifiedMap: Record<string, boolean> = {};
         const nameMap: Record<string, string> = {};
@@ -86,7 +79,7 @@ const ListingsPage = () => {
           nameMap[p.id] = [p.first_name, p.last_name].filter(Boolean).join(" ") || "Host";
         });
 
-        const enriched = data.map((l: any) => ({
+        const enriched = withPhotos.map((l: any) => ({
           ...l,
           tenant_verified: verifiedMap[l.tenant_id] || false,
           tenant_name: nameMap[l.tenant_id] || "Host",
@@ -99,7 +92,6 @@ const ListingsPage = () => {
     };
     fetchListings();
   }, []);
-
 
   useEffect(() => {
     if (!user) return;
@@ -132,17 +124,8 @@ const ListingsPage = () => {
     return true;
   });
 
-  const urgentListings = dbListings.filter((l) => l.is_urgent);
-
-  const formatDates = (from: string | null, until: string | null) => {
-    if (!from) return "";
-    const f = new Date(from).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    if (!until) return `From ${f}`;
-    const u = new Date(until).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    return `${f} - ${u}`;
-  };
-
-  const isOwnListing = (listing: ListingItem) => user && listing.tenant_id === user.id;
+  const urgentListings = filtered.filter((l) => l.is_urgent);
+  const regularListings = filtered;
 
   const toggleSave = async (id: string) => {
     if (!user) { requireAuth(() => toggleSave(id)); return; }
@@ -152,18 +135,68 @@ const ListingsPage = () => {
     else await supabase.from("saved_listings").insert({ user_id: user.id, listing_id: id });
   };
 
-  const handleContact = async (listing: ListingItem) => {
-    if (!user) { requireAuth(() => handleContact(listing)); return; }
-    setContactingId(listing.id);
-    const { data: existing } = await supabase.from("conversations").select("id").eq("listing_id", listing.id).or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`).maybeSingle();
-    if (existing) { setContactingId(null); navigate(`/messages?conversation=${existing.id}`); return; }
-    const { data: convo, error } = await supabase.from("conversations").insert({ participant_1: user.id, participant_2: listing.tenant_id, listing_id: listing.id }).select("id").single();
-    setContactingId(null);
-    if (error || !convo) { toast.error("Failed to start conversation."); return; }
-    await supabase.from("messages").insert({ conversation_id: convo.id, sender_id: user.id, content: `Hi! I'm interested in your listing "${listing.headline || "your apartment"}". Is it still available?` });
-    await supabase.from("notifications").insert({ user_id: listing.tenant_id, title: "New Message", message: `Someone messaged you about "${listing.headline || "Untitled"}"`, type: "message", link: "/messages" });
-    toast.success("Message sent!");
-    navigate(`/messages?conversation=${convo.id}`);
+  // Render a listing card — used for both urgent and regular
+  const renderCard = (listing: ListingItem, index: number) => {
+    const isUrgent = listing.is_urgent;
+    const marketRate = listing.monthly_rent ?? 0;
+    const askingPrice = listing.asking_price ?? marketRate;
+    const showDiscount = isUrgent && marketRate > 0 && askingPrice < marketRate;
+
+    return (
+      <motion.div
+        key={listing.id}
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.03 }}
+        onClick={() => navigate(`/listing/${listing.id}`)}
+        className="group cursor-pointer overflow-hidden rounded-2xl border bg-card shadow-card transition-all hover:shadow-elevated hover:-translate-y-0.5"
+      >
+        {/* Photo */}
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <img
+            src={listing.photos![0]}
+            alt={listing.headline || ""}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }}
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
+          >
+            <Heart className={cn("h-4 w-4", savedListings.has(listing.id) ? "fill-red-500 text-red-500" : "text-foreground")} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <h3 className="font-semibold text-foreground text-[15px] truncate">{listing.headline || "Untitled"}</h3>
+              <p className="flex items-center gap-1 text-[13px] text-muted-foreground mt-1 truncate">
+                <MapPin className="h-3 w-3 shrink-0" />
+                {listing.address || "Address not specified"}
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              {showDiscount && (
+                <span className="text-[13px] text-muted-foreground line-through block">${marketRate.toLocaleString()}</span>
+              )}
+              <p className="whitespace-nowrap text-[18px] font-bold text-primary">
+                ${(showDiscount ? askingPrice : marketRate).toLocaleString()}<span className="text-[13px] font-normal text-muted-foreground">/mo</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 mt-2 text-[13px] text-muted-foreground">
+            {listing.bedrooms != null && (
+              <span className="flex items-center gap-1"><Bed className="h-3.5 w-3.5" />{listing.bedrooms} bed</span>
+            )}
+            {listing.bathrooms != null && (
+              <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5" />{listing.bathrooms} bath</span>
+            )}
+          </div>
+        </div>
+      </motion.div>
+    );
   };
 
   return (
@@ -182,19 +215,10 @@ const ListingsPage = () => {
               />
               {searchQuery && <button onClick={() => setSearchQuery("")}><X className="h-4 w-4 text-muted-foreground" /></button>}
             </div>
-            <div className="hidden sm:flex items-center gap-1 rounded-full border p-0.5">
-              <Button variant={viewMode === "grid" ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-[13px]" onClick={() => setViewMode("grid")}>
-                Grid
-              </Button>
-              <Button variant={viewMode === "map" ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-[13px]" onClick={() => setViewMode("map")}>
-                <Map className="mr-1 h-3.5 w-3.5" /> Map
-              </Button>
-            </div>
           </div>
 
           {/* Filter pills */}
           <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
-            {/* Price filter */}
             {[
               { label: "Any price", value: "all" },
               { label: "Under $1,500", value: "0-1500" },
@@ -213,7 +237,6 @@ const ListingsPage = () => {
               </button>
             ))}
 
-            {/* Bedroom filter */}
             {[
               { label: "Studio", value: "studio" },
               { label: "1 bed", value: "1" },
@@ -232,7 +255,6 @@ const ListingsPage = () => {
               </button>
             ))}
 
-            {/* Dates */}
             <Popover>
               <PopoverTrigger asChild>
                 <button className={cn(
@@ -262,128 +284,41 @@ const ListingsPage = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Urgent section */}
-        {urgentListings.length > 0 && viewMode === "grid" && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[18px] font-bold text-foreground">Urgent - priced to fill fast</h2>
-              <Link to="/urgent" className="text-[13px] text-primary hover:underline font-medium">View all</Link>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
-              {urgentListings.slice(0, 6).map((listing) => {
-                const marketRate = listing.monthly_rent ?? 0;
-                const askingPrice = listing.asking_price ?? marketRate;
-                const savings = marketRate > askingPrice ? Math.round(((marketRate - askingPrice) / marketRate) * 100) : 0;
-                return (
-                  <div key={listing.id} className="shrink-0 w-[260px] rounded-2xl border bg-card overflow-hidden shadow-card">
-                    <div className="relative h-[140px]">
-                      {listing.photos?.[0] ? (
-                        <img src={listing.photos[0]} alt="" className="h-full w-full object-cover" loading="lazy" />
-                      ) : (
-                        <div className="h-full w-full bg-muted flex items-center justify-center"><Home className="h-8 w-8 text-muted-foreground/30" /></div>
-                      )}
-                    </div>
-                    <div className="p-3">
-                      <div className="flex items-baseline gap-2">
-                        {savings > 0 && <span className="text-[13px] text-muted-foreground line-through">${marketRate.toLocaleString()}</span>}
-                        <span className="text-[18px] font-bold text-foreground">${askingPrice.toLocaleString()}<span className="text-[13px] font-normal text-muted-foreground">/mo</span></span>
-                        {savings > 0 && <span className="text-[13px] font-semibold text-emerald-600">Save {savings}%</span>}
-                      </div>
-                      <p className="text-[13px] text-muted-foreground mt-1 truncate">{listing.address || "Address not specified"}</p>
-                      <Button
-                        size="sm"
-                        className="w-full mt-3 rounded-full text-[13px] h-9"
-                        onClick={(e) => { e.stopPropagation(); setOfferListing(listing); }}
-                      >
-                        Make an offer
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {viewMode === "map" ? (
-          <div className="rounded-2xl overflow-hidden border shadow-card" style={{ height: "calc(100vh - 220px)" }}>
-            <ListingsMap listings={filtered} hoveredId={hoveredId} selectedId={null} onSelect={(l: any) => navigate(`/listing/${l.id}`)} />
-          </div>
-        ) : loading ? (
+        {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-[15px] text-muted-foreground">Loading apartments...</p>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : regularListings.length === 0 ? (
           <div className="flex flex-col items-center py-20 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent mb-4">
-              <Building2 className="h-8 w-8 text-accent-foreground" />
-            </div>
-            <p className="text-[18px] font-bold text-foreground">No apartments listed yet in Boston</p>
-            <p className="mt-2 text-[15px] text-muted-foreground max-w-xs">Be the first to list yours, or check back soon.</p>
-            <Button className="mt-6 rounded-full" onClick={() => navigate("/listings/create")}>
-              List my apartment
-            </Button>
+            <p className="text-[18px] font-semibold text-foreground">No listings available yet</p>
+            <p className="mt-2 text-[15px] text-muted-foreground">Check back soon.</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((listing, index) => (
-              <motion.div
-                key={listing.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.03 }}
-                onMouseEnter={() => setHoveredId(listing.id)}
-                onMouseLeave={() => setHoveredId(null)}
-                onClick={() => navigate(`/listing/${listing.id}`)}
-                className="group cursor-pointer overflow-hidden rounded-2xl border bg-card shadow-card transition-all hover:shadow-elevated hover:-translate-y-0.5"
-              >
-                {/* Photo */}
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  {listing.photos && listing.photos.length > 0 ? (
-                    <img src={listing.photos[0]} alt={listing.headline || ""} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muted">
-                      <Home className="h-10 w-10 text-muted-foreground/30" strokeWidth={1.5} />
-                    </div>
-                  )}
-                  {/* Save button */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }}
-                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
-                  >
-                    <Heart className={cn("h-4 w-4", savedListings.has(listing.id) ? "fill-red-500 text-red-500" : "text-foreground")} />
-                  </button>
+          <>
+            {/* Urgent section — only if there are urgent listings with photos */}
+            {urgentListings.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[15px] font-semibold text-amber-600">Priced to fill fast</p>
+                  <Link to="/urgent" className="text-[13px] text-primary hover:underline font-medium">View all</Link>
                 </div>
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                  {urgentListings.slice(0, 3).map((listing, i) => renderCard(listing, i))}
+                </div>
+              </div>
+            )}
 
-                {/* Content */}
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-semibold text-foreground text-[15px] truncate">{listing.headline || "Untitled"}</h3>
-                      <p className="flex items-center gap-1 text-[13px] text-muted-foreground mt-1 truncate">
-                        <MapPin className="h-3 w-3 shrink-0" />
-                        {listing.address || "Address not specified"}
-                      </p>
-                    </div>
-                    {listing.monthly_rent && (
-                      <p className="whitespace-nowrap text-[18px] font-bold text-primary shrink-0">
-                        ${listing.monthly_rent.toLocaleString()}<span className="text-[13px] font-normal text-muted-foreground">/mo</span>
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 mt-2 text-[13px] text-muted-foreground">
-                    {listing.bedrooms != null && (
-                      <span className="flex items-center gap-1"><Bed className="h-3.5 w-3.5" />{listing.bedrooms} bed</span>
-                    )}
-                    {listing.bathrooms != null && (
-                      <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5" />{listing.bathrooms} bath</span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+            {/* All listings */}
+            <div>
+              {urgentListings.length > 0 && (
+                <p className="text-[15px] font-semibold text-foreground mb-4">All listings</p>
+              )}
+              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {regularListings.map((listing, index) => renderCard(listing, index))}
+              </div>
+            </div>
+          </>
         )}
       </div>
 
