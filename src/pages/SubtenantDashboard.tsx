@@ -149,6 +149,9 @@ const SubtenantDashboard = () => {
 
         <DocumentReviewStatusCard />
 
+        {/* My Offers - Urgent sublet tracking */}
+        <MyOffersSection />
+
         <Tabs defaultValue="applications" className="mt-6">
           <TabsList className="mb-6">
             <TabsTrigger value="applications">
