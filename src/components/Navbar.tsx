@@ -11,13 +11,24 @@ const Navbar = () => {
   const { user, role } = useAuth();
   const { hasListing } = useHasPublishedListing();
   const [scrolled, setScrolled] = useState(false);
+  const [navVisible, setNavVisible] = useState(true);
 
   const isHomePage = location.pathname === "/";
 
   useEffect(() => {
-    if (!isHomePage) return;
+    let lastScroll = 0;
     const handleScroll = () => {
-      setScrolled(window.scrollY > window.innerHeight * 0.8);
+      const current = window.scrollY;
+      if (isHomePage) {
+        setScrolled(current > window.innerHeight * 0.8);
+      }
+      // Hide/show navbar on scroll
+      if (current > lastScroll && current > 80) {
+        setNavVisible(false);
+      } else {
+        setNavVisible(true);
+      }
+      lastScroll = current;
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
@@ -77,15 +88,16 @@ const Navbar = () => {
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-[100] w-full transition-all duration-300 ease-in-out"
-      style={
-        isTransparent
+      style={{
+        transform: navVisible ? "translateY(0)" : "translateY(-100%)",
+        ...(isTransparent
           ? { background: "transparent" }
           : {
               background: "rgba(255,255,255,0.97)",
               backdropFilter: "blur(12px)",
               boxShadow: "0 1px 12px rgba(0,0,0,0.08)",
-            }
-      }
+            }),
+      }}
     >
       <div className="flex h-16 items-center justify-between px-6 w-full">
         {/* Left: Logo */}
