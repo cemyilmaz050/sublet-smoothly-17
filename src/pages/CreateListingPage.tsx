@@ -1,30 +1,27 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, Loader2, Home, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { ArrowLeft, Loader2, CalendarIcon, Home, Building2, Landmark, SquareStack, Trash2, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
-import StepProgress from "@/components/StepProgress";
-import ListingStep1 from "@/components/listing/ListingStep1";
-import ListingStep2 from "@/components/listing/ListingStep2";
-import ListingStep3 from "@/components/listing/ListingStep3";
-import ListingStep4 from "@/components/listing/ListingStep4";
-import ListingStep5 from "@/components/listing/ListingStep5";
-import ListingStepVideo from "@/components/listing/ListingStepVideo";
-import PublishChecklist from "@/components/listing/PublishChecklist";
-import PublishSuccess from "@/components/listing/PublishSuccess";
-import TenantIdVerification from "@/components/TenantIdVerification";
+import UniversalPhotoUploader from "@/components/UniversalPhotoUploader";
+import UrgentToggle from "@/components/urgent/UrgentToggle";
 import { ListingFormData, defaultListingForm } from "@/types/listing";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
 
-const STEPS = ["Property Basics", "Photos & Description", "Meet the Host", "Pricing & Availability", "House Rules", "Review & Submit"];
+const TOTAL_STEPS = 6;
 
 const CreateListingPage = () => {
   const navigate = useNavigate();
@@ -33,28 +30,14 @@ const CreateListingPage = () => {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ListingFormData>(defaultListingForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [confirmed, setConfirmed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [published, setPublished] = useState(false);
   const [draftId, setDraftId] = useState<string | null>(editId || null);
-  const [idVerified, setIdVerified] = useState<boolean | null>(null);
-  const [introVideoUrl, setIntroVideoUrl] = useState<string | null>(null);
-
-  // Check ID verification status
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("profiles").select("id_verified").eq("id", user.id).single()
-      .then(({ data }) => setIdVerified(data?.id_verified ?? false));
-  }, [user]);
 
   useEffect(() => {
     if (!editId) return;
     const load = async () => {
-      const { data } = await supabase
-        .from("listings")
-        .select("*")
-        .eq("id", editId)
-        .single();
+      const { data } = await supabase.from("listings").select("*").eq("id", editId).single();
       if (data) {
         setForm({
           address: data.address || "",
@@ -82,7 +65,6 @@ const CreateListingPage = () => {
           house_rules: data.house_rules || "",
           guest_policy: (data.guest_policy as any) || "",
         });
-        setIntroVideoUrl((data as any).intro_video_url || null);
       }
     };
     load();
@@ -90,45 +72,34 @@ const CreateListingPage = () => {
 
   const onChange = (partial: Partial<ListingFormData>) => {
     setForm((prev) => ({ ...prev, ...partial }));
-    const keys = Object.keys(partial);
     setErrors((prev) => {
       const next = { ...prev };
-      keys.forEach((k) => delete next[k]);
+      Object.keys(partial).forEach((k) => delete next[k]);
       return next;
     });
   };
 
   const validateStep = (s: number): boolean => {
     const e: Record<string, string> = {};
-    if (s === 0) {
-      if (!form.management_type) e.management_type = "Please select one";
-      if (!form.address.trim()) e.address = "Address is required";
-      if (!form.property_type) e.property_type = "Property type is required";
-      if (form.bedrooms === "") e.bedrooms = "Required";
-      if (form.bathrooms === "") e.bathrooms = "Required";
-    } else if (s === 1) {
-      const totalPhotos = form.photoUrls.length;
-      if (totalPhotos < 3) e.photos = `At least 3 photos required (${totalPhotos} uploaded)`;
-      if (!form.headline.trim()) e.headline = "Headline is required";
-      if (!form.description.trim()) e.description = "Description is required";
-    } else if (s === 2) {
-      // Video step — optional, always passes
-    } else if (s === 3) {
-      if (form.monthly_rent === "" || Number(form.monthly_rent) <= 0) e.monthly_rent = "Enter a valid rent amount";
-      if (form.security_deposit === "" || Number(form.security_deposit) < 0) e.security_deposit = "Enter a valid deposit";
-      if (!form.available_from) e.available_from = "Start date is required";
-      if (!form.available_until) e.available_until = "End date is required";
+    if (s === 0 && !form.property_type) e.property_type = "Please select a property type";
+    if (s === 1 && form.photoUrls.length < 3) e.photos = `Add at least 3 photos (${form.photoUrls.length} uploaded)`;
+    if (s === 2) {
+      if (!form.headline.trim()) e.headline = "Please add a headline";
+      if (!form.description.trim()) e.description = "Please add a description";
+    }
+    if (s === 3) {
+      if (form.monthly_rent === "" || Number(form.monthly_rent) <= 0) e.monthly_rent = "Please enter a valid rent amount";
+      if (form.security_deposit === "" || Number(form.security_deposit) < 0) e.security_deposit = "Please enter a valid deposit";
+    }
+    if (s === 4) {
+      if (!form.available_from) e.available_from = "Please select a start date";
+      if (!form.available_until) e.available_until = "Please select an end date";
       if (form.available_from && form.available_until && form.available_until <= form.available_from)
-        e.available_until = "Must be after start date";
-    } else if (s === 4) {
-      if (!form.guest_policy) e.guest_policy = "Guest policy is required";
+        e.available_until = "End date must be after start date";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
-
-  // Photos are now uploaded directly via UniversalPhotoUploader
-  const getPhotoUrls = (): string[] => form.photoUrls;
 
   const saveDraft = async () => {
     if (!user) return;
@@ -153,6 +124,7 @@ const CreateListingPage = () => {
       guest_policy: form.guest_policy || null,
       status: "draft" as const,
       management_group_id: form.management_type === "bbg" ? BBG_PM_ID : null,
+      photos: form.photoUrls,
       is_urgent: form.is_urgent,
       asking_price: form.is_urgent && form.asking_price !== "" ? Number(form.asking_price) : null,
       minimum_price: form.is_urgent && form.minimum_price !== "" ? Number(form.minimum_price) : null,
@@ -161,15 +133,10 @@ const CreateListingPage = () => {
     } as any;
 
     if (draftId) {
-      const photos = getPhotoUrls();
-      await supabase.from("listings").update({ ...payload, photos, intro_video_url: introVideoUrl || null } as any).eq("id", draftId);
+      await supabase.from("listings").update(payload).eq("id", draftId);
     } else {
       const { data } = await supabase.from("listings").insert(payload).select("id").single();
-      if (data) {
-        setDraftId(data.id);
-        const photos = getPhotoUrls();
-        await supabase.from("listings").update({ photos, intro_video_url: introVideoUrl || null } as any).eq("id", data.id);
-      }
+      if (data) setDraftId(data.id);
     }
   };
 
@@ -179,18 +146,12 @@ const CreateListingPage = () => {
     setStep((s) => s + 1);
   };
 
-  // Publish checklist
-  const checklist = PublishChecklist({ data: form, onGoToStep: setStep });
-
   const handlePublish = async () => {
-    if (!confirmed || !user || !checklist.allDone) return;
+    if (!user) return;
     setLoading(true);
     try {
       const id = draftId || crypto.randomUUID();
-      const photos = getPhotoUrls();
-
       const BBG_PM_ID = "d39b883c-0941-4620-96d6-ea588231b58e";
-      const BBG_MANAGER_USER_ID = "370d6445-15bc-4802-8626-1507c38fbdd4";
       const isManaged = form.management_type === "bbg";
       const newStatus = isManaged ? "pending" : "active";
 
@@ -212,8 +173,7 @@ const CreateListingPage = () => {
         amenities: form.amenities,
         house_rules: form.house_rules || null,
         guest_policy: form.guest_policy || null,
-        photos,
-        intro_video_url: introVideoUrl || null,
+        photos: form.photoUrls,
         status: newStatus as any,
         published_at: isManaged ? null : new Date().toISOString(),
         management_group_id: isManaged ? BBG_PM_ID : null,
@@ -232,154 +192,334 @@ const CreateListingPage = () => {
         if (error) throw error;
         setDraftId(id);
       }
-
       setPublished(true);
-
-      if (isManaged) {
-        // Notify BBG manager: new listing needs approval
-        supabase.from("notifications").insert({
-          user_id: BBG_MANAGER_USER_ID,
-          title: "New listing submitted for approval",
-          message: `New listing submitted for approval — ${form.address}`,
-          type: "listing",
-          link: "/portal-mgmt-bbg/approvals",
-        }).then(() => {});
-
-        supabase.functions.invoke("send-notification-email", {
-          body: {
-            to: "demo@bostonbrokerage.com",
-            subject: `New listing submitted for approval — ${form.address}`,
-            type: "listing_approval_needed",
-            data: {
-              listing_title: form.headline,
-              address: form.address,
-              action_url: `${window.location.origin}/manager/approvals`,
-            },
-          },
-        }).catch(() => {});
-      } else {
-        // Independent listing — live immediately
-        supabase.functions.invoke("send-notification-email", {
-          body: {
-            to: user.email,
-            subject: `Your listing "${form.headline}" is live on SubIn!`,
-            type: "listing_live",
-            data: {
-              listing_title: form.headline,
-              action_url: `${window.location.origin}/listings?id=${draftId || id}`,
-            },
-          },
-        }).catch(() => {});
-      }
-
     } catch (err: any) {
-      console.error("Publish error:", err);
       toast.error(err.message || "Failed to publish listing");
     } finally {
       setLoading(false);
     }
   };
 
+  // Published success screen
   if (published) {
-    const isManaged = form.management_type === "bbg";
     return (
-      <PublishSuccess
-        listingId={draftId || ""}
-        headline={form.headline}
-        onDashboard={() => navigate("/tenant/dashboard")}
-        isPending={isManaged}
-      />
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="max-w-[560px] w-full text-center space-y-4">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+            <Check className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-[28px] font-bold text-foreground">Your listing is live</h1>
+          <p className="text-[15px] text-muted-foreground">
+            {form.headline || "Your apartment"} is now visible to renters. You will be notified when someone is interested.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+            <Button className="rounded-full h-12 px-8 text-[15px]" onClick={() => navigate("/tenant/dashboard")}>
+              Go to dashboard
+            </Button>
+            <Button variant="outline" className="rounded-full h-12 px-8 text-[15px]" onClick={() => navigate("/listings")}>
+              View listings
+            </Button>
+          </div>
+        </div>
+      </div>
     );
   }
 
+  const fromDate = form.available_from ? new Date(form.available_from) : undefined;
+  const untilDate = form.available_until ? new Date(form.available_until) : undefined;
+
+  const propertyTypes = [
+    { value: "house", label: "House", icon: Home },
+    { value: "apartment", label: "Apartment", icon: Building2 },
+    { value: "condo", label: "Condo", icon: Landmark },
+    { value: "studio", label: "Studio", icon: SquareStack },
+  ] as const;
+
   return (
     <div className="min-h-screen bg-background">
-      
-        <div className="container max-w-2xl px-4 sm:px-6 py-6 sm:py-8 pb-24 sm:pb-8">
-        <h1 className="mb-2 text-xl sm:text-2xl font-bold text-foreground">{editId ? "Edit Listing" : "Create New Listing"}</h1>
-        <p className="mb-4 sm:mb-6 text-sm sm:text-base text-muted-foreground">Fill in the details about your property</p>
-
-        <Card className="mb-6 shadow-card">
-          <CardContent className="py-6">
-            <StepProgress steps={STEPS} currentStep={step} />
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-card">
-          <CardContent className="p-6">
-            {step === 0 && <ListingStep1 data={form} onChange={onChange} errors={errors} />}
-            {step === 1 && <ListingStep2 data={form} onChange={onChange} errors={errors} />}
-            {step === 2 && (
-              <ListingStepVideo
-                videoUrl={introVideoUrl}
-                onVideoUploaded={(url) => setIntroVideoUrl(url || null)}
-                onSkip={() => setStep((s) => s + 1)}
-              />
-            )}
-            {step === 3 && <ListingStep3 data={form} onChange={onChange} errors={errors} />}
-            {step === 4 && <ListingStep4 data={form} onChange={onChange} errors={errors} />}
-            {step === 5 && (
-              <>
-                <ListingStep5 data={form} confirmed={confirmed} onConfirmChange={setConfirmed} onGoToStep={setStep} />
-                <div className="mt-6">
-                  {checklist.ChecklistUI}
-                </div>
-                {idVerified === false && (
-                  <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
-                    <p className="text-sm font-medium text-foreground mb-1">
-                      ✨ Verified hosts get 3x more inquiries
-                    </p>
-                    <p className="text-xs text-muted-foreground mb-3">
-                      Optional — verify your identity to earn a Verified badge and stand out. Takes 30 seconds.
-                    </p>
-                    <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
-                  </div>
-                )}
-              </>
-            )}
-
-            <div className="mt-8 flex items-center justify-between gap-3 sticky bottom-0 bg-card py-4 -mx-6 px-6 border-t border-border sm:static sm:border-0 sm:py-0 sm:mx-0 sm:px-0 z-10">
-              <Button variant="outline" size="lg" className="min-h-[48px]" onClick={() => step === 0 ? navigate(-1) : setStep((s) => s - 1)}>
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                {step === 0 ? "Cancel" : "Back"}
-              </Button>
-              {step < 5 ? (
-                <Button size="lg" className="min-h-[48px]" onClick={nextStep}>
-                  Next
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  onClick={handlePublish}
-                  disabled={!confirmed || loading || !checklist.allDone}
-                  className="bg-primary text-primary-foreground min-h-[48px]"
-                  size="lg"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Publishing...
-                    </>
-                  ) : (
-                    <>
-                      <Home className="mr-2 h-4 w-4" />
-                      Publish Your Property
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Delete button — only on edit */}
-        {editId && <DeleteListingSection listingId={editId} headline={form.headline || form.address || "this listing"} />}
+      {/* Top bar */}
+      <div className="sticky top-0 z-30 bg-background border-b">
+        <div className="max-w-[560px] mx-auto px-4 h-14 flex items-center justify-between">
+          <button
+            onClick={() => step === 0 ? navigate(-1) : setStep((s) => s - 1)}
+            className="flex items-center gap-1.5 text-[15px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {step === 0 ? "Cancel" : "Back"}
+          </button>
+          <span className="text-[13px] text-muted-foreground">
+            Step {step + 1} of {TOTAL_STEPS}
+          </span>
+        </div>
       </div>
+
+      {/* Content */}
+      <div className="max-w-[560px] mx-auto px-4 py-8 pb-28">
+
+        {/* Step 1: Property Type */}
+        {step === 0 && (
+          <div className="space-y-6">
+            <h1 className="text-[28px] font-bold text-foreground text-center">What type of place is it?</h1>
+            <div className="grid grid-cols-2 gap-4">
+              {propertyTypes.map((t) => {
+                const Icon = t.icon;
+                const selected = form.property_type === t.value;
+                return (
+                  <button
+                    key={t.value}
+                    onClick={() => onChange({ property_type: t.value as any })}
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-3 rounded-2xl border-2 p-6 transition-all min-h-[120px]",
+                      selected ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"
+                    )}
+                  >
+                    <Icon className={cn("h-8 w-8", selected ? "text-primary" : "text-muted-foreground")} strokeWidth={1.5} />
+                    <span className={cn("text-[15px] font-medium", selected ? "text-primary" : "text-foreground")}>{t.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+            {errors.property_type && <p className="text-[13px] text-destructive text-center">{errors.property_type}</p>}
+
+            {/* Additional fields for address and rooms */}
+            <div className="space-y-4 pt-2">
+              <div>
+                <Label className="text-[15px]">Address</Label>
+                <Input
+                  placeholder="123 Main St, Boston"
+                  className="mt-1.5 h-12 text-[16px] rounded-xl"
+                  value={form.address}
+                  onChange={(e) => onChange({ address: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <Label className="text-[13px]">Beds</Label>
+                  <Input type="number" min={0} className="mt-1 h-12 text-[16px] rounded-xl" value={form.bedrooms} onChange={(e) => onChange({ bedrooms: e.target.value ? Number(e.target.value) : "" })} />
+                </div>
+                <div>
+                  <Label className="text-[13px]">Baths</Label>
+                  <Input type="number" min={0} step={0.5} className="mt-1 h-12 text-[16px] rounded-xl" value={form.bathrooms} onChange={(e) => onChange({ bathrooms: e.target.value ? Number(e.target.value) : "" })} />
+                </div>
+                <div>
+                  <Label className="text-[13px]">Sq ft</Label>
+                  <Input type="number" min={0} className="mt-1 h-12 text-[16px] rounded-xl" value={form.sqft} onChange={(e) => onChange({ sqft: e.target.value ? Number(e.target.value) : "" })} placeholder="Optional" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Photos */}
+        {step === 1 && (
+          <div className="space-y-6">
+            <h1 className="text-[28px] font-bold text-foreground text-center">Add photos of your place</h1>
+            <p className="text-[15px] text-muted-foreground text-center">Upload at least 3 photos. The first photo will be the cover.</p>
+            <UniversalPhotoUploader
+              photoUrls={form.photoUrls}
+              onPhotoUrlsChange={(urls) => onChange({ photoUrls: urls })}
+              bucket="listing-photos"
+              storagePath={`listings/${draftId || crypto.randomUUID()}`}
+              maxPhotos={15}
+              minPhotos={3}
+              showCoverBadge
+            />
+            {errors.photos && <p className="text-[13px] text-destructive text-center">{errors.photos}</p>}
+          </div>
+        )}
+
+        {/* Step 3: Describe */}
+        {step === 2 && (
+          <div className="space-y-6">
+            <h1 className="text-[28px] font-bold text-foreground text-center">Describe your place</h1>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-[15px]">Headline</Label>
+                <Input
+                  placeholder="e.g. Sunny 2BR in Back Bay with parking"
+                  className="mt-1.5 h-12 text-[16px] rounded-xl"
+                  value={form.headline}
+                  onChange={(e) => onChange({ headline: e.target.value })}
+                />
+                {errors.headline && <p className="text-[13px] text-destructive mt-1">{errors.headline}</p>}
+              </div>
+              <div>
+                <Label className="text-[15px]">Description</Label>
+                <Textarea
+                  placeholder="Tell renters what makes your place special..."
+                  className="mt-1.5 min-h-[160px] text-[16px] rounded-xl"
+                  value={form.description}
+                  onChange={(e) => onChange({ description: e.target.value })}
+                />
+                {errors.description && <p className="text-[13px] text-destructive mt-1">{errors.description}</p>}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Price */}
+        {step === 3 && (
+          <div className="space-y-6">
+            <h1 className="text-[28px] font-bold text-foreground text-center">Set your price</h1>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-[15px]">Monthly rent ($)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="2000"
+                  className="mt-1.5 h-14 text-[24px] font-bold text-center rounded-xl"
+                  value={form.monthly_rent}
+                  onChange={(e) => onChange({ monthly_rent: e.target.value ? Number(e.target.value) : "" })}
+                />
+                {errors.monthly_rent && <p className="text-[13px] text-destructive mt-1 text-center">{errors.monthly_rent}</p>}
+              </div>
+              <div>
+                <Label className="text-[15px]">Security deposit ($)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="2000"
+                  className="mt-1.5 h-12 text-[16px] rounded-xl"
+                  value={form.security_deposit}
+                  onChange={(e) => onChange({ security_deposit: e.target.value ? Number(e.target.value) : "" })}
+                />
+                {errors.security_deposit && <p className="text-[13px] text-destructive mt-1">{errors.security_deposit}</p>}
+              </div>
+
+              {/* Urgent toggle */}
+              <div className="pt-4">
+                <UrgentToggle data={form} onChange={onChange} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Availability */}
+        {step === 4 && (
+          <div className="space-y-6">
+            <h1 className="text-[28px] font-bold text-foreground text-center">When is it available?</h1>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-[15px]">Available from</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full mt-1.5 h-12 text-[16px] rounded-xl justify-start", !fromDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {fromDate ? format(fromDate, "MMM d, yyyy") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={fromDate}
+                      onSelect={(d) => d && onChange({ available_from: format(d, "yyyy-MM-dd") })}
+                      disabled={(d) => d < new Date()}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {errors.available_from && <p className="text-[13px] text-destructive mt-1">{errors.available_from}</p>}
+              </div>
+              <div>
+                <Label className="text-[15px]">Available until</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full mt-1.5 h-12 text-[16px] rounded-xl justify-start", !untilDate && "text-muted-foreground")}>
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {untilDate ? format(untilDate, "MMM d, yyyy") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={untilDate}
+                      onSelect={(d) => d && onChange({ available_until: format(d, "yyyy-MM-dd") })}
+                      disabled={(d) => d < (fromDate || new Date())}
+                      initialFocus
+                      className="p-3 pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                {errors.available_until && <p className="text-[13px] text-destructive mt-1">{errors.available_until}</p>}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 6: Review & Publish */}
+        {step === 5 && (
+          <div className="space-y-6">
+            <h1 className="text-[28px] font-bold text-foreground text-center">Review and publish</h1>
+            <p className="text-[15px] text-muted-foreground text-center">Make sure everything looks good before publishing.</p>
+
+            <div className="space-y-4">
+              {/* Photo preview */}
+              {form.photoUrls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 rounded-xl overflow-hidden">
+                  {form.photoUrls.slice(0, 3).map((url, i) => (
+                    <img key={i} src={url} alt="" className="aspect-[4/3] w-full object-cover" />
+                  ))}
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <ReviewRow label="Type" value={form.property_type || "Not set"} onEdit={() => setStep(0)} />
+                <ReviewRow label="Address" value={form.address || "Not set"} onEdit={() => setStep(0)} />
+                <ReviewRow label="Layout" value={`${form.bedrooms || 0} bed, ${form.bathrooms || 0} bath${form.sqft ? `, ${form.sqft} sq ft` : ""}`} onEdit={() => setStep(0)} />
+                <ReviewRow label="Headline" value={form.headline || "Not set"} onEdit={() => setStep(2)} />
+                <ReviewRow label="Rent" value={form.monthly_rent ? `$${Number(form.monthly_rent).toLocaleString()}/mo` : "Not set"} onEdit={() => setStep(3)} />
+                <ReviewRow label="Deposit" value={form.security_deposit ? `$${Number(form.security_deposit).toLocaleString()}` : "Not set"} onEdit={() => setStep(3)} />
+                <ReviewRow label="Dates" value={form.available_from && form.available_until ? `${format(new Date(form.available_from), "MMM d")} - ${format(new Date(form.available_until), "MMM d, yyyy")}` : "Not set"} onEdit={() => setStep(4)} />
+                {form.is_urgent && (
+                  <ReviewRow label="Urgent" value={`Asking $${Number(form.asking_price).toLocaleString()}/mo`} onEdit={() => setStep(3)} />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-40" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+        <div className="max-w-[560px] mx-auto px-4 py-3">
+          {step < 5 ? (
+            <Button className="w-full rounded-full h-12 text-[15px]" onClick={nextStep}>
+              Next
+            </Button>
+          ) : (
+            <Button
+              className="w-full rounded-full h-12 text-[15px]"
+              onClick={handlePublish}
+              disabled={loading}
+            >
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Publishing...</> : "Publish listing"}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Delete section for edit mode */}
+      {editId && step === 5 && (
+        <div className="max-w-[560px] mx-auto px-4 pb-32">
+          <DeleteListingSection listingId={editId} headline={form.headline || form.address || "this listing"} />
+        </div>
+      )}
     </div>
   );
 };
 
-/* ---- Delete section at bottom of edit page ---- */
+const ReviewRow = ({ label, value, onEdit }: { label: string; value: string; onEdit: () => void }) => (
+  <div className="flex items-center justify-between py-3 border-b border-border last:border-0">
+    <div className="min-w-0">
+      <p className="text-[13px] text-muted-foreground">{label}</p>
+      <p className="text-[15px] text-foreground truncate">{value}</p>
+    </div>
+    <button onClick={onEdit} className="text-[13px] text-primary hover:underline shrink-0 ml-4">Edit</button>
+  </div>
+);
+
 const DeleteListingSection = ({ listingId, headline }: { listingId: string; headline: string }) => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -388,24 +528,16 @@ const DeleteListingSection = ({ listingId, headline }: { listingId: string; head
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const { data: activeBookings } = await supabase
-        .from("bookings")
-        .select("id")
-        .eq("listing_id", listingId)
-        .in("status", ["confirmed"]);
-
+      const { data: activeBookings } = await supabase.from("bookings").select("id").eq("listing_id", listingId).in("status", ["confirmed"]);
       if (activeBookings && activeBookings.length > 0) {
-        toast.error("You have an active booking for this listing. Please resolve the booking before deleting.");
+        toast.error("You have an active booking. Please resolve it before deleting.");
         setDeleting(false);
         setOpen(false);
         return;
       }
-
-      const { error } = await supabase.functions.invoke("delete-listing", {
-        body: { listingId },
-      });
+      const { error } = await supabase.functions.invoke("delete-listing", { body: { listingId } });
       if (error) throw error;
-      toast.success("Listing deleted successfully.");
+      toast.success("Listing deleted.");
       navigate("/tenant/dashboard");
     } catch (err: any) {
       toast.error(err.message || "Failed to delete listing.");
@@ -417,35 +549,24 @@ const DeleteListingSection = ({ listingId, headline }: { listingId: string; head
 
   return (
     <>
-      <Card className="mt-6 border-destructive/30 shadow-card">
-        <CardContent className="flex items-center justify-between p-6">
-          <div>
-            <p className="text-sm font-semibold text-destructive">Danger Zone</p>
-            <p className="text-xs text-muted-foreground">Permanently delete this listing and all related data.</p>
-          </div>
-          <Button variant="outline" className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => setOpen(true)}>
-            <Trash2 className="mr-2 h-4 w-4" /> Delete Listing
-          </Button>
-        </CardContent>
-      </Card>
-
+      <div className="mt-8 pt-6 border-t">
+        <Button variant="outline" className="w-full rounded-full h-12 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={() => setOpen(true)}>
+          <Trash2 className="mr-2 h-4 w-4" /> Delete listing
+        </Button>
+      </div>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to delete this listing?</AlertDialogTitle>
+            <AlertDialogTitle>Delete this listing?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone and all applications and messages related to this listing will be permanently removed.
+              This cannot be undone. All applications and messages will be removed.
               <span className="mt-2 block font-medium text-foreground">"{headline}"</span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={deleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...</> : "Yes, Delete Listing"}
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {deleting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting...</> : "Yes, delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
