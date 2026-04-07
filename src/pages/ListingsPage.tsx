@@ -345,7 +345,7 @@ const ListingsPage = () => {
                 transition={{ delay: index * 0.03 }}
                 onMouseEnter={() => setHoveredId(listing.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                onClick={() => setSelectedListing(listing)}
+                onClick={() => navigate(`/listing/${listing.id}`)}
                 className="group cursor-pointer overflow-hidden rounded-2xl border bg-card shadow-card transition-all hover:shadow-elevated hover:-translate-y-0.5"
               >
                 {/* Photo */}

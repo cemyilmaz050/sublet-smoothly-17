@@ -39,6 +39,7 @@ import NotFound from "./pages/NotFound";
 import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
 import UrgentPage from "./pages/UrgentPage";
 import UrgentLandingPage from "./pages/UrgentLandingPage";
+import ListingDetailPage from "./pages/ListingDetailPage";
 
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";
