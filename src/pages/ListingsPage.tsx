@@ -4,24 +4,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
-  MapPin, Calendar, ShieldCheck, Heart, Building2,
+  MapPin, Heart, Building2,
   Search, X, Map,
-  MessageSquare, Loader2, CalendarIcon, Home, Zap, Bed, Bath,
+  Loader2, CalendarIcon, Home, Zap, Bed, Bath,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-import SecureThisPlace from "@/components/listing/SecureThisPlace";
-import ReviewSection from "@/components/ReviewSection";
-import KnockButton from "@/components/KnockButton";
-import VerifiedBadge from "@/components/VerifiedBadge";
-import ShareListing from "@/components/ShareListing";
 import ListingsMap from "@/components/discover/ListingsMap";
-import VideoPlayer from "@/components/video/VideoPlayer";
 import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -67,7 +61,7 @@ const ListingsPage = () => {
   const [moveInDate, setMoveInDate] = useState<Date | undefined>();
   const [dbListings, setDbListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedListing, setSelectedListing] = useState<ListingItem | null>(null);
+  
   const [savedListings, setSavedListings] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -106,10 +100,6 @@ const ListingsPage = () => {
     fetchListings();
   }, []);
 
-  useEffect(() => {
-    if (!selectedListing || !user) return;
-    supabase.from("listing_views").insert({ listing_id: selectedListing.id, viewer_id: user.id }).then();
-  }, [selectedListing?.id]);
 
   useEffect(() => {
     if (!user) return;
@@ -317,7 +307,7 @@ const ListingsPage = () => {
 
         {viewMode === "map" ? (
           <div className="rounded-2xl overflow-hidden border shadow-card" style={{ height: "calc(100vh - 220px)" }}>
-            <ListingsMap listings={filtered} hoveredId={hoveredId} selectedId={selectedListing?.id || null} onSelect={(l) => setSelectedListing(l as any)} />
+            <ListingsMap listings={filtered} hoveredId={hoveredId} selectedId={null} onSelect={(l: any) => navigate(`/listing/${l.id}`)} />
           </div>
         ) : loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
@@ -345,7 +335,7 @@ const ListingsPage = () => {
                 transition={{ delay: index * 0.03 }}
                 onMouseEnter={() => setHoveredId(listing.id)}
                 onMouseLeave={() => setHoveredId(null)}
-                onClick={() => setSelectedListing(listing)}
+                onClick={() => navigate(`/listing/${listing.id}`)}
                 className="group cursor-pointer overflow-hidden rounded-2xl border bg-card shadow-card transition-all hover:shadow-elevated hover:-translate-y-0.5"
               >
                 {/* Photo */}
@@ -396,96 +386,6 @@ const ListingsPage = () => {
           </div>
         )}
       </div>
-
-      {/* Listing Detail Sheet */}
-      <Sheet open={!!selectedListing} onOpenChange={(open) => !open && setSelectedListing(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-lg safe-bottom p-0">
-          {selectedListing && (
-            <div>
-              {/* Photo gallery at top */}
-              {selectedListing.photos && selectedListing.photos[0] && (
-                <div className="relative">
-                  <img src={selectedListing.photos[0]} alt={selectedListing.headline || ""} className="h-64 w-full object-cover" />
-                  {selectedListing.photos.length > 1 && (
-                    <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-[13px] text-white font-medium">
-                      1 / {selectedListing.photos.length}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              <div className="p-6 space-y-5">
-                <SheetHeader className="p-0">
-                  <SheetTitle className="text-[18px]">{selectedListing.headline || "Untitled"}</SheetTitle>
-                  <p className="flex items-center gap-1.5 text-[15px] text-muted-foreground mt-1">
-                    <MapPin className="h-4 w-4" />{selectedListing.address || "Unknown"}
-                  </p>
-                </SheetHeader>
-
-                <div className="flex items-center gap-2">
-                  <ShareListing listingId={selectedListing.id} headline={selectedListing.headline} address={selectedListing.address} />
-                  {selectedListing.tenant_verified && <VerifiedBadge verified />}
-                </div>
-
-                {/* Video */}
-                {selectedListing.intro_video_url && (
-                  <VideoPlayer videoUrl={selectedListing.intro_video_url} tenantName={selectedListing.tenant_name || "Host"} verified={selectedListing.tenant_verified} />
-                )}
-
-                {/* Key details grid */}
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: "Monthly rent", value: selectedListing.monthly_rent ? `$${selectedListing.monthly_rent.toLocaleString()}` : "-", primary: true },
-                    { label: "Bedrooms", value: selectedListing.bedrooms ?? "-" },
-                    { label: "Bathrooms", value: selectedListing.bathrooms ?? "-" },
-                    { label: "Size", value: selectedListing.sqft ? `${selectedListing.sqft} sq ft` : "-" },
-                  ].map((item) => (
-                    <div key={item.label} className="rounded-xl border p-3">
-                      <p className="text-[13px] text-muted-foreground">{item.label}</p>
-                      <p className={`text-[18px] font-bold ${item.primary ? "text-primary" : "text-foreground"}`}>{item.value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
-                  <Calendar className="h-4 w-4" />{formatDates(selectedListing.available_from, selectedListing.available_until) || "Dates not specified"}
-                </p>
-
-                {selectedListing.description && (
-                  <div>
-                    <h4 className="mb-1 text-[15px] font-semibold text-foreground">About this place</h4>
-                    <p className="text-[15px] text-muted-foreground leading-relaxed">{selectedListing.description}</p>
-                  </div>
-                )}
-
-                <ReviewSection listingId={selectedListing.id} tenantId={selectedListing.tenant_id} />
-
-                {/* Actions */}
-                {!isOwnListing(selectedListing) && (
-                  <div className="space-y-3 pt-2">
-                    {selectedListing.is_urgent ? (
-                      <Button className="w-full rounded-full h-12 text-[15px]" size="lg" onClick={() => { setSelectedListing(null); setOfferListing(selectedListing); }}>
-                        Make an offer
-                      </Button>
-                    ) : (
-                      <SecureThisPlace listing={selectedListing} />
-                    )}
-                    <KnockButton listingId={selectedListing.id} tenantId={selectedListing.tenant_id} listingHeadline={selectedListing.headline} listingAddress={selectedListing.address} knockCount={(selectedListing as any).knock_count || 0} />
-                    <Button variant="outline" className="w-full rounded-full h-12 text-[15px]" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
-                      {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a message</>}
-                    </Button>
-                  </div>
-                )}
-                {role === "tenant" && isOwnListing(selectedListing) && (
-                  <Button className="w-full rounded-full h-12 text-[15px]" size="lg" onClick={() => navigate(`/listings/edit/${selectedListing.id}`)}>
-                    Edit listing
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
 
       {/* Offer Modal */}
       {offerListing && (
