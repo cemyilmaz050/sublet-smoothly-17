@@ -58,6 +58,22 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
   const [scheduleSent, setScheduleSent] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
 
+  useEffect(() => {
+    if (!listing.tenant_id) return;
+    supabase
+      .from("profiles")
+      .select("first_name, last_name")
+      .eq("id", listing.tenant_id)
+      .maybeSingle()
+      .then(({ data }) => { if (data) setTenantProfile(data); });
+  }, [listing.tenant_id]);
+
+  const monthlyRent = listing.monthly_rent ?? 0;
+  const weeklyRent = Math.round(monthlyRent / 4);
+  const depositAmount = monthlyRent * DEPOSIT_MONTHS;
+  const platformFee = Math.round(monthlyRent * (PLATFORM_FEE_PERCENT / 100));
+  const totalDue = depositAmount + platformFee;
+
   const withAuth = (action: () => void) => {
     if (!user) {
       requireAuth(action);
