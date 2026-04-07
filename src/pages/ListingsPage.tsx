@@ -397,8 +397,6 @@ const ListingsPage = () => {
         )}
       </div>
 
-      </div>
-
       {/* Offer Modal */}
       {offerListing && (
         <MakeOfferModal open={!!offerListing} onClose={() => setOfferListing(null)} listing={offerListing} />
