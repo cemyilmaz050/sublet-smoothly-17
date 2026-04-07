@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
-  MapPin, Calendar, ShieldCheck, Heart, Building2, Video,
-  Search, SlidersHorizontal, Pencil, Eye, X, Map,
-  MessageSquare, Loader2, CalendarIcon, Home, Check, Zap,
+  MapPin, Calendar, ShieldCheck, Heart, Building2,
+  Search, X, Map,
+  MessageSquare, Loader2, CalendarIcon, Home, Zap, Bed, Bath,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -19,18 +19,15 @@ import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import ReviewSection from "@/components/ReviewSection";
 import KnockButton from "@/components/KnockButton";
 import VerifiedBadge from "@/components/VerifiedBadge";
-import StarRating from "@/components/StarRating";
 import ShareListing from "@/components/ShareListing";
 import ListingsMap from "@/components/discover/ListingsMap";
-import { useNavigate } from "react-router-dom";
+import VideoPlayer from "@/components/video/VideoPlayer";
+import MakeOfferModal from "@/components/urgent/MakeOfferModal";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
 import { toast } from "sonner";
-
-import VideoPlayer from "@/components/video/VideoPlayer";
-import UrgentListingCard from "@/components/urgent/UrgentListingCard";
-import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 interface ListingItem {
   id: string;
@@ -62,21 +59,20 @@ interface ListingItem {
 const ListingsPage = () => {
   const { user, role } = useAuth();
   const { requireAuth } = useAuthModal();
-
   const navigate = useNavigate();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [priceFilter, setPriceFilter] = useState("");
+  const [bedroomFilter, setBedroomFilter] = useState("");
   const [moveInDate, setMoveInDate] = useState<Date | undefined>();
-  const [moveOutDate, setMoveOutDate] = useState<Date | undefined>();
   const [dbListings, setDbListings] = useState<ListingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedListing, setSelectedListing] = useState<ListingItem | null>(null);
   const [savedListings, setSavedListings] = useState<Set<string>>(new Set());
   const [viewMode, setViewMode] = useState<"grid" | "map">("grid");
-  const [showFilters, setShowFilters] = useState(false);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [urgentOnly, setUrgentOnly] = useState(false);
   const [offerListing, setOfferListing] = useState<ListingItem | null>(null);
+  const [contactingId, setContactingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -96,21 +92,10 @@ const ListingsPage = () => {
           nameMap[p.id] = [p.first_name, p.last_name].filter(Boolean).join(" ") || "Host";
         });
 
-        const listingIds = data.map((l: any) => l.id);
-        const { data: reviews } = await supabase.from("reviews").select("listing_id, rating").in("listing_id", listingIds) as any;
-        const ratingMap: Record<string, { sum: number; count: number }> = {};
-        (reviews || []).forEach((r: any) => {
-          if (!ratingMap[r.listing_id]) ratingMap[r.listing_id] = { sum: 0, count: 0 };
-          ratingMap[r.listing_id].sum += r.rating;
-          ratingMap[r.listing_id].count += 1;
-        });
-
         const enriched = data.map((l: any) => ({
           ...l,
           tenant_verified: verifiedMap[l.tenant_id] || false,
           tenant_name: nameMap[l.tenant_id] || "Host",
-          avg_rating: ratingMap[l.id] ? ratingMap[l.id].sum / ratingMap[l.id].count : 0,
-          review_count: ratingMap[l.id]?.count || 0,
         }));
         setDbListings(enriched as ListingItem[]);
       } else {
@@ -126,22 +111,33 @@ const ListingsPage = () => {
     supabase.from("listing_views").insert({ listing_id: selectedListing.id, viewer_id: user.id }).then();
   }, [selectedListing?.id]);
 
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("saved_listings").select("listing_id").eq("user_id", user.id).then(({ data }) => {
+      if (data) setSavedListings(new Set(data.map((d) => d.listing_id)));
+    });
+  }, [user]);
+
   const filtered = dbListings.filter((l) => {
     if (searchQuery && !l.address?.toLowerCase().includes(searchQuery.toLowerCase()) && !l.headline?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    if (urgentOnly && !l.is_urgent) return false;
     if (priceFilter && priceFilter !== "all") {
       const rent = l.monthly_rent ?? 0;
       if (priceFilter === "0-1500" && rent > 1500) return false;
       if (priceFilter === "1500-2500" && (rent < 1500 || rent > 2500)) return false;
       if (priceFilter === "2500+" && rent < 2500) return false;
     }
-    if (moveInDate || moveOutDate) {
+    if (bedroomFilter && bedroomFilter !== "all") {
+      const beds = l.bedrooms ?? 0;
+      if (bedroomFilter === "studio" && beds !== 0) return false;
+      if (bedroomFilter === "1" && beds !== 1) return false;
+      if (bedroomFilter === "2" && beds !== 2) return false;
+      if (bedroomFilter === "3+" && beds < 3) return false;
+    }
+    if (moveInDate) {
       const from = l.available_from ? new Date(l.available_from) : null;
       const until = l.available_until ? new Date(l.available_until) : null;
-      if (moveInDate && from && from > moveInDate) return false;
-      if (moveInDate && until && until < moveInDate) return false;
-      if (moveOutDate && until && until < moveOutDate) return false;
-      if (moveOutDate && from && from > moveOutDate) return false;
+      if (from && from > moveInDate) return false;
+      if (until && until < moveInDate) return false;
     }
     return true;
   });
@@ -152,12 +148,11 @@ const ListingsPage = () => {
     if (!from) return "";
     const f = new Date(from).toLocaleDateString("en-US", { month: "short", day: "numeric" });
     if (!until) return `From ${f}`;
-    const u = new Date(until).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    return `${f} – ${u}`;
+    const u = new Date(until).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `${f} - ${u}`;
   };
 
   const isOwnListing = (listing: ListingItem) => user && listing.tenant_id === user.id;
-  const isManagedListing = (listing: ListingItem) => user && listing.manager_id === user.id;
 
   const toggleSave = async (id: string) => {
     if (!user) { requireAuth(() => toggleSave(id)); return; }
@@ -166,15 +161,6 @@ const ListingsPage = () => {
     if (isSaved) await supabase.from("saved_listings").delete().eq("user_id", user.id).eq("listing_id", id);
     else await supabase.from("saved_listings").insert({ user_id: user.id, listing_id: id });
   };
-
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("saved_listings").select("listing_id").eq("user_id", user.id).then(({ data }) => {
-      if (data) setSavedListings(new Set(data.map((d) => d.listing_id)));
-    });
-  }, [user]);
-
-  const [contactingId, setContactingId] = useState<string | null>(null);
 
   const handleContact = async (listing: ListingItem) => {
     if (!user) { requireAuth(() => handleContact(listing)); return; }
@@ -185,139 +171,182 @@ const ListingsPage = () => {
     setContactingId(null);
     if (error || !convo) { toast.error("Failed to start conversation."); return; }
     await supabase.from("messages").insert({ conversation_id: convo.id, sender_id: user.id, content: `Hi! I'm interested in your listing "${listing.headline || "your apartment"}". Is it still available?` });
-    await supabase.from("notifications").insert({ user_id: listing.tenant_id, title: "New Message", message: `Someone sent you a message about "${listing.headline || "Untitled"}"`, type: "message", link: "/messages" });
+    await supabase.from("notifications").insert({ user_id: listing.tenant_id, title: "New Message", message: `Someone messaged you about "${listing.headline || "Untitled"}"`, type: "message", link: "/messages" });
     toast.success("Message sent!");
     navigate(`/messages?conversation=${convo.id}`);
   };
 
   return (
     <div className="min-h-screen bg-secondary/30">
-      {/* Header */}
-      <div className="bg-card border-b">
-        <div className="container mx-auto px-6 py-8">
-          <h1 className="text-3xl font-bold text-foreground">Available Listings</h1>
-          <p className="mt-1 text-muted-foreground">Browse manager-approved sublets in your area</p>
-        </div>
-      </div>
-
-      {/* Search & Filters */}
+      {/* Search Bar */}
       <div className="bg-card border-b sticky top-16 z-30">
-        <div className="container mx-auto px-6 py-4">
+        <div className="container mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center gap-3">
             <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border bg-background px-4 h-11">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <Input
-                placeholder="Search by location or name..."
+                placeholder="Search by city or neighborhood..."
                 className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-[16px] h-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
               {searchQuery && <button onClick={() => setSearchQuery("")}><X className="h-4 w-4 text-muted-foreground" /></button>}
             </div>
-            <Button variant="outline" className="rounded-full gap-2 shrink-0" onClick={() => setShowFilters(!showFilters)}>
-              <SlidersHorizontal className="h-4 w-4" />
-              Filters
-            </Button>
             <div className="hidden sm:flex items-center gap-1 rounded-full border p-0.5">
-              <Button variant={viewMode === "grid" ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs" onClick={() => setViewMode("grid")}>
+              <Button variant={viewMode === "grid" ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-[13px]" onClick={() => setViewMode("grid")}>
                 Grid
               </Button>
-              <Button variant={viewMode === "map" ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs" onClick={() => setViewMode("map")}>
+              <Button variant={viewMode === "map" ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-[13px]" onClick={() => setViewMode("map")}>
                 <Map className="mr-1 h-3.5 w-3.5" /> Map
-              </Button>
-            </div>
-            {/* Urgent filter toggle */}
-            <div className="hidden sm:flex items-center gap-1 rounded-full border p-0.5">
-              <Button variant={!urgentOnly ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs" onClick={() => setUrgentOnly(false)}>
-                All Listings
-              </Button>
-              <Button variant={urgentOnly ? "default" : "ghost"} size="sm" className="rounded-full h-8 px-3 text-xs text-amber-600" onClick={() => setUrgentOnly(true)}>
-                <Zap className="mr-1 h-3 w-3" /> Urgent Only
               </Button>
             </div>
           </div>
 
-          {showFilters && (
-            <div className="flex items-center gap-3 mt-3">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className={cn("rounded-full", !moveInDate && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                    {moveInDate ? format(moveInDate, "MMM d") : "Move in"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarPicker mode="single" selected={moveInDate} onSelect={setMoveInDate} disabled={(d) => d < new Date()} initialFocus className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className={cn("rounded-full", !moveOutDate && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-1.5 h-3.5 w-3.5" />
-                    {moveOutDate ? format(moveOutDate, "MMM d") : "Move out"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarPicker mode="single" selected={moveOutDate} onSelect={setMoveOutDate} disabled={(d) => d < (moveInDate || new Date())} initialFocus className="p-3 pointer-events-auto" />
-                </PopoverContent>
-              </Popover>
-              {(moveInDate || moveOutDate) && (
-                <button onClick={() => { setMoveInDate(undefined); setMoveOutDate(undefined); }} className="text-xs text-primary hover:underline">Clear dates</button>
-              )}
-            </div>
-          )}
+          {/* Filter pills */}
+          <div className="flex items-center gap-2 mt-3 overflow-x-auto pb-1 scrollbar-hide">
+            {/* Price filter */}
+            {[
+              { label: "Any price", value: "all" },
+              { label: "Under $1,500", value: "0-1500" },
+              { label: "$1,500-$2,500", value: "1500-2500" },
+              { label: "$2,500+", value: "2500+" },
+            ].map((p) => (
+              <button
+                key={p.value}
+                onClick={() => setPriceFilter(priceFilter === p.value ? "" : p.value)}
+                className={cn(
+                  "shrink-0 rounded-full border px-4 py-1.5 text-[13px] font-medium transition-colors",
+                  priceFilter === p.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent"
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+
+            {/* Bedroom filter */}
+            {[
+              { label: "Studio", value: "studio" },
+              { label: "1 bed", value: "1" },
+              { label: "2 bed", value: "2" },
+              { label: "3+ bed", value: "3+" },
+            ].map((b) => (
+              <button
+                key={b.value}
+                onClick={() => setBedroomFilter(bedroomFilter === b.value ? "" : b.value)}
+                className={cn(
+                  "shrink-0 rounded-full border px-4 py-1.5 text-[13px] font-medium transition-colors",
+                  bedroomFilter === b.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent"
+                )}
+              >
+                {b.label}
+              </button>
+            ))}
+
+            {/* Dates */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className={cn(
+                  "shrink-0 rounded-full border px-4 py-1.5 text-[13px] font-medium transition-colors flex items-center gap-1.5",
+                  moveInDate ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground hover:bg-accent"
+                )}>
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  {moveInDate ? format(moveInDate, "MMM d") : "Move-in date"}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarPicker mode="single" selected={moveInDate} onSelect={setMoveInDate} disabled={(d) => d < new Date()} initialFocus className="p-3 pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
+
+            {(priceFilter || bedroomFilter || moveInDate) && (
+              <button
+                onClick={() => { setPriceFilter(""); setBedroomFilter(""); setMoveInDate(undefined); }}
+                className="shrink-0 text-[13px] text-primary hover:underline font-medium"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-6 py-8 space-y-8">
-        {/* Urgent Sublets Section */}
-        {!urgentOnly && urgentListings.length > 0 && viewMode === "grid" && (
+      <div className="container mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* Urgent section */}
+        {urgentListings.length > 0 && viewMode === "grid" && (
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Zap className="h-5 w-5 text-amber-500" />
-              <h2 className="text-lg font-bold text-foreground">Urgent Sublets</h2>
-              <Link to="/urgent" className="ml-auto text-sm text-amber-600 hover:underline font-medium">View all →</Link>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[18px] font-bold text-foreground">Urgent - priced to fill fast</h2>
+              <Link to="/urgent" className="text-[13px] text-primary hover:underline font-medium">View all</Link>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 scrollbar-hide">
-              {urgentListings.map((listing) => (
-                <UrgentListingCard key={listing.id} listing={listing as any} onMakeOffer={(l) => setOfferListing({ ...listing, ...l } as any)} />
-              ))}
+            <div className="flex gap-4 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-hide">
+              {urgentListings.slice(0, 6).map((listing) => {
+                const marketRate = listing.monthly_rent ?? 0;
+                const askingPrice = listing.asking_price ?? marketRate;
+                const savings = marketRate > askingPrice ? Math.round(((marketRate - askingPrice) / marketRate) * 100) : 0;
+                return (
+                  <div key={listing.id} className="shrink-0 w-[260px] rounded-2xl border bg-card overflow-hidden shadow-card">
+                    <div className="relative h-[140px]">
+                      {listing.photos?.[0] ? (
+                        <img src={listing.photos[0]} alt="" className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="h-full w-full bg-muted flex items-center justify-center"><Home className="h-8 w-8 text-muted-foreground/30" /></div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <div className="flex items-baseline gap-2">
+                        {savings > 0 && <span className="text-[13px] text-muted-foreground line-through">${marketRate.toLocaleString()}</span>}
+                        <span className="text-[18px] font-bold text-foreground">${askingPrice.toLocaleString()}<span className="text-[13px] font-normal text-muted-foreground">/mo</span></span>
+                        {savings > 0 && <span className="text-[13px] font-semibold text-emerald-600">Save {savings}%</span>}
+                      </div>
+                      <p className="text-[13px] text-muted-foreground mt-1 truncate">{listing.address || "Address not specified"}</p>
+                      <Button
+                        size="sm"
+                        className="w-full mt-3 rounded-full text-[13px] h-9"
+                        onClick={(e) => { e.stopPropagation(); setOfferListing(listing); }}
+                      >
+                        Make an offer
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
+
         {viewMode === "map" ? (
-          <div className="rounded-2xl overflow-hidden border shadow-card" style={{ height: "calc(100vh - 280px)" }}>
-            <ListingsMap
-              listings={filtered}
-              hoveredId={hoveredId}
-              selectedId={selectedListing?.id || null}
-              onSelect={(l) => setSelectedListing(l as any)}
-            />
+          <div className="rounded-2xl overflow-hidden border shadow-card" style={{ height: "calc(100vh - 220px)" }}>
+            <ListingsMap listings={filtered} hoveredId={hoveredId} selectedId={selectedListing?.id || null} onSelect={(l) => setSelectedListing(l as any)} />
           </div>
         ) : loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading listings...</p>
+            <p className="text-[15px] text-muted-foreground">Loading apartments...</p>
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center py-20 text-center">
-            <Building2 className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-lg font-semibold text-foreground">No listings available</p>
-            <p className="mt-1 text-sm text-muted-foreground max-w-xs">Check back soon or broaden your search.</p>
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent mb-4">
+              <Building2 className="h-8 w-8 text-accent-foreground" />
+            </div>
+            <p className="text-[18px] font-bold text-foreground">No apartments listed yet in Boston</p>
+            <p className="mt-2 text-[15px] text-muted-foreground max-w-xs">Be the first to list yours, or check back soon.</p>
+            <Button className="mt-6 rounded-full" onClick={() => navigate("/listings/create")}>
+              List my apartment
+            </Button>
           </div>
         ) : (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((listing, index) => (
               <motion.div
                 key={listing.id}
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.04 }}
+                transition={{ delay: index * 0.03 }}
                 onMouseEnter={() => setHoveredId(listing.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 onClick={() => setSelectedListing(listing)}
-                className="group cursor-pointer overflow-hidden rounded-2xl border bg-card shadow-card transition-all hover:shadow-elevated hover:-translate-y-1"
+                className="group cursor-pointer overflow-hidden rounded-2xl border bg-card shadow-card transition-all hover:shadow-elevated hover:-translate-y-0.5"
               >
                 {/* Photo */}
                 <div className="relative aspect-[4/3] overflow-hidden">
@@ -328,47 +357,39 @@ const ListingsPage = () => {
                       <Home className="h-10 w-10 text-muted-foreground/30" strokeWidth={1.5} />
                     </div>
                   )}
-                  {/* Manager Approved badge */}
-                  <div className="absolute left-3 top-3">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald px-3 py-1 text-xs font-semibold text-white shadow-sm">
-                      <ShieldCheck className="h-3.5 w-3.5" />
-                      Manager Approved
-                    </span>
-                  </div>
-                  {/* Video avatar thumbnail */}
-                  {listing.intro_video_url && (
-                    <div className="absolute left-3 bottom-3" onClick={(e) => e.stopPropagation()}>
-                      <VideoPlayer videoUrl={listing.intro_video_url} compact />
-                    </div>
-                  )}
-                  {/* Video badge */}
-                  {listing.intro_video_url && (
-                    <div className="absolute right-3 top-3">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-1 text-[10px] font-medium text-white">
-                        <Video className="h-3 w-3" /> Video
-                      </span>
-                    </div>
-                  )}
+                  {/* Save button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }}
+                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
+                  >
+                    <Heart className={cn("h-4 w-4", savedListings.has(listing.id) ? "fill-red-500 text-red-500" : "text-foreground")} />
+                  </button>
                 </div>
 
                 {/* Content */}
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-foreground text-[15px] truncate">{listing.headline || "Untitled"}</h3>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-foreground text-[15px] truncate">{listing.headline || "Untitled"}</h3>
+                      <p className="flex items-center gap-1 text-[13px] text-muted-foreground mt-1 truncate">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        {listing.address || "Address not specified"}
+                      </p>
+                    </div>
                     {listing.monthly_rent && (
-                      <p className="whitespace-nowrap text-lg font-bold text-primary shrink-0">
-                        ${listing.monthly_rent.toLocaleString()}<span className="text-xs font-normal text-muted-foreground">/mo</span>
+                      <p className="whitespace-nowrap text-[18px] font-bold text-primary shrink-0">
+                        ${listing.monthly_rent.toLocaleString()}<span className="text-[13px] font-normal text-muted-foreground">/mo</span>
                       </p>
                     )}
                   </div>
-                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground mt-2 truncate">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    {listing.address || "Address not specified"}
-                  </p>
-                  <p className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1.5 truncate">
-                    <Calendar className="h-3 w-3 shrink-0" />
-                    {formatDates(listing.available_from, listing.available_until) || "Dates not specified"}
-                  </p>
+                  <div className="flex items-center gap-3 mt-2 text-[13px] text-muted-foreground">
+                    {listing.bedrooms != null && (
+                      <span className="flex items-center gap-1"><Bed className="h-3.5 w-3.5" />{listing.bedrooms} bed</span>
+                    )}
+                    {listing.bathrooms != null && (
+                      <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5" />{listing.bathrooms} bath</span>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -376,96 +397,99 @@ const ListingsPage = () => {
         )}
       </div>
 
-      {/* Listing Detail Drawer */}
+      {/* Listing Detail Sheet */}
       <Sheet open={!!selectedListing} onOpenChange={(open) => !open && setSelectedListing(null)}>
-        <SheetContent className="w-full overflow-y-auto sm:max-w-lg safe-bottom">
+        <SheetContent className="w-full overflow-y-auto sm:max-w-lg safe-bottom p-0">
           {selectedListing && (
-            <>
-              <SheetHeader>
-                <SheetTitle className="pr-8 text-xl">{selectedListing.headline || "Untitled"}</SheetTitle>
-                <div className="flex items-center gap-2 pt-1">
-                  <ShareListing listingId={selectedListing.id} headline={selectedListing.headline} address={selectedListing.address} />
+            <div>
+              {/* Photo gallery at top */}
+              {selectedListing.photos && selectedListing.photos[0] && (
+                <div className="relative">
+                  <img src={selectedListing.photos[0]} alt={selectedListing.headline || ""} className="h-64 w-full object-cover" />
+                  {selectedListing.photos.length > 1 && (
+                    <span className="absolute bottom-3 right-3 rounded-full bg-black/60 px-3 py-1 text-[13px] text-white font-medium">
+                      1 / {selectedListing.photos.length}
+                    </span>
+                  )}
                 </div>
-              </SheetHeader>
-              <div className="mt-4 space-y-5">
-                {/* Tenant intro video */}
-                {selectedListing.intro_video_url && (
-                  <VideoPlayer
-                    videoUrl={selectedListing.intro_video_url}
-                    tenantName={selectedListing.tenant_name || "Host"}
-                    verified={selectedListing.tenant_verified}
-                  />
-                )}
-                {selectedListing.photos && selectedListing.photos[0] && (
-                  <div className="overflow-hidden rounded-xl">
-                    <img src={selectedListing.photos[0]} alt={selectedListing.headline || ""} className="h-56 w-full object-cover" />
-                  </div>
-                )}
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald/10 px-3 py-1 text-xs font-semibold text-emerald">
-                    <ShieldCheck className="h-3.5 w-3.5" />
-                    Manager Approved
-                  </span>
+              )}
+
+              <div className="p-6 space-y-5">
+                <SheetHeader className="p-0">
+                  <SheetTitle className="text-[18px]">{selectedListing.headline || "Untitled"}</SheetTitle>
+                  <p className="flex items-center gap-1.5 text-[15px] text-muted-foreground mt-1">
+                    <MapPin className="h-4 w-4" />{selectedListing.address || "Unknown"}
+                  </p>
+                </SheetHeader>
+
+                <div className="flex items-center gap-2">
+                  <ShareListing listingId={selectedListing.id} headline={selectedListing.headline} address={selectedListing.address} />
                   {selectedListing.tenant_verified && <VerifiedBadge verified />}
                 </div>
+
+                {/* Video */}
+                {selectedListing.intro_video_url && (
+                  <VideoPlayer videoUrl={selectedListing.intro_video_url} tenantName={selectedListing.tenant_name || "Host"} verified={selectedListing.tenant_verified} />
+                )}
+
+                {/* Key details grid */}
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Monthly Rent", value: `$${selectedListing.monthly_rent?.toLocaleString() ?? "-"}`, primary: true },
+                    { label: "Monthly rent", value: selectedListing.monthly_rent ? `$${selectedListing.monthly_rent.toLocaleString()}` : "-", primary: true },
                     { label: "Bedrooms", value: selectedListing.bedrooms ?? "-" },
                     { label: "Bathrooms", value: selectedListing.bathrooms ?? "-" },
-                    { label: "Sq. Ft.", value: selectedListing.sqft ?? "-" },
+                    { label: "Size", value: selectedListing.sqft ? `${selectedListing.sqft} sq ft` : "-" },
                   ].map((item) => (
                     <div key={item.label} className="rounded-xl border p-3">
-                      <p className="text-xs text-muted-foreground">{item.label}</p>
-                      <p className={`text-lg font-bold ${item.primary ? "text-primary" : "text-foreground"}`}>{item.value}</p>
+                      <p className="text-[13px] text-muted-foreground">{item.label}</p>
+                      <p className={`text-[18px] font-bold ${item.primary ? "text-primary" : "text-foreground"}`}>{item.value}</p>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-2">
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground"><MapPin className="h-4 w-4" />{selectedListing.address || "Unknown"}</p>
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground"><Calendar className="h-4 w-4" />{formatDates(selectedListing.available_from, selectedListing.available_until)}</p>
-                </div>
+
+                <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
+                  <Calendar className="h-4 w-4" />{formatDates(selectedListing.available_from, selectedListing.available_until) || "Dates not specified"}
+                </p>
+
                 {selectedListing.description && (
                   <div>
-                    <h4 className="mb-1 text-sm font-semibold text-foreground">About this place</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{selectedListing.description}</p>
+                    <h4 className="mb-1 text-[15px] font-semibold text-foreground">About this place</h4>
+                    <p className="text-[15px] text-muted-foreground leading-relaxed">{selectedListing.description}</p>
                   </div>
                 )}
+
                 <ReviewSection listingId={selectedListing.id} tenantId={selectedListing.tenant_id} />
 
-                {selectedListing.management_group_id && !isOwnListing(selectedListing) && (
-                  <Button className="w-full rounded-full" size="lg" variant="outline" onClick={() => navigate(`/documents/bbg?listing_id=${selectedListing.id}`)}>
-                    <Pencil className="mr-1 h-4 w-4" /> Complete BBG Documents
+                {/* Actions */}
+                {!isOwnListing(selectedListing) && (
+                  <div className="space-y-3 pt-2">
+                    {selectedListing.is_urgent ? (
+                      <Button className="w-full rounded-full h-12 text-[15px]" size="lg" onClick={() => { setSelectedListing(null); setOfferListing(selectedListing); }}>
+                        Make an offer
+                      </Button>
+                    ) : (
+                      <SecureThisPlace listing={selectedListing} />
+                    )}
+                    <KnockButton listingId={selectedListing.id} tenantId={selectedListing.tenant_id} listingHeadline={selectedListing.headline} listingAddress={selectedListing.address} knockCount={(selectedListing as any).knock_count || 0} />
+                    <Button variant="outline" className="w-full rounded-full h-12 text-[15px]" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
+                      {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a message</>}
+                    </Button>
+                  </div>
+                )}
+                {role === "tenant" && isOwnListing(selectedListing) && (
+                  <Button className="w-full rounded-full h-12 text-[15px]" size="lg" onClick={() => navigate(`/listings/edit/${selectedListing.id}`)}>
+                    Edit listing
                   </Button>
                 )}
-
-                <div className="space-y-3 pt-2">
-                  {!isOwnListing(selectedListing) && (
-                    <>
-                      <SecureThisPlace listing={selectedListing} />
-                      <KnockButton listingId={selectedListing.id} tenantId={selectedListing.tenant_id} listingHeadline={selectedListing.headline} listingAddress={selectedListing.address} knockCount={(selectedListing as any).knock_count || 0} />
-                      <Button variant="outline" className="w-full rounded-full" size="lg" onClick={() => handleContact(selectedListing)} disabled={contactingId === selectedListing.id}>
-                        {contactingId === selectedListing.id ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" />Opening chat...</> : <><MessageSquare className="mr-1 h-4 w-4" />Send a Message</>}
-                      </Button>
-                    </>
-                  )}
-                  {role === "tenant" && isOwnListing(selectedListing) && (
-                    <Button className="w-full rounded-full" size="lg" onClick={() => navigate(`/listings/edit/${selectedListing.id}`)}><Pencil className="mr-1 h-4 w-4" />Edit Listing</Button>
-                  )}
-                </div>
               </div>
-            </>
+            </div>
           )}
         </SheetContent>
       </Sheet>
 
-      {/* Make Offer Modal */}
+      {/* Offer Modal */}
       {offerListing && (
-        <MakeOfferModal
-          open={!!offerListing}
-          onClose={() => setOfferListing(null)}
-          listing={offerListing}
-        />
+        <MakeOfferModal open={!!offerListing} onClose={() => setOfferListing(null)} listing={offerListing} />
       )}
     </div>
   );
