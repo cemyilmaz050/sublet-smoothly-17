@@ -106,10 +106,6 @@ const ListingsPage = () => {
     fetchListings();
   }, []);
 
-  useEffect(() => {
-    if (!selectedListing || !user) return;
-    supabase.from("listing_views").insert({ listing_id: selectedListing.id, viewer_id: user.id }).then();
-  }, [selectedListing?.id]);
 
   useEffect(() => {
     if (!user) return;
