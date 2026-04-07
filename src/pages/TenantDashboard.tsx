@@ -19,7 +19,7 @@ import SubletFlowOverlay from "@/components/sublet-flow/SubletFlowOverlay";
 import FriendSubletPreScreen from "@/components/FriendSubletPreScreen";
 import FriendSubletFlow from "@/components/FriendSubletFlow";
 import ProfileCompleteness from "@/components/ProfileCompleteness";
-import TenantIdVerification from "@/components/TenantIdVerification";
+
 import KnocksSection from "@/components/tenant/KnocksSection";
 import OffersSection from "@/components/urgent/OffersSection";
 
@@ -200,7 +200,7 @@ const TenantDashboard = () => {
 
         {/* Profile Completeness */}
         <ProfileCompleteness />
-        <TenantIdVerification idVerified={idVerified} onVerified={() => setIdVerified(true)} />
+        
 
         {/* Video prompt for tenants without intro video */}
         {listings.length > 0 && !listings.some(l => (l as any).intro_video_url) && (

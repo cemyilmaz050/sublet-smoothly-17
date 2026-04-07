@@ -41,7 +41,7 @@ interface Props {
   } | null;
 }
 
-type Step = "verify" | "form" | "review" | "sent";
+type Step = "form" | "review" | "sent";
 
 const MakeOfferModal = ({ open, onClose, listing, prefill }: Props) => {
   const { user } = useAuth();
@@ -49,43 +49,8 @@ const MakeOfferModal = ({ open, onClose, listing, prefill }: Props) => {
   const askingPrice = listing.asking_price || listing.monthly_rent || 0;
 
   const [step, setStep] = useState<Step>("form");
-  const [idVerified, setIdVerified] = useState<boolean | null>(null);
-  const [checkingId, setCheckingId] = useState(true);
 
   const [offerAmount, setOfferAmount] = useState(prefill?.counterAmount || Math.round(askingPrice * 0.85));
-  const [message, setMessage] = useState("");
-  const [moveInDate, setMoveInDate] = useState<Date | undefined>();
-  const [duration, setDuration] = useState(3);
-  const [agreed, setAgreed] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
-  const [countdown, setCountdown] = useState("");
-
-  // Available date range
-  const availFrom = listing.available_from ? new Date(listing.available_from) : new Date();
-  const availUntil = listing.available_until ? new Date(listing.available_until) : undefined;
-  const fullPeriodMonths = availUntil ? Math.max(1, differenceInMonths(availUntil, availFrom)) : undefined;
-
-  const savings = askingPrice - offerAmount;
-  const sliderMin = Math.round(askingPrice * 0.5);
-  const sliderMax = askingPrice;
-
-  // Check ID verification on open
-  useEffect(() => {
-    if (!open || !user) return;
-    setCheckingId(true);
-    (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id_verified")
-        .eq("id", user.id)
-        .single();
-      const verified = data?.id_verified ?? false;
-      setIdVerified(verified);
-      setStep(verified ? "form" : "verify");
-      setCheckingId(false);
-    })();
-  }, [open, user]);
 
   // Countdown timer for sent screen
   useEffect(() => {
@@ -170,38 +135,7 @@ const MakeOfferModal = ({ open, onClose, listing, prefill }: Props) => {
     onClose();
   };
 
-  const launchVerification = () => {
-    // Navigate to verification, then user comes back
-    window.location.href = "/tenant/onboarding";
-  };
-
   const renderContent = () => {
-    if (checkingId) {
-      return (
-        <div className="flex flex-col items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      );
-    }
-
-    if (step === "verify") {
-      return (
-        <div className="flex flex-col items-center py-8 text-center space-y-5 px-2">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <ShieldCheck className="h-8 w-8 text-primary" />
-          </div>
-          <h3 className="text-xl font-bold text-foreground">Verify your identity to make an offer</h3>
-          <p className="text-sm text-muted-foreground max-w-xs">
-            Urgent listings require identity verification so subletters know exactly who they are dealing with. It takes under 2 minutes.
-          </p>
-          <Button onClick={launchVerification} size="lg" className="rounded-full w-full max-w-xs">
-            <ShieldCheck className="mr-2 h-4 w-4" />
-            Verify Now
-          </Button>
-        </div>
-      );
-    }
-
     if (step === "sent") {
       return (
         <div className="flex flex-col items-center py-8 text-center space-y-4 px-2">
@@ -408,7 +342,6 @@ const MakeOfferModal = ({ open, onClose, listing, prefill }: Props) => {
   };
 
   const getTitle = () => {
-    if (step === "verify") return "Identity Verification";
     if (step === "sent") return "";
     if (step === "review") return "Review Your Offer";
     return prefill ? "Respond to Counter Offer" : "Make an Offer";

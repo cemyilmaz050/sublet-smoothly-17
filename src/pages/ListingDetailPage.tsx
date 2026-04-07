@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import KnockButton from "@/components/KnockButton";
-import VerifiedBadge from "@/components/VerifiedBadge";
+import VideoPlayer from "@/components/video/VideoPlayer";
 import VideoPlayer from "@/components/video/VideoPlayer";
 import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
@@ -49,7 +49,6 @@ const ListingDetailPage = () => {
 
   const [listing, setListing] = useState<ListingDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tenantVerified, setTenantVerified] = useState(false);
   const [tenantName, setTenantName] = useState("Host");
   const [saved, setSaved] = useState(false);
   const [contactingId, setContactingId] = useState<string | null>(null);
@@ -73,9 +72,8 @@ const ListingDetailPage = () => {
       setListing(data as ListingDetail);
 
       // Fetch tenant info
-      const { data: profile } = await supabase.from("profiles").select("id_verified, first_name, last_name").eq("id", data.tenant_id).maybeSingle() as any;
+      const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("id", data.tenant_id).maybeSingle() as any;
       if (profile) {
-        setTenantVerified(profile.id_verified);
         setTenantName([profile.first_name, profile.last_name].filter(Boolean).join(" ") || "Host");
       }
 
@@ -294,11 +292,6 @@ const ListingDetailPage = () => {
                 <p className="flex items-center gap-1.5 text-[15px] text-muted-foreground mt-2">
                   <MapPin className="h-4 w-4 shrink-0" />{listing.address || "Address not specified"}
                 </p>
-                {tenantVerified && (
-                  <div className="mt-2">
-                    <VerifiedBadge verified />
-                  </div>
-                )}
               </div>
 
               {/* Stats row */}

@@ -984,17 +984,6 @@ const SubletFlowOverlay = ({ open, onClose }: SubletFlowOverlayProps) => {
           </div>
         )}
 
-        {idVerified === false && (
-          <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-            <p className="text-sm font-medium text-foreground mb-1">
-              ✨ Verified hosts get 3x more inquiries
-            </p>
-            <p className="text-xs text-muted-foreground mb-3">
-              Optional — verify your identity to earn a Verified badge and stand out. Takes 30 seconds.
-            </p>
-            <TenantIdVerification idVerified={false} onVerified={() => setIdVerified(true)} />
-          </div>
-        )}
 
         <label className="flex items-start gap-2 min-h-[48px]">
           <Checkbox checked={data.confirmAccuracy} onCheckedChange={(v) => update({ confirmAccuracy: !!v })} className="mt-0.5 h-6 w-6" />
