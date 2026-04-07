@@ -38,6 +38,7 @@ import FriendSubletLanding from "./pages/FriendSubletLanding";
 import NotFound from "./pages/NotFound";
 import BBGDocumentFillingPage from "./pages/BBGDocumentFillingPage";
 import UrgentPage from "./pages/UrgentPage";
+import UrgentLandingPage from "./pages/UrgentLandingPage";
 
 // Manager layout + pages
 import ManagerLayout from "./components/manager/ManagerLayout";

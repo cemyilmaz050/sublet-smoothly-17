@@ -79,10 +79,10 @@ const Navbar = () => {
                 Listings
               </Link>
               <Link
-                to="/urgent"
+                to="/urgent-landing"
                 className="text-sm font-semibold transition-colors text-amber-600 hover:text-amber-700 flex items-center gap-1"
               >
-                ⚡ Urgent
+                Urgent Sublets
               </Link>
               <a
                 href="#how-it-works"
