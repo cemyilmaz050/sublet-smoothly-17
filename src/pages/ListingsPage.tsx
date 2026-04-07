@@ -17,7 +17,6 @@ import { format } from "date-fns";
 
 import ListingsMap from "@/components/discover/ListingsMap";
 import MakeOfferModal from "@/components/urgent/MakeOfferModal";
-import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
