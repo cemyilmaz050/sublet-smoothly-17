@@ -64,7 +64,6 @@ const ListingsPage = () => {
         .select("id, headline, address, monthly_rent, photos, available_from, available_until, bedrooms, bathrooms, sqft, description, source, tenant_id, manager_id, management_group_id, property_type, knock_count, intro_video_url, is_urgent, asking_price, urgency_deadline")
         .eq("status", "active")
         .not("photos", "is", null)
-        .neq("photos", "{}")
         .order("created_at", { ascending: false });
 
       if (data && data.length > 0) {
