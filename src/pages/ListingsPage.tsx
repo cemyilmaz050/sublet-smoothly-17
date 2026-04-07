@@ -8,9 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import {
-  MapPin, Calendar, ShieldCheck, Heart, Building2,
+  MapPin, Heart, Building2,
   Search, X, Map,
-  MessageSquare, Loader2, CalendarIcon, Home, Zap, Bed, Bath,
+  Loader2, CalendarIcon, Home, Zap, Bed, Bath,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
