@@ -313,7 +313,7 @@ const ListingsPage = () => {
 
         {viewMode === "map" ? (
           <div className="rounded-2xl overflow-hidden border shadow-card" style={{ height: "calc(100vh - 220px)" }}>
-            <ListingsMap listings={filtered} hoveredId={hoveredId} selectedId={selectedListing?.id || null} onSelect={(l) => setSelectedListing(l as any)} />
+            <ListingsMap listings={filtered} hoveredId={hoveredId} selectedId={null} onSelect={(l: any) => navigate(`/listing/${l.id}`)} />
           </div>
         ) : loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
