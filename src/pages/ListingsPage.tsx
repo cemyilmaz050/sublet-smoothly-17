@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarPicker } from "@/components/ui/calendar";
@@ -124,8 +123,17 @@ const ListingsPage = () => {
     return true;
   });
 
-  const urgentListings = filtered.filter((l) => l.is_urgent);
-  const regularListings = filtered;
+  // Sort: urgent first (by deadline soonest), then regular by newest
+  const sorted = [...filtered].sort((a, b) => {
+    if (a.is_urgent && !b.is_urgent) return -1;
+    if (!a.is_urgent && b.is_urgent) return 1;
+    if (a.is_urgent && b.is_urgent) {
+      const da = a.urgency_deadline ? new Date(a.urgency_deadline).getTime() : Infinity;
+      const db = b.urgency_deadline ? new Date(b.urgency_deadline).getTime() : Infinity;
+      return da - db;
+    }
+    return 0; // preserve original newest-first order for regular
+  });
 
   const toggleSave = async (id: string) => {
     if (!user) { requireAuth(() => toggleSave(id)); return; }
@@ -135,12 +143,23 @@ const ListingsPage = () => {
     else await supabase.from("saved_listings").insert({ user_id: user.id, listing_id: id });
   };
 
-  // Render a listing card — used for both urgent and regular
+  // Countdown helper for urgent listings
+  const getCountdown = (deadline: string | null | undefined) => {
+    if (!deadline) return null;
+    const diff = new Date(deadline).getTime() - Date.now();
+    if (diff <= 0) return "Expired";
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    return `${days}d ${hours}h left`;
+  };
+
+  // Render a listing card
   const renderCard = (listing: ListingItem, index: number) => {
     const isUrgent = listing.is_urgent;
     const marketRate = listing.monthly_rent ?? 0;
     const askingPrice = listing.asking_price ?? marketRate;
     const showDiscount = isUrgent && marketRate > 0 && askingPrice < marketRate;
+    const countdown = isUrgent ? getCountdown(listing.urgency_deadline) : null;
 
     return (
       <motion.div
@@ -159,6 +178,15 @@ const ListingsPage = () => {
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />
+          {/* Urgent pill */}
+          {isUrgent && (
+            <div className="absolute left-3 top-3 flex flex-col gap-0.5">
+              <span className="inline-block rounded-full bg-amber-500 px-2.5 py-0.5 text-[11px] font-bold text-white">Urgent</span>
+              {countdown && countdown !== "Expired" && (
+                <span className="text-[10px] text-white/90 font-medium drop-shadow">{countdown}</span>
+              )}
+            </div>
+          )}
           <button
             onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }}
             className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
@@ -179,7 +207,7 @@ const ListingsPage = () => {
             </div>
             <div className="shrink-0 text-right">
               {showDiscount && (
-                <span className="text-[13px] text-muted-foreground line-through block">${marketRate.toLocaleString()}</span>
+                <span className="text-[13px] text-muted-foreground line-through block">${marketRate.toLocaleString()}/mo</span>
               )}
               <p className="whitespace-nowrap text-[18px] font-bold text-primary">
                 ${(showDiscount ? askingPrice : marketRate).toLocaleString()}<span className="text-[13px] font-normal text-muted-foreground">/mo</span>
@@ -289,36 +317,15 @@ const ListingsPage = () => {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-[15px] text-muted-foreground">Loading apartments...</p>
           </div>
-        ) : regularListings.length === 0 ? (
+        ) : sorted.length === 0 ? (
           <div className="flex flex-col items-center py-20 text-center">
             <p className="text-[18px] font-semibold text-foreground">No listings available yet</p>
             <p className="mt-2 text-[15px] text-muted-foreground">Check back soon.</p>
           </div>
         ) : (
-          <>
-            {/* Urgent section — only if there are urgent listings with photos */}
-            {urgentListings.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-[15px] font-semibold text-amber-600">Priced to fill fast</p>
-                  <Link to="/urgent" className="text-[13px] text-primary hover:underline font-medium">View all</Link>
-                </div>
-                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {urgentListings.slice(0, 3).map((listing, i) => renderCard(listing, i))}
-                </div>
-              </div>
-            )}
-
-            {/* All listings */}
-            <div>
-              {urgentListings.length > 0 && (
-                <p className="text-[15px] font-semibold text-foreground mb-4">All listings</p>
-              )}
-              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {regularListings.map((listing, index) => renderCard(listing, index))}
-              </div>
-            </div>
-          </>
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {sorted.map((listing, index) => renderCard(listing, index))}
+          </div>
         )}
       </div>
 
