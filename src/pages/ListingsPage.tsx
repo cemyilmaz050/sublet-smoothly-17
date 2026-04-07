@@ -189,7 +189,7 @@ const ListingsPage = () => {
           )}
           <button
             onClick={(e) => { e.stopPropagation(); toggleSave(listing.id); }}
-            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
+            className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm transition-colors hover:bg-white"
           >
             <Heart className={cn("h-4 w-4", savedListings.has(listing.id) ? "fill-red-500 text-red-500" : "text-foreground")} />
           </button>
@@ -228,9 +228,9 @@ const ListingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-secondary/30">
-      {/* Search Bar */}
-      <div className="bg-card border-b sticky top-16 z-30">
+    <div className="min-h-screen bg-secondary/30" style={{ overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+      {/* Search Bar — normal flow, not sticky */}
+      <div className="bg-card border-b">
         <div className="container mx-auto px-4 sm:px-6 py-3">
           <div className="flex items-center gap-3">
             <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full border bg-background px-4 h-11">
