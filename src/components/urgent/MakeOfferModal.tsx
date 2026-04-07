@@ -51,6 +51,22 @@ const MakeOfferModal = ({ open, onClose, listing, prefill }: Props) => {
   const [step, setStep] = useState<Step>("form");
 
   const [offerAmount, setOfferAmount] = useState(prefill?.counterAmount || Math.round(askingPrice * 0.85));
+  const [message, setMessage] = useState("");
+  const [moveInDate, setMoveInDate] = useState<Date | undefined>();
+  const [duration, setDuration] = useState(3);
+  const [agreed, setAgreed] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
+  const [countdown, setCountdown] = useState("");
+
+  // Available date range
+  const availFrom = listing.available_from ? new Date(listing.available_from) : new Date();
+  const availUntil = listing.available_until ? new Date(listing.available_until) : undefined;
+  const fullPeriodMonths = availUntil ? Math.max(1, differenceInMonths(availUntil, availFrom)) : undefined;
+
+  const savings = askingPrice - offerAmount;
+  const sliderMin = Math.round(askingPrice * 0.5);
+  const sliderMax = askingPrice;
 
   // Countdown timer for sent screen
   useEffect(() => {

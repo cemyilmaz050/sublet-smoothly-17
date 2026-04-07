@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { Play, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
   videoUrl: string;

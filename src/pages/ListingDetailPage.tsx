@@ -11,7 +11,6 @@ import { toast } from "sonner";
 import SecureThisPlace from "@/components/listing/SecureThisPlace";
 import KnockButton from "@/components/KnockButton";
 import VideoPlayer from "@/components/video/VideoPlayer";
-import VideoPlayer from "@/components/video/VideoPlayer";
 import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 interface ListingDetail {
@@ -317,7 +316,7 @@ const ListingDetailPage = () => {
 
               {/* Video */}
               {listing.intro_video_url && (
-                <VideoPlayer videoUrl={listing.intro_video_url} tenantName={tenantName} verified={tenantVerified} />
+                <VideoPlayer videoUrl={listing.intro_video_url} tenantName={tenantName} verified={false} />
               )}
 
               {/* Description */}
@@ -351,7 +350,7 @@ const ListingDetailPage = () => {
               {/* Hosted by */}
               <div className="border-t pt-6">
                 <h2 className="text-[18px] font-semibold text-foreground mb-1">Hosted by {tenantName}</h2>
-                {tenantVerified && <p className="text-[13px] text-muted-foreground">Identity verified</p>}
+                
               </div>
 
               {/* Mobile actions (hidden on desktop where sticky card is used) */}
