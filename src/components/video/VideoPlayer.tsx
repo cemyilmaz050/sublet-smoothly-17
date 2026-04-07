@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { Play, Volume2, VolumeX } from "lucide-react";
-import VerifiedBadge from "@/components/VerifiedBadge";
 import { cn } from "@/lib/utils";
 
 interface VideoPlayerProps {
@@ -128,7 +127,6 @@ const VideoPlayer = ({
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 pt-10">
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-white">{tenantName}</p>
-            {verified && <VerifiedBadge verified size="sm" />}
           </div>
           {memberSince && (
             <p className="text-xs text-white/70 mt-0.5">Member since {memberSince}</p>

@@ -27,10 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/hooks/useAuthModal";
-import { useRenterVerification } from "@/hooks/useRenterVerification";
 import CancellationPolicy from "@/components/CancellationPolicy";
-import RenterVerificationGate from "@/components/RenterVerificationGate";
-import VerificationSuccessScreen from "@/components/VerificationSuccessScreen";
 
 interface SecureThisPlaceProps {
   listing: {
@@ -47,7 +44,6 @@ const DEPOSIT_MONTHS = 1;
 const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
   const { user } = useAuth();
   const { requireAuth } = useAuthModal();
-  const { isFullyVerified } = useRenterVerification();
   const [tenantProfile, setTenantProfile] = useState<{
     first_name: string | null;
     last_name: string | null;
@@ -61,11 +57,6 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
   const [submittingSchedule, setSubmittingSchedule] = useState(false);
   const [scheduleSent, setScheduleSent] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
-
-  // Verification gate state
-  const [showGate, setShowGate] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [pendingAction, setPendingAction] = useState<"schedule" | "payment" | null>(null);
 
   useEffect(() => {
     if (!listing.tenant_id) return;
@@ -91,36 +82,12 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
     action();
   };
 
-  const withVerification = (action: "schedule" | "payment") => {
-    withAuth(() => {
-      if (!isFullyVerified) {
-        setPendingAction(action);
-        setShowGate(true);
-        return;
-      }
-      if (action === "schedule") setShowScheduleModal(true);
-      else setShowPaymentModal(true);
-    });
-  };
-
-  const handleVerified = () => {
-    setShowGate(false);
-    setShowSuccess(true);
-  };
-
-  const handleSuccessDismiss = () => {
-    setShowSuccess(false);
-    if (pendingAction === "schedule") setShowScheduleModal(true);
-    else if (pendingAction === "payment") setShowPaymentModal(true);
-    setPendingAction(null);
-  };
-
   const handleScheduleClick = () => {
-    withVerification("schedule");
+    withAuth(() => setShowScheduleModal(true));
   };
 
   const handlePaymentClick = () => {
-    withVerification("payment");
+    withAuth(() => setShowPaymentModal(true));
   };
 
   const handleScheduleSubmit = async () => {
@@ -229,8 +196,8 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
             <Clock className="h-3 w-3 shrink-0" /> Usually responds within a few hours
           </p>
         </div>
-        <Badge variant="outline" className="gap-1 text-xs border-emerald/30 text-emerald shrink-0">
-          <ShieldCheck className="h-3 w-3" /> Verified
+      <Badge variant="outline" className="gap-1 text-xs border-emerald/30 text-emerald shrink-0">
+          Listed
         </Badge>
       </div>
 
@@ -267,9 +234,8 @@ const SecureThisPlace = ({ listing }: SecureThisPlaceProps) => {
         Your deposit is protected until move-in is confirmed.
       </p>
 
-      {/* Verification Gate */}
-      <RenterVerificationGate open={showGate} onOpenChange={setShowGate} onVerified={handleVerified} action={pendingAction || undefined} />
-      <VerificationSuccessScreen open={showSuccess} onClose={handleSuccessDismiss} />
+
+
 
       {/* Schedule Modal */}
       <Dialog open={showScheduleModal} onOpenChange={(open) => { setShowScheduleModal(open); if (!open) { setScheduleSent(false); setSchedulingDate(undefined); setScheduleMessage(""); } }}>
