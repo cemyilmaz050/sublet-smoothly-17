@@ -15,13 +15,8 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
-import SecureThisPlace from "@/components/listing/SecureThisPlace";
-import ReviewSection from "@/components/ReviewSection";
-import KnockButton from "@/components/KnockButton";
-import VerifiedBadge from "@/components/VerifiedBadge";
-import ShareListing from "@/components/ShareListing";
 import ListingsMap from "@/components/discover/ListingsMap";
-import VideoPlayer from "@/components/video/VideoPlayer";
+import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 import MakeOfferModal from "@/components/urgent/MakeOfferModal";
 
 import { supabase } from "@/integrations/supabase/client";
