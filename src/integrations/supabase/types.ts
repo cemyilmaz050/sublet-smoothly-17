@@ -1035,6 +1035,7 @@ export type Database = {
           intro_video_url: string | null
           is_urgent: boolean
           knock_count: number
+          last_offer_amount: number | null
           latitude: number | null
           longitude: number | null
           management_group_id: string | null
@@ -1043,6 +1044,7 @@ export type Database = {
           minimum_price: number | null
           monthly_rent: number | null
           move_in_flexibility: string | null
+          offers_count: number
           path: string | null
           pending_email: string | null
           photos: string[] | null
@@ -1079,6 +1081,7 @@ export type Database = {
           intro_video_url?: string | null
           is_urgent?: boolean
           knock_count?: number
+          last_offer_amount?: number | null
           latitude?: number | null
           longitude?: number | null
           management_group_id?: string | null
@@ -1087,6 +1090,7 @@ export type Database = {
           minimum_price?: number | null
           monthly_rent?: number | null
           move_in_flexibility?: string | null
+          offers_count?: number
           path?: string | null
           pending_email?: string | null
           photos?: string[] | null
@@ -1123,6 +1127,7 @@ export type Database = {
           intro_video_url?: string | null
           is_urgent?: boolean
           knock_count?: number
+          last_offer_amount?: number | null
           latitude?: number | null
           longitude?: number | null
           management_group_id?: string | null
@@ -1131,6 +1136,7 @@ export type Database = {
           minimum_price?: number | null
           monthly_rent?: number | null
           move_in_flexibility?: string | null
+          offers_count?: number
           path?: string | null
           pending_email?: string | null
           photos?: string[] | null
@@ -1318,6 +1324,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      offer_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          offer_id: string
+          read: boolean
+          recipient_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          offer_id: string
+          read?: boolean
+          recipient_id: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          offer_id?: string
+          read?: boolean
+          recipient_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_notifications_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       offers: {
         Row: {
