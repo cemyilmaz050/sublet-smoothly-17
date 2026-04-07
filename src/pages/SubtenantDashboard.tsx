@@ -6,6 +6,7 @@ import { Heart, Search, MapPin, Calendar, ShieldCheck, Clock, MessageSquare, Doo
 
 import ProfileCompleteness from "@/components/ProfileCompleteness";
 import DocumentReviewStatusCard from "@/components/DocumentReviewStatusCard";
+import MyOffersSection from "@/components/urgent/MyOffersSection";
 import EmptyState from "@/components/EmptyState";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, useNavigate } from "react-router-dom";
