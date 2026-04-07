@@ -1,11 +1,13 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Users, FileText, ArrowRight, CheckCircle2, Upload } from "lucide-react";
-import PhoneMock from "@/components/landing/PhoneMock";
+import { ShieldCheck, Users, FileText, ArrowRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const HomePage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (location.hash === "#how-it-works") {
@@ -14,10 +16,25 @@ const HomePage = () => {
       }, 100);
     }
   }, [location.hash]);
+
+  const handleChoice = (role: "tenant" | "subtenant") => {
+    try {
+      localStorage.setItem("subin_intent", role);
+    } catch {}
+
+    if (user) {
+      if (role === "tenant") navigate("/listings/create");
+      else navigate("/listings");
+    } else {
+      if (role === "tenant") navigate("/signup?intent=tenant");
+      else navigate("/listings");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero — full screen, warm cinematic */}
-      <section className="relative w-screen min-h-screen overflow-hidden">
+      {/* Hero */}
+      <section className="relative w-screen min-h-screen overflow-hidden flex items-center justify-center">
         {/* Warm background image */}
         <div
           className="absolute inset-0"
@@ -28,115 +45,63 @@ const HomePage = () => {
             backgroundPosition: "center",
           }}
         />
+        <div className="absolute inset-0 z-[1]" style={{ background: "rgba(100, 40, 5, 0.45)" }} />
+        <div className="absolute inset-0 z-[2]" style={{ background: "linear-gradient(to bottom right, rgba(15, 6, 1, 0.6) 0%, rgba(90, 38, 4, 0.4) 50%, rgba(15, 6, 1, 0.7) 100%)" }} />
+        <div className="absolute inset-0 z-[3]" style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(10, 5, 2, 0.45) 100%)" }} />
 
-        {/* Layer 1 — warm amber color tint */}
-        <div
-          className="absolute inset-0 z-[1]"
-          style={{ background: "rgba(100, 40, 5, 0.45)" }}
-        />
-
-        {/* Layer 2 — directional warm gradient */}
-        <div
-          className="absolute inset-0 z-[2]"
-          style={{
-            background:
-              "linear-gradient(to bottom right, rgba(15, 6, 1, 0.6) 0%, rgba(90, 38, 4, 0.4) 50%, rgba(15, 6, 1, 0.7) 100%)",
-          }}
-        />
-
-        {/* Vignette */}
-        <div
-          className="absolute inset-0 z-[3]"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, transparent 30%, rgba(10, 5, 2, 0.45) 100%)",
-          }}
-        />
-
-        {/* === DESKTOP LAYOUT (sm+) === */}
-        {/* Phone — positioned center-right */}
-        <div className="hidden sm:flex absolute inset-0 z-[5] items-center justify-end pointer-events-none pr-[12%] lg:pr-[18%]">
-          <div style={{ filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.7))" }}>
-            <PhoneMock />
-          </div>
-        </div>
-
-        {/* Left text backing gradient for legibility */}
-        <div
-          className="hidden sm:block absolute inset-0 z-[4] pointer-events-none"
-          style={{
-            background: "linear-gradient(to right, rgba(10,4,1,0.8) 0%, rgba(10,4,1,0.4) 35%, transparent 55%)",
-          }}
-        />
-
-        {/* Desktop hero content — bottom aligned */}
-        <div className="hidden sm:flex relative z-10 w-full flex-row items-end justify-between px-6 sm:px-10 lg:px-16 pb-36 sm:pb-40 min-h-screen">
-          {/* Left: Main heading */}
-          <div className="mt-auto sm:max-w-[42%]">
-            <h1
-              className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[1.05] tracking-tight"
-              style={{ fontFamily: "Inter, sans-serif" }}
-            >
-              Sublet your apartment
-              <br />
-              the right way
-            </h1>
-          </div>
-
-          {/* Right: CTA */}
-          <div className="mt-auto flex flex-col items-end">
-            <Link to="/signup?role=tenant">
-              <Button
-                size="lg"
-                className="bg-white text-[#1a1008] hover:bg-white/90 rounded-full px-10 h-14 text-base font-semibold shadow-xl border-0"
-              >
-                I'm a Tenant
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <p className="mt-4 text-white/60 text-sm leading-relaxed text-right max-w-[260px]">
-              The trusted platform for tenants,
-              <br />
-              subtenants, and property managers.
-            </p>
-          </div>
-        </div>
-
-        {/* === MOBILE LAYOUT (below sm) === */}
-        <div className="flex sm:hidden relative z-10 flex-col items-center justify-start w-full min-h-screen pt-20 pb-32 px-6">
-          {/* Phone mockup */}
-          <div className="mb-8 max-h-[55vh] overflow-hidden" style={{ filter: "drop-shadow(0 30px 50px rgba(0,0,0,0.6))" }}>
-            <PhoneMock mobile />
-          </div>
-
-          {/* Heading */}
+        <div className="relative z-10 w-full max-w-3xl mx-auto px-6 py-20">
           <h1
-            className="text-3xl font-bold text-white leading-[1.1] tracking-tight text-center"
+            className="text-[28px] sm:text-5xl lg:text-6xl font-bold text-white text-center leading-[1.1] tracking-tight mb-10 sm:mb-14"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
-            Sublet your apartment
+            The easiest way to
             <br />
-            the right way
+            sublet in Boston
           </h1>
 
-          {/* CTA button */}
-          <Link to="/signup?role=tenant" className="mt-6">
-            <Button
-              size="lg"
-              className="bg-white text-[#1a1008] hover:bg-white/90 rounded-full px-10 h-14 text-base font-semibold shadow-xl border-0"
+          {/* Two choice cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            {/* Card 1: Host */}
+            <button
+              onClick={() => handleChoice("tenant")}
+              className="group rounded-2xl p-6 sm:p-8 text-left transition-all hover:scale-[1.02]"
+              style={{ background: "rgba(10, 5, 2, 0.7)", backdropFilter: "blur(8px)" }}
             >
-              I'm a Tenant
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+              <p className="text-[18px] font-bold text-white leading-snug">
+                I have an apartment to sublet
+              </p>
+              <p className="mt-2 text-[15px] text-white/70 leading-relaxed">
+                List your place and get it filled in days
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-[15px] font-semibold text-white bg-primary hover:bg-primary/90 transition-colors">
+                Start listing
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </button>
+
+            {/* Card 2: Renter */}
+            <button
+              onClick={() => handleChoice("subtenant")}
+              className="group rounded-2xl p-6 sm:p-8 text-left transition-all hover:scale-[1.02] bg-primary"
+            >
+              <p className="text-[18px] font-bold text-white leading-snug">
+                I need a place to stay
+              </p>
+              <p className="mt-2 text-[15px] text-white/80 leading-relaxed">
+                Find verified sublets below market rate
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full px-6 py-3 text-[15px] font-semibold text-primary bg-white hover:bg-white/90 transition-colors">
+                Browse apartments
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </button>
+          </div>
         </div>
+
         {/* Hero-to-content gradient fade */}
         <div
           className="absolute bottom-0 left-0 right-0 z-[5] pointer-events-none"
-          style={{
-            height: 120,
-            background: "linear-gradient(to bottom, transparent 0%, #ffffff 100%)",
-          }}
+          style={{ height: 120, background: "linear-gradient(to bottom, transparent 0%, #ffffff 100%)" }}
         />
       </section>
 
@@ -144,11 +109,11 @@ const HomePage = () => {
       <section className="border-b bg-card">
         <div className="container mx-auto flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16 py-5 px-6">
           {[
-            { icon: ShieldCheck, label: "Manager Approved Listings" },
-            { icon: Users, label: "Verified Subtenants" },
-            { icon: FileText, label: "Digital Contracts" },
+            { icon: ShieldCheck, label: "Verified hosts and renters" },
+            { icon: Users, label: "Identity checked" },
+            { icon: FileText, label: "Digital agreements" },
           ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5 text-sm font-medium text-muted-foreground">
+            <div key={item.label} className="flex items-center gap-2.5 text-[13px] font-medium text-muted-foreground">
               <item.icon className="h-5 w-5 text-emerald-500" />
               {item.label}
             </div>
@@ -160,23 +125,22 @@ const HomePage = () => {
       <section id="how-it-works" className="py-24 bg-secondary/30">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">How It Works</h2>
-            <p className="mt-3 text-muted-foreground text-lg">Three simple steps to a hassle-free sublet</p>
+            <h2 className="text-[28px] font-bold text-foreground">How it works</h2>
+            <p className="mt-3 text-muted-foreground text-[15px]">Three steps to a hassle-free sublet</p>
           </div>
 
-          <div className="grid gap-8 md:grid-cols-3 max-w-4xl mx-auto">
+          <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
             {[
-              { step: "01", icon: Upload, title: "List Your Space", desc: "Upload your documents and create a detailed listing for your apartment." },
-              { step: "02", icon: ShieldCheck, title: "Get Approved", desc: "Your property manager reviews and approves the sublet request." },
-              { step: "03", icon: Users, title: "Close the Deal", desc: "Sign the digital agreement and welcome your verified subtenant." },
+              { step: "1", title: "List or browse", desc: "Hosts list their apartment in minutes. Renters browse verified sublets." },
+              { step: "2", title: "Make a deal", desc: "Send offers, negotiate the price, and agree on dates that work for both sides." },
+              { step: "3", title: "Sign and move in", desc: "Sign the digital agreement and move in. Payments are handled securely." },
             ].map((item) => (
-              <div key={item.step} className="relative rounded-2xl border bg-card p-8 text-center shadow-card hover:shadow-elevated transition-shadow">
-                <span className="absolute top-4 right-5 text-sm font-medium text-muted-foreground/50">{item.step}</span>
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-                  <item.icon className="h-7 w-7 text-primary" />
+              <div key={item.step} className="rounded-2xl border bg-card p-6 sm:p-8 text-center shadow-card">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-[18px] font-bold text-primary">
+                  {item.step}
                 </div>
-                <h3 className="text-lg font-bold text-foreground">{item.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                <h3 className="text-[18px] font-bold text-foreground">{item.title}</h3>
+                <p className="mt-2 text-[15px] text-muted-foreground leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -184,25 +148,23 @@ const HomePage = () => {
       </section>
 
       {/* CTA */}
-      <section className="py-24 bg-primary">
+      <section className="py-24" style={{ background: "linear-gradient(135deg, #1a0e05 0%, #2d1408 100%)" }}>
         <div className="container mx-auto text-center px-6">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">Ready to get started?</h2>
-          <p className="mt-4 text-white/80 text-lg max-w-md mx-auto">
-            Join thousands of tenants and subtenants using SubIn.
+          <h2 className="text-[28px] sm:text-4xl font-bold text-white">Ready to make a move?</h2>
+          <p className="mt-4 text-white/70 text-[15px] max-w-md mx-auto">
+            No commitment. No listing fees. Just faster subletting.
           </p>
-          <Link to="/signup">
-            <Button size="lg" variant="outline" className="mt-8 border-2 border-white text-white hover:bg-white/10 rounded-full px-10 h-12 text-base font-semibold bg-transparent">
-              Create Your Account
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-6 text-white/70 text-sm">
-            {["Free to list", "No hidden fees", "Cancel anytime"].map((t) => (
-              <span key={t} className="flex items-center gap-1.5">
-                <CheckCircle2 className="h-4 w-4" />
-                {t}
-              </span>
-            ))}
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/listings">
+              <Button size="lg" className="bg-white text-[#1a1008] hover:bg-white/90 rounded-full px-8 h-14 text-[15px] font-semibold border-0">
+                Find a summer place
+              </Button>
+            </Link>
+            <Link to="/signup?intent=tenant">
+              <Button size="lg" variant="outline" className="border-2 border-white/40 text-white hover:bg-white/10 rounded-full px-8 h-14 text-[15px] font-semibold bg-transparent">
+                List my apartment
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

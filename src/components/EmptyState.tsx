@@ -15,10 +15,10 @@ const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction }: E
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent">
         <Icon className="h-8 w-8 text-accent-foreground" />
       </div>
-      <h3 className="mt-4 text-lg font-semibold text-foreground">{title}</h3>
-      <p className="mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>
+      <h3 className="mt-4 text-[18px] font-bold text-foreground">{title}</h3>
+      <p className="mt-2 max-w-sm text-[15px] text-muted-foreground">{description}</p>
       {actionLabel && onAction && (
-        <Button className="mt-6" onClick={onAction}>
+        <Button className="mt-6 rounded-full h-12 px-8 text-[15px]" onClick={onAction}>
           {actionLabel}
         </Button>
       )}

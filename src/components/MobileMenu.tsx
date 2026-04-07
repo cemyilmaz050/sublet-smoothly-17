@@ -1,5 +1,5 @@
-import { Building2, Info, LogIn, Search, UserPlus, X, Zap } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { LogIn, Search, UserPlus, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 type MobileMenuProps = {
   isOpen: boolean;
@@ -8,32 +8,10 @@ type MobileMenuProps = {
 
 const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const closeAndRun = (action: () => void) => {
-    onClose();
-    action();
-  };
 
   const handleNavigate = (path: string) => {
-    closeAndRun(() => {
-      if (path.startsWith("#")) {
-        const targetId = path.replace("#", "");
-
-        if (location.pathname === "/") {
-          const el = document.getElementById(targetId);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth" });
-            return;
-          }
-        }
-
-        navigate(`/${path}`);
-        return;
-      }
-
-      navigate(path);
-    });
+    onClose();
+    setTimeout(() => navigate(path), 50);
   };
 
   if (!isOpen) return null;
@@ -60,22 +38,17 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
 
         {[
-          { label: "How It Works", path: "#how-it-works", icon: Info },
-          { label: "Browse Listings", path: "/discover", icon: Search },
-          { label: "Urgent Sublets", path: "/urgent-landing", icon: Zap, amber: true },
-          { label: "Log In", path: "/login", icon: LogIn },
-          { label: "Sign Up", path: "/signup", icon: UserPlus },
-          { label: "Property Manager", path: "/signup?role=manager", icon: Building2 },
+          { label: "Browse apartments", path: "/listings", icon: Search },
+          { label: "Log in", path: "/login", icon: LogIn },
+          { label: "Sign up", path: "/signup", icon: UserPlus },
         ].map((item) => (
           <button
             key={item.label}
             type="button"
             onClick={() => handleNavigate(item.path)}
-            className={`flex min-h-[56px] w-full items-center gap-4 border-b border-border px-6 text-left text-base font-medium transition-colors hover:bg-accent active:bg-accent ${
-              (item as any).amber ? "text-amber-600" : "text-foreground"
-            }`}
+            className="flex min-h-[56px] w-full items-center gap-4 border-b border-border px-6 text-left text-[15px] font-medium text-foreground transition-colors hover:bg-accent active:bg-accent"
           >
-            <item.icon className={`h-5 w-5 shrink-0 ${(item as any).amber ? "text-amber-500" : "text-muted-foreground"}`} />
+            <item.icon className="h-5 w-5 shrink-0 text-muted-foreground" />
             {item.label}
           </button>
         ))}

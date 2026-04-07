@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, Mail, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
+import { Mail, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,9 +32,9 @@ const LoginPage = () => {
 
   const validate = () => {
     const e: { email?: string; password?: string } = {};
-    if (!email.trim()) e.email = "Email is required";
+    if (!email.trim()) e.email = "Please enter your email address";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Please enter a valid email address";
-    if (!password) e.password = "Password is required";
+    if (!password) e.password = "Please enter your password";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -48,7 +48,7 @@ const LoginPage = () => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
-          setLoginError("Incorrect email or password. Please try again.");
+          setLoginError("Incorrect email or password. Double-check and try again.");
           setLoginErrorType("credentials");
         } else if (error.message.includes("Email not confirmed")) {
           setLoginError("Your email hasn't been verified yet. Check your inbox for the verification link.");
@@ -60,7 +60,6 @@ const LoginPage = () => {
         return;
       }
       if (data.session) {
-        // If BBG staff email, go to manager portal
         if (data.session.user.email?.toLowerCase().endsWith("@realestateboston.com")) {
           navigate("/portal-mgmt-bbg", { replace: true });
         } else {
@@ -68,7 +67,7 @@ const LoginPage = () => {
         }
       }
     } catch (err: any) {
-      setLoginError(err.message || "An unexpected error occurred. Please try again.");
+      setLoginError(err.message || "Something went wrong. Please try again.");
       setLoginErrorType("generic");
     } finally {
       setLoading(false);
@@ -81,26 +80,16 @@ const LoginPage = () => {
     else toast.success("Verification email resent! Check your inbox.");
   };
 
-
   const handleForgotPassword = async () => {
     setForgotError(null);
-    if (!forgotEmail.trim()) {
-      setForgotError("Please enter your email address");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
-      setForgotError("Please enter a valid email address");
-      return;
-    }
+    if (!forgotEmail.trim()) { setForgotError("Please enter your email address"); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) { setForgotError("Please enter a valid email address"); return; }
     setForgotLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (error) {
-        setForgotError(error.message);
-        return;
-      }
+      if (error) { setForgotError(error.message); return; }
       setForgotSent(true);
     } catch (err: any) {
       setForgotError(err.message || "Failed to send reset email");
@@ -118,41 +107,32 @@ const LoginPage = () => {
               {forgotSent ? (
                 <div className="text-center space-y-4">
                   <Mail className="mx-auto h-12 w-12 text-primary" />
-                  <h2 className="mt-4 text-2xl font-bold text-foreground">Check your inbox</h2>
-                  <p className="text-muted-foreground">
+                  <h2 className="mt-4 text-[28px] font-bold text-foreground">Check your inbox</h2>
+                  <p className="text-[15px] text-muted-foreground">
                     We sent a password reset link to <strong className="text-foreground">{forgotEmail}</strong>.
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Don't see it? Check your <strong>spam or junk folder</strong>. It may take a minute.
-                  </p>
-                  <Button variant="outline" className="mt-4 h-12" onClick={() => { setForgotMode(false); setForgotSent(false); }}>
-                    ← Back to login
+                  <p className="text-[13px] text-muted-foreground">Don't see it? Check your <strong>spam or junk folder</strong>.</p>
+                  <Button variant="outline" className="mt-4 h-12 text-[15px]" onClick={() => { setForgotMode(false); setForgotSent(false); }}>
+                    Back to log in
                   </Button>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-2xl font-bold text-foreground">Reset your password</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Enter your email and we'll send you a reset link.</p>
+                  <h2 className="text-[28px] font-bold text-foreground">Reset your password</h2>
+                  <p className="mt-1 text-[15px] text-muted-foreground">Enter your email and we'll send you a reset link.</p>
                   <form onSubmit={(e) => { e.preventDefault(); handleForgotPassword(); }} className="mt-6 space-y-4">
                     <div>
                       <Label htmlFor="forgot-email">Email</Label>
-                      <Input
-                        id="forgot-email"
-                        type="email"
-                        placeholder="john@example.com"
-                        className="mt-1.5 h-12"
-                        autoComplete="email"
-                        value={forgotEmail}
-                        onChange={(e) => { setForgotEmail(e.target.value); setForgotError(null); }}
-                      />
-                      {forgotError && <p className="mt-1 text-sm text-destructive">{forgotError}</p>}
+                      <Input id="forgot-email" type="email" placeholder="you@email.com" className="mt-1.5 h-12 text-[16px]" autoComplete="email"
+                        value={forgotEmail} onChange={(e) => { setForgotEmail(e.target.value); setForgotError(null); }} />
+                      {forgotError && <p className="mt-1 text-[13px] text-destructive">{forgotError}</p>}
                     </div>
-                    <Button className="w-full h-12" type="submit" disabled={forgotLoading}>
+                    <Button className="w-full h-12 text-[15px]" type="submit" disabled={forgotLoading}>
                       {forgotLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      Send Reset Link
+                      Send reset link
                     </Button>
-                    <button type="button" onClick={() => { setForgotMode(false); setForgotError(null); }} className="w-full text-center text-sm text-muted-foreground hover:text-primary">
-                      ← Back to login
+                    <button type="button" onClick={() => { setForgotMode(false); setForgotError(null); }} className="w-full text-center text-[13px] text-muted-foreground hover:text-primary">
+                      Back to log in
                     </button>
                   </form>
                 </>
@@ -166,41 +146,25 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      
       <div className="container flex items-center justify-center px-4 py-10 sm:py-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
           <div className="text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <h1 className="mt-4 text-2xl sm:text-3xl font-bold text-foreground">Welcome back</h1>
-            <p className="mt-1 text-muted-foreground">Sign in to your SubIn account</p>
+            <h1 className="text-[28px] font-bold text-foreground">Welcome back</h1>
+            <p className="mt-1 text-[15px] text-muted-foreground">Sign in to your SubIn account</p>
           </div>
 
           <div className="mt-8 rounded-xl border bg-card p-6 sm:p-8 shadow-card">
-            <form
-              onSubmit={(e) => { e.preventDefault(); handleLogin(); }}
-              className="space-y-4"
-            >
-              {/* Inline login error */}
+            <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }} className="space-y-4">
               {loginError && (
-                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-3 text-sm text-destructive space-y-2">
+                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-3 text-[13px] text-destructive space-y-2">
                   <p>{loginError}</p>
                   {loginErrorType === "credentials" && (
-                    <button
-                      type="button"
-                      onClick={() => { setForgotMode(true); setForgotEmail(email); }}
-                      className="text-xs font-medium underline hover:no-underline"
-                    >
+                    <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(email); }} className="text-[13px] font-medium underline hover:no-underline">
                       Reset your password
                     </button>
                   )}
                   {loginErrorType === "unconfirmed" && (
-                    <button
-                      type="button"
-                      onClick={handleResendVerification}
-                      className="text-xs font-medium underline hover:no-underline"
-                    >
+                    <button type="button" onClick={handleResendVerification} className="text-[13px] font-medium underline hover:no-underline">
                       Resend verification email
                     </button>
                   )}
@@ -209,81 +173,39 @@ const LoginPage = () => {
 
               <div>
                 <Label htmlFor="login-email">Email</Label>
-                <div className="relative mt-1.5">
-                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="john@example.com"
-                    className="pl-10 h-12"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); setLoginError(null); }}
-                  />
-                </div>
-                {errors.email && <p className="mt-1 text-sm text-destructive">{errors.email}</p>}
+                <Input id="login-email" type="email" placeholder="you@email.com" className="mt-1.5 h-12 text-[16px]" autoComplete="email"
+                  value={email} onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); setLoginError(null); }} />
+                {errors.email && <p className="mt-1 text-[13px] text-destructive">{errors.email}</p>}
               </div>
               <div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="login-password">Password</Label>
-                  <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(email); }} className="text-xs text-primary hover:underline">
+                  <button type="button" onClick={() => { setForgotMode(true); setForgotEmail(email); }} className="text-[13px] text-primary hover:underline">
                     Forgot password?
                   </button>
                 </div>
                 <div className="relative mt-1.5">
-                  <Input
-                    id="login-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    className="pr-10 h-12"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); setLoginError(null); }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    tabIndex={-1}
-                  >
+                  <Input id="login-password" type={showPassword ? "text" : "password"} placeholder="Enter your password" className="pr-10 h-12 text-[16px]" autoComplete="current-password"
+                    value={password} onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); setLoginError(null); }} />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {errors.password && <p className="mt-1 text-sm text-destructive">{errors.password}</p>}
+                {errors.password && <p className="mt-1 text-[13px] text-destructive">{errors.password}</p>}
               </div>
-              <Button className="w-full h-12" size="lg" type="submit" disabled={loading}>
+              <Button className="w-full h-12 text-[15px]" size="lg" type="submit" disabled={loading}>
                 {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in...</>
                 ) : (
-                  <>
-                    Sign In
-                    <ArrowRight className="ml-1 h-4 w-4" />
-                  </>
+                  <>Log in <ArrowRight className="ml-1 h-4 w-4" /></>
                 )}
               </Button>
             </form>
-            <p className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="mt-6 text-center text-[15px] text-muted-foreground">
               Don't have an account?{" "}
               <Link to="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
             </p>
           </div>
-
-          {/* Property Manager Login Info */}
-          <div className="mt-6 rounded-xl border border-dashed border-muted-foreground/30 bg-muted/30 p-4">
-            <div className="flex items-start gap-3">
-              <Building2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-foreground">Are you a Property Manager?</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Sign in with your official Boston Brokerage Group email to access the staff portal.
-                </p>
-              </div>
-            </div>
-          </div>
-
         </motion.div>
       </div>
     </div>
