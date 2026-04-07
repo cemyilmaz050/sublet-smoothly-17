@@ -99,6 +99,7 @@ const App = () => (
                   <Route path="/auth/callback" element={<AuthCallbackPage />} />
                   <Route path="/managers/:slug" element={<ManagerProfilePage />} />
                   <Route path="/urgent" element={<UrgentPage />} />
+                  <Route path="/urgent-landing" element={<UrgentLandingPage />} />
                   <Route path="/invite/friend" element={<FriendSubletLanding />} />
 
                   {/* Redirect old AI finder route */}
