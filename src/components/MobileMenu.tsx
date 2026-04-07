@@ -62,7 +62,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
         {[
           { label: "How It Works", path: "#how-it-works", icon: Info },
           { label: "Browse Listings", path: "/discover", icon: Search },
-          { label: "⚡ Urgent Sublets", path: "/urgent", icon: Zap, amber: true },
+          { label: "Urgent Sublets", path: "/urgent-landing", icon: Zap, amber: true },
           { label: "Log In", path: "/login", icon: LogIn },
           { label: "Sign Up", path: "/signup", icon: UserPlus },
           { label: "Property Manager", path: "/signup?role=manager", icon: Building2 },
